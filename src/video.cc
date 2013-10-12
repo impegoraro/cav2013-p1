@@ -30,7 +30,7 @@ Video::~Video()
 
 }
 
-Frame Video::getFrame()
+void Video::getFrame(Frame& frame)
 {
 
 }

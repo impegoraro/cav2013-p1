@@ -13,7 +13,7 @@ public:
 	Video(const std::string& path);
 	virtual ~Video();
 
-	Frame getFrame();
+	void getFrame(Frame& frame);
 
 protected:
 

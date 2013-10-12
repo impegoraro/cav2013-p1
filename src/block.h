@@ -1,22 +1,35 @@
 #ifndef CAV_BLOCK_H
 #define CAV_BLOCK_H
 
+#include "exceptions/cav-exceptions.h"
+
 class Block
 {
 public:
-	Block();
+	//Block();
 	Block(unsigned int rows, unsigned int cols);
+	Block(Block&& b);
+	Block(const Block& b);
+
 	virtual ~Block();
 
 	void setPoint(unsigned int row, unsigned int col, int value);
-	void print();
-protected:
+	int getPoint(unsigned int row, unsigned int col);
 
+	Block* dup();
+
+	Block& operator=(const Block& rhs);
+	Block& operator=(Block&& rhs);
+	int& operator[](unsigned int index);
+	const int& operator[](unsigned int index) const;
+
+	void print();
 private:
 	unsigned int m_nRows;
 	unsigned int m_nCols;
 
 	int *m_buffer;
+
 };
 
 #endif
