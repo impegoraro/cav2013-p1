@@ -27,8 +27,9 @@ Block::Block(const Block& b)
 }
 
 Block::Block(Block&& b)
-	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_buffer(b.m_buffer)
+	: m_nRows(b.m_nRows), m_nCols(b.m_nCols)
 {
+	m_buffer = b.m_buffer;
 	b.m_buffer = NULL;
 }
 
@@ -56,8 +57,9 @@ int Block::getPoint(unsigned int row, unsigned int col)
 
 Block* Block::dup()
 {
-	Block *b = new Block(m_nRows, m_nCols);
-	b = this;
+	Block* b = new Block(m_nRows, m_nCols);
+	*b = *this; // Copying buffers
+	
 	return b;
 }
 
@@ -95,7 +97,6 @@ Block& Block::operator=(Block&& rhs)
 	// TODO: Check if smaller blocks could be used
 	if(m_nRows != rhs.m_nRows && m_nCols != rhs.m_nCols)
 		throw InvalidDimensionException();
-	
 	this->m_buffer = rhs.m_buffer;
 	rhs.m_buffer = NULL;
 	return *this;

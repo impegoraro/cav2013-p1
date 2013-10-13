@@ -67,7 +67,7 @@ Frame::~Frame()
 
 Frame& Frame::operator=(const Frame& rhs)
 {
-	//assert(m_uvRows <= rhs.m_uvRows && m_uvCols <= rhs.m_uvCols);
+	assert(m_uvRows <= rhs.m_uvRows && m_uvCols <= rhs.m_uvCols);
 	(*m_y) = *rhs.m_y;
 	(*m_u) = *rhs.m_u;
 	(*m_v) = *rhs.m_v;
@@ -111,7 +111,6 @@ void Frame::getPixel(int pos, int& y, int& u, int& v)
 Frame Frame::convert()
 {
 	Frame f(*this);
-	
 	return f;
 }
 
@@ -180,25 +179,25 @@ Frame Frame::parse(std::string& path)
 	FILE *fd;
 	int cols, rows;
 
-	if((fd = fopen(path.c_str(), "r")) != NULL) {
-		fscanf(fd, "%d%d", &cols, &rows);
-		Frame f(rows, cols);
+	if((fd = fopen(path.c_str(), "r")) == NULL)
+		throw FileNotFoundException();
+		
+	fscanf(fd, "%d%d", &cols, &rows);
+	Frame f(rows, cols);
 
-		unsigned char buffer[cols * rows * 3];
-		fread(buffer, sizeof(unsigned char), cols * rows * 3, fd);
-		int y,u,v;
-		for(int i = 0 ; i < rows * cols * 3 ; i += 3)
-		{ 
-			/* Accessing to planar infor */
-			y = buffer[i / 3]; 
-			u = buffer[(i / 3) + (rows * cols)]; 
-			v = buffer[(i / 3) + (rows * cols) * 2];
-			f.y()[i / 3] = y;
-			f.u()[i / 3] = u;
-			f.v()[i / 3] = v;
-		}
-		fclose(fd);
-		return f;
+	unsigned char buffer[cols * rows * 3];
+	fread(buffer, sizeof(unsigned char), cols * rows * 3, fd);
+	int y,u,v;
+	for(int i = 0 ; i < rows * cols * 3 ; i += 3)
+	{ 
+		/* Accessing to planar infor */
+		y = buffer[i / 3]; 
+		u = buffer[(i / 3) + (rows * cols)]; 
+		v = buffer[(i / 3) + (rows * cols) * 2];
+		f.y()[i / 3] = y;
+		f.u()[i / 3] = u;
+		f.v()[i / 3] = v;
 	}
-	throw FileNotFoundException();
+	fclose(fd);
+	return f;
 }
