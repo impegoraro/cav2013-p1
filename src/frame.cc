@@ -50,6 +50,9 @@ Frame::Frame(Frame &&f)
 	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_y(std::move(f.m_y)), m_u(std::move(f.m_u)), m_v(std::move(f.m_v))
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
+	f.m_y = NULL;
+	f.m_u = NULL;
+	f.m_v = NULL;
 }
 
 Frame::~Frame()
@@ -114,16 +117,10 @@ Frame Frame::convert()
 
 void Frame::display()
 {
-//	std::cout<< "printing: m_y"<< std::endl;
-//	m_y->print();
-//	std::cout<< "printing: m_u"<< std::endl;
-//	m_u->print();
-//	std::cout<< "printing: m_v"<< std::endl;
-//	m_v->print();
-
-	Frame f = convert();
+	// Move the converted frame instead of just copying it.
 	int r, g, b;
 	int y, u, v;
+	Frame f = std::move(convert());
 	int yRows(f.rows()), yCols(f.cols());
 	cv::Mat img = cv::Mat(cv::Size(yCols, yRows), CV_8UC3);
 	unsigned char *buffer;
@@ -131,8 +128,8 @@ void Frame::display()
 	buffer = (uchar*)img.ptr();
 	for(int i = 0; i < f.rows() * f.cols() * 3; i += 3) {
 		y = f.y()[i / 3];
-		u = f.u()[(i / 3) + (yRows * yCols)];
-		v = f.v()[(i / 3) + (yRows * yCols) * 2];
+		u = f.u()[(i / 3)];
+		v = f.v()[(i / 3)];
 
 		/* convert to RGB */
 		b = (int)(1.164*(y - 16) + 2.018*(u-128));
@@ -176,4 +173,32 @@ Block& Frame::u()
 Block& Frame::v()
 {
 	return *m_v;
+}
+
+Frame Frame::parse(std::string& path)
+{
+	FILE *fd;
+	int cols, rows;
+
+	if((fd = fopen(path.c_str(), "r")) != NULL) {
+		fscanf(fd, "%d%d", &cols, &rows);
+		Frame f(rows, cols);
+
+		unsigned char buffer[cols * rows * 3];
+		fread(buffer, sizeof(unsigned char), cols * rows * 3, fd);
+		int y,u,v;
+		for(int i = 0 ; i < rows * cols * 3 ; i += 3)
+		{ 
+			/* Accessing to planar infor */
+			y = buffer[i / 3]; 
+			u = buffer[(i / 3) + (rows * cols)]; 
+			v = buffer[(i / 3) + (rows * cols) * 2];
+			f.y()[i / 3] = y;
+			f.u()[i / 3] = u;
+			f.v()[i / 3] = v;
+		}
+		fclose(fd);
+		return f;
+	}
+	throw FileNotFoundException();
 }

@@ -27,9 +27,8 @@ Block::Block(const Block& b)
 }
 
 Block::Block(Block&& b)
-	: m_nRows(b.m_nRows), m_nCols(b.m_nCols)
+	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_buffer(b.m_buffer)
 {
-	this->m_buffer = b.m_buffer;
 	b.m_buffer = NULL;
 }
 

@@ -33,6 +33,7 @@ public:
 	Block& u();
 	Block& v();
 
+	static Frame parse(std::string& path);
 protected:
 	int m_uvRows;
 	int m_uvCols;

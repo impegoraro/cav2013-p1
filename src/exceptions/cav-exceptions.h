@@ -21,4 +21,13 @@ public:
 	}
 };
 
+class FileNotFoundException : public std::exception
+{
+public:
+	virtual const char* what()
+	{
+		return "File not found.";
+	}
+};
+
 #endif
