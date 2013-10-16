@@ -15,6 +15,8 @@ using namespace cv;
 int main(int argc, char** argv)
 {
 	int end = false, playing = true, inputKey, fps = 25;
+	Frame *f; 
+
 	if(argc == 1) {
 		cerr<< "Usage: "<< argv[0]<< " <picture>"<<endl;
 		return 1;
@@ -22,8 +24,9 @@ int main(int argc, char** argv)
 	try {
 		string path(argv[1]);
 		cvNamedWindow( "YUV", CV_WINDOW_AUTOSIZE );
-		Frame f = Frame::parse(path);
-		f.display();
+		f= Frame::create_from_file(path);
+
+		f->display();
 		while(!end) {
 			if(playing)
 			{
@@ -48,8 +51,10 @@ int main(int argc, char** argv)
 					break;
 			}
 		}
+		delete f;
 	} catch (FileNotFoundException& e) {
 		cerr<< "File not found"<< endl;
 	}
+	
 	return 0;
 }

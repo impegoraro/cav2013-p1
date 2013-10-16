@@ -1,6 +1,5 @@
 #include <iostream>
 #include <algorithm>
-#include <stdio.h>
 #include <assert.h>
 #include <cstring>
 

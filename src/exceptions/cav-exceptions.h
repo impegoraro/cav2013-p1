@@ -30,4 +30,12 @@ public:
 	}
 };
 
+class InvalidVideoTypeException : public std::exception
+{
+public:
+	virtual const char* what()
+	{
+		return "Video must be a YUV 444, YUV 422 or YUV420.";
+	}
+};
 #endif

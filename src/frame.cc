@@ -2,14 +2,16 @@
 #include <algorithm>
 #include <string>
 #include <fstream>
-#include <stdio.h>
-#include <cstdlib>
-#include <time.h>
 #include <opencv2/opencv.hpp>
 
 #include "video-format.h"
 #include "frame.h"
+#include "frame422.h"
 
+Frame::Frame()
+	: m_uvRows(0), m_uvCols(0), m_y(NULL), m_u(NULL), m_v(NULL)
+{
+}
 
 Frame::Frame(unsigned int nRows, unsigned int nCols)
 	: m_uvRows(nRows), m_uvCols(nCols)
@@ -73,8 +75,21 @@ Frame& Frame::operator=(const Frame& rhs)
 	(*m_v) = *rhs.m_v;
 }
 
+Frame& Frame::operator=(Frame&& rhs)
+{
+	m_uvRows = rhs.rows();
+	m_uvCols = rhs.cols();
+	(m_y) = rhs.m_y;
+	rhs.m_y = NULL;
+	(m_u) = rhs.m_u;
+	rhs.m_u = NULL;
+	(m_v) = rhs.m_v;
+	rhs.m_v = NULL;
+}
+
 void Frame::setBlock(const Block &y, const Block &u, const Block &v)
 {
+	assert(m_uvRows > 0 && m_uvCols > 0);
 	(*m_y) = y;
 	(*m_u) = u;
 	(*m_v) = v;
@@ -82,6 +97,7 @@ void Frame::setBlock(const Block &y, const Block &u, const Block &v)
 
 void Frame::getBlock(Block& y, Block& u, Block& v)
 {
+	assert(m_uvRows > 0 && m_uvCols > 0);
 	y = *m_y;
 	u = *m_u;
 	v = *m_v;
@@ -89,6 +105,7 @@ void Frame::getBlock(Block& y, Block& u, Block& v)
 
 void Frame::setPixel(int row, int col, int y, int u, int v)
 {
+	assert(m_uvRows > 0 && m_uvCols > 0);
 	m_y->setPoint(row, col, y);
 	m_u->setPoint(row, col, u);	
 	m_v->setPoint(row, col, v);
@@ -96,6 +113,7 @@ void Frame::setPixel(int row, int col, int y, int u, int v)
 
 void Frame::getPixel(int row, int col, int& y, int& u, int& v)
 {
+	assert(m_uvRows > 0 && m_uvCols > 0);
 	y = m_y->getPoint(row, col);
 	u = m_u->getPoint(row, col);	
 	v = m_v->getPoint(row, col);
@@ -103,6 +121,7 @@ void Frame::getPixel(int row, int col, int& y, int& u, int& v)
 
 void Frame::getPixel(int pos, int& y, int& u, int& v)
 {
+	assert(m_uvRows > 0 && m_uvCols > 0);
 	y = (*m_y)[pos];
 	u = (*m_u)[pos];	
 	v = (*m_v)[pos];
@@ -110,12 +129,14 @@ void Frame::getPixel(int pos, int& y, int& u, int& v)
 
 Frame Frame::convert()
 {
+	assert(m_uvRows > 0 && m_uvCols > 0);
 	Frame f(*this);
 	return f;
 }
 
 void Frame::display()
 {
+	assert(m_uvRows > 0 && m_uvCols > 0);
 	// Move the converted frame instead of just copying it.
 	int r, g, b;
 	int y, u, v;
@@ -151,12 +172,12 @@ void Frame::display()
 	imshow("rgb", img);
 }
 
-int Frame::rows()
+unsigned int Frame::rows()
 {
 	return m_uvRows;
 }
 
-int Frame::cols()
+unsigned int Frame::cols()
 {
 	return m_uvCols;
 }
@@ -174,19 +195,32 @@ Block& Frame::v()
 	return *m_v;
 }
 
-Frame Frame::parse(std::string& path)
+Frame* Frame::create_from_file(std::string& path)
 {
-	FILE *fd;
-	int cols, rows;
+	std::ifstream stream(path);
+	int cols, rows, type;
+	Frame *f(NULL);
 
-	if((fd = fopen(path.c_str(), "r")) == NULL)
+	if(!stream.good())
 		throw FileNotFoundException();
-		
-	fscanf(fd, "%d%d", &cols, &rows);
-	Frame f(rows, cols);
 
+	stream>>type>>cols>>rows;
 	unsigned char buffer[cols * rows * 3];
-	fread(buffer, sizeof(unsigned char), cols * rows * 3, fd);
+	
+	switch(type) {
+	case 444:
+		f = new Frame(rows, cols);
+		break;
+	case 422: {
+		f = new Frame422(rows, cols);
+		cols /= 2;
+		break;
+	}
+	default:
+		throw InvalidVideoTypeException();
+	}
+	
+	stream.read((char*)buffer, (cols * rows * 3));
 	int y,u,v;
 	for(int i = 0 ; i < rows * cols * 3 ; i += 3)
 	{ 
@@ -194,10 +228,10 @@ Frame Frame::parse(std::string& path)
 		y = buffer[i / 3]; 
 		u = buffer[(i / 3) + (rows * cols)]; 
 		v = buffer[(i / 3) + (rows * cols) * 2];
-		f.y()[i / 3] = y;
-		f.u()[i / 3] = u;
-		f.v()[i / 3] = v;
+		f->y()[i / 3] = y;
+		f->u()[i / 3] = u;
+		f->v()[i / 3] = v;
 	}
-	fclose(fd);
+	stream.close();
 	return f;
 }

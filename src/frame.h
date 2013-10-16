@@ -23,25 +23,30 @@ public:
 	void getPixel(int pos, int& y, int& u, int& v);
 	void display();
 
-	int rows();
-	int cols();
+	unsigned int rows();
+	unsigned int cols();
 
 	Frame& operator=(const Frame& rhs);
-	virtual Frame convert();
+	Frame& operator=(Frame&& rhs);
 
 	Block& y();
 	Block& u();
 	Block& v();
 
-	static Frame parse(std::string& path);
+	static Frame* create_from_file(std::string& path);
 protected:
-	int m_uvRows;
-	int m_uvCols;
+	unsigned int m_uvRows;
+	unsigned int m_uvCols;
 
-	Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols);
 	Block* m_y;
 	Block* m_u;
 	Block* m_v;
+
+	// Dumb constructor that doesnt initializes anything. 
+	// Its purpose is to help the parse function without using the heap.
+	Frame();
+	Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols);
+	virtual Frame convert();
 };
 
 #endif
