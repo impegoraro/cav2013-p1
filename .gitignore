@@ -18,3 +18,4 @@ stamp-h1
 Makefile
 config.status
 config.log
+test-frame.cc

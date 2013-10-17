@@ -23,15 +23,15 @@ int main(int argc, char** argv)
 	}
 	try {
 		string path(argv[1]);
-		cvNamedWindow( "YUV", CV_WINDOW_AUTOSIZE );
-		f= Frame::create_from_file(path);
+		Video v(path);
+		f= v.getFrame();
 
-		f->display();
 		while(!end) {
+			f->display();
 			if(playing)
 			{
 				/* wait according to the frame rate */
-				inputKey = waitKey(1.0 / fps * 1000);
+				inputKey = waitKey(1.0 / v.fps() * 1000);
 			}
 			else
 			{
@@ -49,6 +49,13 @@ int main(int argc, char** argv)
 				case 'p':
 					playing = playing ? 0 : 1;
 					break;
+			}
+			delete f;
+			try {
+				f = v.getFrame();
+			} catch (exception& e) {
+				cout<< "Video ended"<<endl;
+				end = true;
 			}
 		}
 		delete f;

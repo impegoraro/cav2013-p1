@@ -2,7 +2,7 @@
 #define CAV_VIDEO_H
 
 #include <string>
-
+#include <fstream>
 #include "frame.h"
 
 class Video
@@ -13,12 +13,20 @@ public:
 	Video(const std::string& path);
 	virtual ~Video();
 
-	void getFrame(Frame& frame);
+	int rows();
+	int cols();
+	int fps();
+
+	Frame* getFrame();
+
 
 protected:
-
-private:
-
+	std::ifstream m_stream;
+	
+	unsigned int m_rows;
+	unsigned int m_cols;
+	unsigned int m_fps;
+	VideoFormat m_type;
 };
 
 #endif

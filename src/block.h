@@ -18,10 +18,13 @@ public:
 
 	Block* dup();
 
+	unsigned int rows(void);
+	unsigned int cols(void);
+
 	Block& operator=(const Block& rhs);
 	Block& operator=(Block&& rhs);
 	int& operator[](unsigned int index);
-	const int& operator[](unsigned int index) const;
+	int operator[](unsigned int index) const;
 
 	void print();
 private:

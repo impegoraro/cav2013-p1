@@ -33,7 +33,9 @@ public:
 	Block& u();
 	Block& v();
 
+	void write(const std::string& path);
 	static Frame* create_from_file(std::string& path);
+
 protected:
 	unsigned int m_uvRows;
 	unsigned int m_uvCols;
@@ -42,10 +44,11 @@ protected:
 	Block* m_u;
 	Block* m_v;
 
+	VideoFormat m_format;
 	// Dumb constructor that doesnt initializes anything. 
 	// Its purpose is to help the parse function without using the heap.
 	Frame();
-	Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols);
+	Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols, VideoFormat format);
 	virtual Frame convert();
 };
 

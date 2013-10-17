@@ -8,13 +8,23 @@
 #include "frame.h"
 #include "frame422.h"
 
+/**
+ * Frame constructor
+ * Protected constructor, creates an uninitialized frame. This is used internally by the class hierachy.
+ */
 Frame::Frame()
-	: m_uvRows(0), m_uvCols(0), m_y(NULL), m_u(NULL), m_v(NULL)
+	: m_uvRows(0), m_uvCols(0), m_y(NULL), m_u(NULL), m_v(NULL), m_format(YUV_444)
 {
 }
 
+/**
+ * Frame constructor
+ * Constructs an frame with the specified rows and columns with all buffers of the same size. The data of the buffer is uninitialized.
+ * /param unsigned int - Number of Rows
+ * /param unsigned int - Number of Columns
+ */
 Frame::Frame(unsigned int nRows, unsigned int nCols)
-	: m_uvRows(nRows), m_uvCols(nCols)
+	: m_uvRows(nRows), m_uvCols(nCols), m_format(YUV_444)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
 
@@ -23,8 +33,16 @@ Frame::Frame(unsigned int nRows, unsigned int nCols)
 	m_v = new Block(m_uvRows, m_uvCols);
 }
 
-Frame::Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols)
-	: m_uvRows(uvRows), m_uvCols(uvCols)
+/**
+ * Frame constructor
+ * A Protected constructor used by the hierarchy of Frames (422 and 420) to initialize the internal structure of the frame.
+ * /param unsigned int - rows of the Y component
+ * /param unsigned int - cols of the Y component
+ * /param unsigned int - uvRows of U and V component
+ * /param unsigned int - uvCols of U and V component
+ */
+Frame::Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols, VideoFormat format)
+	: m_uvRows(uvRows), m_uvCols(uvCols), m_format(format)
 {
 	assert(rows > 0 && cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 
@@ -33,11 +51,16 @@ Frame::Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned
 	m_v = new Block(m_uvRows, m_uvCols);
 }
 
+/**
+ * Copy Constructor.
+ * Makes a copy of each blocks y, u and v.
+ * /param Frame - a constant reference to the Frame to copy
+ */
 Frame::Frame(const Frame &f)
-	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols)
+	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_format(YUV_444)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
-
+	
 	this->m_y = f.m_y->dup();
 	this->m_u = f.m_u->dup();
 	this->m_v = f.m_v->dup();
@@ -49,9 +72,10 @@ Frame::Frame(const Frame &f)
  */
 
 Frame::Frame(Frame &&f)
-	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_y(std::move(f.m_y)), m_u(std::move(f.m_u)), m_v(std::move(f.m_v))
+	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_y(std::move(f.m_y)), m_u(std::move(f.m_u)), m_v(std::move(f.m_v)), m_format(YUV_444)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
+
 	f.m_y = NULL;
 	f.m_u = NULL;
 	f.m_v = NULL;
@@ -70,6 +94,14 @@ Frame::~Frame()
 Frame& Frame::operator=(const Frame& rhs)
 {
 	assert(m_uvRows <= rhs.m_uvRows && m_uvCols <= rhs.m_uvCols);
+
+	if(m_y != NULL)
+		delete m_y;
+	if(m_u != NULL)
+		delete m_u;
+	if(m_v != NULL)
+		delete m_v;
+
 	(*m_y) = *rhs.m_y;
 	(*m_u) = *rhs.m_u;
 	(*m_v) = *rhs.m_v;
@@ -79,6 +111,14 @@ Frame& Frame::operator=(Frame&& rhs)
 {
 	m_uvRows = rhs.rows();
 	m_uvCols = rhs.cols();
+
+	if(m_y != NULL)
+		delete m_y;
+	if(m_u != NULL)
+		delete m_u;
+	if(m_v != NULL)
+		delete m_v;
+
 	(m_y) = rhs.m_y;
 	rhs.m_y = NULL;
 	(m_u) = rhs.m_u;
@@ -127,6 +167,9 @@ void Frame::getPixel(int pos, int& y, int& u, int& v)
 	v = (*m_v)[pos];
 }
 
+/**
+ * Converts a Frame to YUV 444
+ */
 Frame Frame::convert()
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
@@ -195,6 +238,29 @@ Block& Frame::v()
 	return *m_v;
 }
 
+void Frame::write(const std::string& path)
+{
+	std::ofstream stream(path);
+	int cols, rows, type;
+
+	if(!stream.good())
+		throw FileNotFoundException();
+
+	stream<<m_uvCols<<m_uvRows<<m_format;
+	unsigned char buffer[m_uvRows * m_uvCols * 3];
+
+	for(int i = 0; i < m_uvRows * m_uvCols; i++) {
+		buffer[i * 3] = (*m_y)[i];
+		buffer[i * 3 + m_uvRows * m_uvCols] = (*m_u)[i];
+		buffer[i * 3 + m_uvRows * m_uvCols * 2] = (*m_v)[i];
+	}
+	stream.write((char*)buffer, (cols * rows * 3));
+	stream.close();
+}
+
+/************************************
+ *          Static Methods          * 
+ ***********************************/
 Frame* Frame::create_from_file(std::string& path)
 {
 	std::ifstream stream(path);
@@ -204,7 +270,7 @@ Frame* Frame::create_from_file(std::string& path)
 	if(!stream.good())
 		throw FileNotFoundException();
 
-	stream>>type>>cols>>rows;
+	stream>>cols>>rows>>type;
 	unsigned char buffer[cols * rows * 3];
 	
 	switch(type) {

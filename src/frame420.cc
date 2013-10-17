@@ -2,8 +2,9 @@
 
 #include "frame.h"
 #include "frame420.h"
+#include "video-format.h"
 
-Frame420::Frame420(unsigned int nRows, unsigned int nCols) : Frame((nRows / 2), (nCols / 2))
+Frame420::Frame420(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols, (nRows / 2), (nCols / 2), YUV_420)
 {
 
 }
