@@ -19,6 +19,8 @@ public:
 
 	Frame* getFrame();
 
+	void reset();
+	void display();
 
 protected:
 	std::ifstream m_stream;

@@ -1,9 +1,14 @@
 #include <iostream>
 #include <stdio.h>
+#include <opencv2/opencv.hpp>
 
 #include "video-format.h"
 #include "frame.h"
+#include "frame422.h"
+#include "frame420.h"
 #include "video.h"
+
+using namespace cv;
 
 Video::Video()
 {
@@ -45,10 +50,14 @@ Video::Video(const std::string& fpath)
 			m_type = YUV_420;
 		break;
 		default:
-		throw int();
+			throw int();
 	}
 }
 
+/**
+ * Video Destructor.
+ * Cleans the internal state of the class, closes the stream.
+ */
 Video::~Video()
 {
 	m_stream.close();
@@ -56,83 +65,126 @@ Video::~Video()
 
 Frame* Video::getFrame()
 {
-	Frame *f = new Frame(m_rows, m_cols);
+	Frame *f;
 	unsigned char buffer[m_cols * m_rows * 3];
-	
+	int cols, rows;
+	int size;
 	if(m_stream.eof())
 		throw FileNotFoundException();
 	
+	switch(m_type) {
+		case YUV_444:
+			rows = m_rows;
+			cols = m_cols;
+			size = m_rows * m_cols * 3;
+			f = new Frame(m_rows, m_cols);
+		break;
+		case YUV_422:
+			rows = m_rows;
+			cols = m_cols / 2;
+			size = m_rows * m_cols + m_rows * cols * 2;
+			f = new Frame422(m_rows, m_cols);
+		break;
+		case YUV_420:
+			rows = m_rows / 2;
+			cols = m_cols / 2;
+			size = m_rows * m_cols + rows * cols * 2;
+			f = new Frame(m_rows, m_cols);
+		break;
+	}
 	int y, u, v;
-	m_stream.read((char*)buffer, (m_cols * m_rows * 3));
+	m_stream.read((char*)buffer, size);
 	for(int i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
 	{
 		/* Accessing to planar infor */
-		y = buffer[i / 3]; 
-		u = buffer[(i / 3) + (m_rows * m_cols)]; 
-		v = buffer[(i / 3) + (m_rows * m_cols) * 2];
+		y = buffer[i / 3];
+		if(m_type == YUV_444 || (i < rows * cols * 3)) {
+			u = buffer[(i / 3) + (rows * cols)]; 
+			v = buffer[(i / 3) + (rows * cols) * 2];
+			f->u()[i / 3] = u;
+			f->v()[i / 3] = v;
+		}
 		f->y()[i / 3] = y;
-		f->u()[i / 3] = u;
-		f->v()[i / 3] = v;
 	}
 	return f;
 }
 
+/**
+ * Gets the rows that each frame represents
+ * /returns int - Number of rows
+ */
 int Video::rows()
 {
 	return m_rows;
 }
+
+/**
+ * Gets the columns that each frame represents
+ * /returns int - Number of columns
+ */
 int Video::cols()
 {
 	return m_cols;
 }
+
+/**
+ * Gets the frames per second
+ * /returns int - Number of frames per second
+ */
 int Video::fps()
 {
 	return m_fps;
 }
 
-/*
-	std::ifstream stream(path);
-	int cols, rows, type;
-	int y, u, v;
+/**
+ * Sets the posistion of the file to the begining.
+ */
+void Video::reset()
+{
+	if(!m_stream.is_open())
+		throw FileNotOpenException();
+	m_stream.seekg(0, std::ios_base::beg);
+}
 
-	if(!stream.good())
-		throw FileNotFoundException();
+/**
+ * Displays the video in a window.
+ */
+void Video::display()
+{
+	Frame *f;
+	int end = false, playing = true, inputKey;
 
-	stream>>m_cols>>m_rows>>m_fps>>m_type;
-	unsigned char buffer[cols * rows * 3];
-	
-	while(stream.good()) {
-		stream.read((char*)buffer, (cols * rows * 3));
-
-		for(int i = 0 ; i < rows * cols * 3 ; i += 3)
-		{ 
-			Frame f;
-			
-			switch(type) {
-			case 444:
-				f = new Frame(rows, cols);
-				m_type = YUV_444;
-		 		break;
-			case 422: {
-				f = new Frame422(rows, cols);
-				cols /= 2;
-				m_type = YUV_422;
-				break;
-			}
-			default:
-				throw InvalidVideoTypeException();
-			}
-			/* Accessing to planar infor 
-			y = buffer[i / 3]; 
-			u = buffer[(i / 3) + (rows * cols)]; 
-			v = buffer[(i / 3) + (rows * cols) * 2];
-			f.y()[i / 3] = y;
-			f.u()[i / 3] = u;
-			f.v()[i / 3] = v;
-
-			m_frames.push_back(std::move(f));
+	while(!end) {
+		try {
+			f = getFrame();
+		} catch (std::exception& e) {
+			std::cout<< "Video ended"<<std::endl;
+			end = true;
+			continue;
 		}
+		f->display();
+		delete f;
+		if(playing)
+		{
+			/* wait according to the frame rate */
+			inputKey = waitKey(1.0 / m_fps * 1000);
+		}
+		else
+		{
+			/* wait until user press a key */
+			inputKey = waitKey(0);
+		}
+	
+		/* parse the pressed keys, if any */
+		switch((char)inputKey)
+		{
+			case 'q':
+				end = 1;
+				break;
+			
+			case 'p':
+				playing = playing ? 0 : 1;
+				break;
+		}		
 	}
-	stream.close();
-
-*/
+}

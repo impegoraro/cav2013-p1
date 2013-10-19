@@ -34,6 +34,7 @@ Block::Block(const Block& b)
 {
 	this->m_buffer = new int[m_nRows * m_nCols];
 	std::memmove(this->m_buffer, b.m_buffer, (m_nRows * m_nCols));
+	assert(*this == b);
 }
 
 /**
@@ -112,7 +113,20 @@ Block* Block::dup()
 	Block* b = new Block(m_nRows, m_nCols);
 	*b = *this; // Copying buffers
 	
+	assert (*b == *this);
 	return b;
+}
+
+bool Block::operator==(const Block& rhs)
+{
+	if(this->m_nRows != rhs.m_nRows || this->m_nCols != rhs.m_nCols)
+		return false;
+
+	for(int i = 0; i < m_nRows * m_nCols; i++) {
+		if(m_buffer[i] != rhs.m_buffer[i])
+			return false;
+	}
+	return true;
 }
 
 /**
@@ -153,7 +167,21 @@ Block& Block::operator=(const Block& rhs)
 
 	for(int i = 0; i < (m_nRows * m_nCols); i++)
 		m_buffer[i] = rhs.m_buffer[i];
+
+	assert (*this == rhs);
 	return *this;
+}
+
+/**
+ * Copies the buffer rhs into the internal data. Note that the size of the array must be equal to the internal size of the Block, if not the result is unknown.
+ * /param const char * - array of bytes.
+ * /returns Block& - a reference to the to object itself.
+ */
+Block& Block::operator=(const char *rhs)
+{
+	
+	for(int i = 0; i < m_nRows * m_nCols; i++)
+		(*this)[i] = rhs[i]; 
 }
 
 /**

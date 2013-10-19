@@ -22,7 +22,9 @@ public:
 	unsigned int cols(void);
 
 	Block& operator=(const Block& rhs);
+	Block& operator=(const char *rhs);
 	Block& operator=(Block&& rhs);
+	bool operator==(const Block& rhs);
 	int& operator[](unsigned int index);
 	int operator[](unsigned int index) const;
 

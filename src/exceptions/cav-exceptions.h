@@ -38,4 +38,13 @@ public:
 		return "Video must be a YUV 444, YUV 422 or YUV420.";
 	}
 };
+
+class FileNotOpenException : public std::exception
+{
+public:
+	virtual const char* what()
+	{
+		return "File is not open.";
+	}
+};
 #endif
