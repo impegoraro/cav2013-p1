@@ -104,6 +104,15 @@ unsigned int Block::cols(void)
 }
 
 /**
+ * Gets the size of the block
+ * /returns unsigned int - size of the block
+ */
+unsigned int Block::size(void)
+{
+	return m_nRows * m_nCols;
+}
+
+/**
  * Duplicates the block.
  * The row, column and the block's content is duplicated. Note that the deletion of the block is delegated to the caller.
  * /returns Block* - a pointer to the newly heap allocated block.
@@ -117,6 +126,12 @@ Block* Block::dup()
 	return b;
 }
 
+/**
+ * Operator== Overloaded
+ * Checks whether the blocks are equal.
+ * /param const Block& - Constant reference to a block
+ * /returns bool - true if the blocks are equal, otherwise false.
+ */
 bool Block::operator==(const Block& rhs)
 {
 	if(this->m_nRows != rhs.m_nRows || this->m_nCols != rhs.m_nCols)
@@ -127,6 +142,21 @@ bool Block::operator==(const Block& rhs)
 			return false;
 	}
 	return true;
+}
+
+/**
+ * Operator== Overloaded
+ * Checks whether the block's buffer is equal to a chunk of memory of the same size.
+ * /param const const char* - array of bytes.
+ * /returns bool - true if the blocks are equal, otherwise false.
+ */
+bool Block::operator==(const char* rhs)
+{
+	bool res = true;
+	for(int i = 0; i < (m_nRows * m_nCols); i++)
+		if(m_buffer[i] != rhs[i])
+			res = false;
+	return res;
 }
 
 /**
@@ -179,9 +209,9 @@ Block& Block::operator=(const Block& rhs)
  */
 Block& Block::operator=(const char *rhs)
 {
-	
 	for(int i = 0; i < m_nRows * m_nCols; i++)
-		(*this)[i] = rhs[i]; 
+		m_buffer[i] = rhs[i];
+	assert (*this == rhs);
 }
 
 /**

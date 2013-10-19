@@ -19,14 +19,11 @@ Frame Frame422::convert()
 
 	f.y() = *m_y; // copies the Y buffer as is
 	int cols = f.cols();
-	for (int r = 0; r < m_uvRows; r++)
-		for (int c = 0; c < m_uvCols; c++) {
-			f.u()[r * cols + c * 2] = (*m_u)[r * m_uvCols + c];
-			f.u()[r * cols + c * 2 + 1] = (*m_u)[r * m_uvCols + c];
-			
-			f.v()[r * cols + c * 2] = (*m_v)[r * m_uvCols + c];
-			f.v()[r * cols + c * 2 + 1] = (*m_v)[r * m_uvCols + c];
-		}
 
+	for (uint i = 0; i < f.cols() * f.rows(); i+=2) { 
+		f.u()[i + 1] = f.u()[i] = u()[i / 2]; 
+		f.v()[i + 1] = f.v()[i] = v()[i / 2];
+	} 
+	
 	return f;
 }

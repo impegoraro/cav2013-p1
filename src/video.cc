@@ -98,9 +98,9 @@ Frame* Video::getFrame()
 	{
 		/* Accessing to planar infor */
 		y = buffer[i / 3];
-		if(m_type == YUV_444 || (i < rows * cols * 3)) {
-			u = buffer[(i / 3) + (rows * cols)]; 
-			v = buffer[(i / 3) + (rows * cols) * 2];
+		if(m_type == YUV_444 || ((i/3) < f->u().size())) {
+			u = buffer[(i / 3) + (m_rows * m_cols)]; 
+			v = buffer[(i / 3) + (m_rows * m_cols + rows * cols)];
 			f->u()[i / 3] = u;
 			f->v()[i / 3] = v;
 		}
