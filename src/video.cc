@@ -89,7 +89,7 @@ Frame* Video::getFrame()
 			rows = m_rows / 2;
 			cols = m_cols / 2;
 			size = m_rows * m_cols + rows * cols * 2;
-			f = new Frame(m_rows, m_cols);
+			f = new Frame420(m_rows, m_cols);
 		break;
 	}
 	int y, u, v;
