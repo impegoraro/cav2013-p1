@@ -33,8 +33,8 @@ public:
 	Block& u();
 	Block& v();
 
-	void write(const std::string& path);
-	static Frame* create_from_file(std::string& path);
+	virtual void write(const std::string& path);
+	static Frame* create_from_file(const std::string& path);
 
 protected:
 	unsigned int m_uvRows;
@@ -49,7 +49,7 @@ protected:
 	// Its purpose is to help the parse function without using the heap.
 	Frame();
 	Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols, VideoFormat format);
-	virtual Frame convert();
+	virtual Frame convert(VideoFormat dest);
 };
 
 #endif

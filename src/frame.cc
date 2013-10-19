@@ -2,11 +2,14 @@
 #include <algorithm>
 #include <string>
 #include <fstream>
+#include <assert.h>
 #include <opencv2/opencv.hpp>
 
 #include "video-format.h"
 #include "frame.h"
+#include "frame444.h"
 #include "frame422.h"
+#include "frame420.h"
 
 /**
  * Frame constructor
@@ -167,23 +170,13 @@ void Frame::getPixel(int pos, int& y, int& u, int& v)
 	v = (*m_v)[pos];
 }
 
-/**
- * Converts a Frame to YUV 444
- */
-Frame Frame::convert()
-{
-	assert(m_uvRows > 0 && m_uvCols > 0);
-	Frame f(*this);
-	return f;
-}
-
 void Frame::display()
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
 	// Move the converted frame instead of just copying it.
 	int r, g, b;
 	int y, u, v;
-	Frame f = std::move(convert());
+	Frame f = std::move(convert(YUV_444));
 	int yRows(f.rows()), yCols(f.cols());
 	cv::Mat img = cv::Mat(cv::Size(yCols, yRows), CV_8UC3);
 	unsigned char *buffer;
@@ -215,29 +208,76 @@ void Frame::display()
 	imshow("rgb", img);
 }
 
+/**
+ * Gets the number of rows of the defined frame.
+ * /returns unsigned int - Number of rows
+ */
 unsigned int Frame::rows()
 {
 	return m_uvRows;
 }
 
+/**
+ * Gets the number of columns of the defined frame.
+ * /returns unsigned int - Number of columns
+ */
 unsigned int Frame::cols()
 {
 	return m_uvCols;
 }
 
+/**
+ * Gets the block defined by the component Y.
+ * /returns Block& - A reference to the block Y.
+ */
 Block& Frame::y()
 {
 	return *m_y;
 }
+
+/**
+ * Gets the block defined by the component U.
+ * /returns Block& - A reference to the block U.
+ */
 Block& Frame::u()
 {
 	return *m_u;
 }
+
+/**
+ * Gets the block defined by the component V
+ * /returns Block& - A reference to the block V.
+ */
 Block& Frame::v()
 {
 	return *m_v;
 }
 
+/**
+ * Converts a Frame to YUV 444
+ */
+Frame Frame::convert(VideoFormat dest)
+{
+	assert(m_uvRows > 0 && m_uvCols > 0);
+	Frame f;
+	switch(dest) {
+	case YUV_444:
+		f = std::move(Frame(*this));
+		break;
+	case YUV_422:
+
+		break;
+	case YUV_420:
+
+		break;
+	}
+	return f;
+}
+
+/**
+ * Test function to write a frame to a file specified by path.
+ * /param const  std::string& - The file path.
+ */
 void Frame::write(const std::string& path)
 {
 	std::ofstream stream(path);
@@ -261,10 +301,14 @@ void Frame::write(const std::string& path)
 /************************************
  *          Static Methods          * 
  ***********************************/
-Frame* Frame::create_from_file(std::string& path)
+/**
+ * Creates a frame from the a filename
+ */
+Frame* Frame::create_from_file(const std::string& path)
 {
 	std::ifstream stream(path);
 	int cols, rows, type;
+	int uvCols, uvRows, size;
 	Frame *f(NULL);
 
 	if(!stream.good())
@@ -272,17 +316,29 @@ Frame* Frame::create_from_file(std::string& path)
 
 	stream>>cols>>rows>>type;
 	unsigned char buffer[cols * rows * 3];
-	
+
 	switch(type) {
-	case 444:
-		f = new Frame(rows, cols);
+	case 444: {
+		uvRows = rows;
+		uvCols = cols;
+		size = rows * cols * 3;
+		f = new Frame444(rows, cols);
 		break;
-	case 422: {
+	} case 422: {
+		uvRows = rows;
+		uvCols = cols / 2;
+		size = rows * cols + uvRows * uvCols * 2;
 		f = new Frame422(rows, cols);
 		cols /= 2;
 		break;
-	}
-	default:
+	} case 420: {
+		rows = rows / 2;
+		cols = cols / 2;
+		size = rows * cols + uvRows * uvCols * 2;
+
+		f = new Frame420(rows, cols);
+		break;
+	} default:
 		throw InvalidVideoTypeException();
 	}
 	
@@ -292,11 +348,14 @@ Frame* Frame::create_from_file(std::string& path)
 	{ 
 		/* Accessing to planar infor */
 		y = buffer[i / 3]; 
-		u = buffer[(i / 3) + (rows * cols)]; 
-		v = buffer[(i / 3) + (rows * cols) * 2];
 		f->y()[i / 3] = y;
-		f->u()[i / 3] = u;
-		f->v()[i / 3] = v;
+		
+		if(type == YUV_444 || ((i/3) < f->u().size())) {
+			u = buffer[(i / 3) + (rows * cols)]; 
+			v = buffer[(i / 3) + (rows * cols + uvRows * uvCols)];
+			f->u()[i / 3] = u;
+			f->v()[i / 3] = v;
+		}
 	}
 	stream.close();
 	return f;

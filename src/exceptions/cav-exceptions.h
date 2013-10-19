@@ -47,4 +47,13 @@ public:
 		return "File is not open.";
 	}
 };
+
+class VideoEndedException : public std::exception
+{
+public:
+	virtual const char* what()
+	 {
+		return "Video has ended.";
+	 }
+};
 #endif

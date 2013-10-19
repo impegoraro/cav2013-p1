@@ -1,9 +1,11 @@
 #include <iostream>
 #include <stdio.h>
+#include <assert.h>
 #include <opencv2/opencv.hpp>
 
 #include "video-format.h"
 #include "frame.h"
+#include "frame444.h"
 #include "frame422.h"
 #include "frame420.h"
 #include "video.h"
@@ -70,14 +72,14 @@ Frame* Video::getFrame()
 	int cols, rows;
 	int size;
 	if(m_stream.eof())
-		throw FileNotFoundException();
+		throw VideoEndedException();
 	
 	switch(m_type) {
 		case YUV_444:
 			rows = m_rows;
 			cols = m_cols;
 			size = m_rows * m_cols * 3;
-			f = new Frame(m_rows, m_cols);
+			f = new Frame444(m_rows, m_cols);
 		break;
 		case YUV_422:
 			rows = m_rows;
@@ -98,13 +100,13 @@ Frame* Video::getFrame()
 	{
 		/* Accessing to planar infor */
 		y = buffer[i / 3];
+		f->y()[i / 3] = y;
 		if(m_type == YUV_444 || ((i/3) < f->u().size())) {
 			u = buffer[(i / 3) + (m_rows * m_cols)]; 
 			v = buffer[(i / 3) + (m_rows * m_cols + rows * cols)];
 			f->u()[i / 3] = u;
 			f->v()[i / 3] = v;
 		}
-		f->y()[i / 3] = y;
 	}
 	return f;
 }
@@ -141,9 +143,12 @@ int Video::fps()
  */
 void Video::reset()
 {
+	string tmp;
 	if(!m_stream.is_open())
 		throw FileNotOpenException();
+	m_stream.clear();
 	m_stream.seekg(0, std::ios_base::beg);
+	getline(m_stream, tmp); // skip the header
 }
 
 /**
@@ -157,8 +162,7 @@ void Video::display()
 	while(!end) {
 		try {
 			f = getFrame();
-		} catch (std::exception& e) {
-			std::cout<< "Video ended"<<std::endl;
+		} catch (VideoEndedException& e) {
 			end = true;
 			continue;
 		}

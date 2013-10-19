@@ -9,7 +9,7 @@ Frame420::Frame420(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols,
 
 }
 
-Frame Frame420::convert()
+Frame Frame420::convert(VideoFormat dest)
 {
 	Frame f((m_uvRows * 2), (m_uvCols * 2));
 	

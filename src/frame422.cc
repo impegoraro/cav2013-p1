@@ -12,7 +12,7 @@ Frame422::Frame422(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols,
 {
 }
 
-Frame Frame422::convert()
+Frame Frame422::convert(VideoFormat dest)
 {
 	Frame f(m_uvRows, (m_uvCols * 2));
 	int l = 0;

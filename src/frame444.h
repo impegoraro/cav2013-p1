@@ -1,13 +1,13 @@
-#ifndef FRAME420_H_
-#define FRAME420_H_
+#ifndef FRAME444_H_
+#define FRAME444_H_
 
 #include "frame.h"
 #include "video-format.h"
 
-class Frame420 : public Frame
+class Frame444 : public Frame
 {
 public:
-	Frame420(unsigned int nRows, unsigned int nCols);
+	Frame444(unsigned int nRows, unsigned int nCols);
 
 protected:
 	virtual Frame convert(VideoFormat dest);
