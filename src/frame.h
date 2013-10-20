@@ -25,8 +25,6 @@ public:
 
 	unsigned int rows();
 	unsigned int cols();
-	unsigned int uvRows();
-	unsigned int uvCols();
 
 	Frame& operator=(const Frame& rhs);
 	Frame& operator=(Frame&& rhs);
@@ -39,8 +37,6 @@ public:
 	static Frame* create_from_file(const std::string& path);
 
 protected:
-	unsigned int m_nRows;
-	unsigned int m_nCols;
 	unsigned int m_uvRows;
 	unsigned int m_uvCols;
 

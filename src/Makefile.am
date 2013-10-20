@@ -1,15 +1,27 @@
-bin_PROGRAMS=cavp1
+lib_LIBRARIES=libcav.a
+bin_PROGRAMS=yuvShow yuvComp
 
+# Definition of the configuration flag
 AM_CXXFLAGS=-std=c++0x
-AM_CFLAGS=$(DEPS_CFLAGS) 
-cavp1_LDADD=$(DEPS_LIBS)
+AM_CFLAGS=$(DEPS_CFLAGS)
 
-cavp1_SOURCES=block.h block.cc \
+libcav_a_SOURCES = block.h block.cc \
               frame.h frame.cc \
               frame422.h frame422.cc \
               frame420.h frame420.cc \
               frame444.h frame444.cc \
               video.h video.cc \
               video-formats.h \
-              exceptions/cav-exceptions.h \
-              yuvShow.cc
+              exceptions/cav-exceptions.h
+libcav_a_LDFLAGS=-static 
+#libcav_a_LIBADD=$(DEPS_LIBS)
+#libcav_a_CPPFLAGS=$(DEPS)
+
+# yuvShow program 
+yuvShow_LDADD=$(DEPS_LIBS) libcav.a
+yuvShow_SOURCES=yuvShow.cc
+
+
+# yuvComp program 
+yuvComp_LDADD=$(DEPS_LIBS) libcav.a
+yuvComp_SOURCES=yuvComp.cc

@@ -33,7 +33,12 @@ Block::Block(const Block& b)
 	: m_nRows(b.m_nRows), m_nCols(b.m_nCols)
 {
 	this->m_buffer = new int[m_nRows * m_nCols];
-	std::memmove(this->m_buffer, b.m_buffer, (m_nRows * m_nCols));
+	// Aparently the memmove does not copies the buffer correctly
+	//std::memmove(this->m_buffer, b.m_buffer, (m_nRows * m_nCols));
+
+	//Falling back to copying byte by byte
+	for(int i = 0; i < m_nRows * m_nCols; i++)
+		m_buffer[i] = b.m_buffer[i];
 	assert(*this == b);
 }
 
@@ -189,7 +194,7 @@ int Block::operator[](unsigned int index) const
  */
 Block& Block::operator=(const Block& rhs)
 {
-	if(m_nRows != rhs.m_nRows && m_nCols != rhs.m_nCols) {
+	if(m_nRows != rhs.m_nRows || m_nCols != rhs.m_nCols) {
 		delete []m_buffer;
 		m_nRows = rhs.m_nRows;
 		m_nCols = rhs.m_nCols;

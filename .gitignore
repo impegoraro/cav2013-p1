@@ -19,3 +19,13 @@ Makefile
 config.status
 config.log
 test-frame.cc
+config.guess
+config.sub
+libtool
+ltmain.sh
+src/.libs/
+ar-lib
+src/libcav.a
+src/yuvShow
+src/yuvComp
+src/yuvCopy

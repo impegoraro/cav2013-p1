@@ -16,23 +16,23 @@ float calcESq(Frame& f, Frame& f2, uint component) {
         //TODO: check dimensions
         
         int lim = 1;
-        unsigned char *fBuffer, *f2Buffer;
+        Block *fBuffer, *f2Buffer;
         
         switch (component){
                 case 0:
-                        fBuffer = f.y();
-                        f2Buffer = f2.y();
-                        lim = f.rows()*f.cols();
+                        fBuffer = &f.y();
+                        f2Buffer = &f2.y();
+                        lim = fBuffer->rows() * fBuffer->cols();
                         break;
                 case 1:
-                        fBuffer = f.u();
-                        f2Buffer = f2.u();
-                        lim = f.uvRows()*f.uvCols();
+                        fBuffer = &f.u();
+                        f2Buffer = &f2.u();
+                        lim = fBuffer->rows() * fBuffer->cols();
                         break;
                 case 2:
-                        fBuffer = f.v();
-                        f2Buffer = f2.v();
-                        lim = f.uvRows()*f.uvCols();
+                        fBuffer = &f.v();
+                        f2Buffer = &f2.v();
+                        lim = fBuffer->rows() * fBuffer->cols();
                         break;
         }
         
@@ -40,20 +40,20 @@ float calcESq(Frame& f, Frame& f2, uint component) {
         float eSq = 1.0/lim;
         
         for(i = 0 ; i < lim; i++) {
-                sum += (fBuffer[i] - f2Buffer[i])*(fBuffer[i] - f2Buffer[i]);
+                sum += ((*fBuffer)[i] - (*f2Buffer)[i]) * ((*fBuffer)[i] - (*f2Buffer)[i]);
         }
-        
-        eSq*=sum;
+
+        eSq *= sum;
         return eSq;
 }
 
 float inline calcPSNR(Frame& f, Frame& f2, int component){
-        return 10.0 * log10f(255.0*255.0/calcESq(f,f2,component));
+        return 10.0 * log10f(255.0 * 255.0 / calcESq(f,f2,component));
 }
 
 int main(int argc, char** argv)
 {
-	if(argc != 2 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
+	if(argc != 3 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
 		cerr<< "Usage: yuvComp <src1> <src2>"<<endl<<endl;
 		cout<< "The program is able to compare in the following formats: YUV444, YUV422 and YUV420."<<endl;
 		cout<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl;
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 
 	try {
 		string path(argv[1]);
-		string path(argv[2]);
+		string path2(argv[2]);
 		Video v(path);
 		Video v2(path2);
 
@@ -85,15 +85,15 @@ int main(int argc, char** argv)
 				continue;
 			}
 
-			sumY += calcPSNR(f, f2, 0);
-            sumU += calcPSNR(f, f2, 1);
-            sumV += calcPSNR(f, f2, 2);
+			sumY += calcPSNR(*f, *f2, 0);
+            sumU += calcPSNR(*f, *f2, 1);
+            sumV += calcPSNR(*f, *f2, 2);
                         
             frames++;
 
 			delete f;
 		}
-
+		
 		printf("Y: %f, U:%f, V:%f\n", sumY/(float)frames, sumU/(float)frames, sumV/(float)frames);
 
 
