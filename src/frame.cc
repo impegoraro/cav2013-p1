@@ -45,11 +45,11 @@ Frame::Frame(unsigned int nRows, unsigned int nCols)
  * /param unsigned int - uvCols of U and V component
  */
 Frame::Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols, VideoFormat format)
-	: m_uvRows(uvRows), m_uvCols(uvCols), m_format(format)
+	: m_nRows(rows), m_nCols(cols), m_uvRows(uvRows), m_uvCols(uvCols), m_format(format)
 {
 	assert(rows > 0 && cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 
-	m_y = new Block(rows, cols);
+	m_y = new Block(m_nRows, m_nCols);
 	m_u = new Block(m_uvRows, m_uvCols);
 	m_v = new Block(m_uvRows, m_uvCols);
 }
@@ -112,8 +112,8 @@ Frame& Frame::operator=(const Frame& rhs)
 
 Frame& Frame::operator=(Frame&& rhs)
 {
-	m_uvRows = rhs.rows();
-	m_uvCols = rhs.cols();
+	m_uvRows = rhs.uvRows();
+	m_uvCols = rhs.uvCols();
 
 	if(m_y != NULL)
 		delete m_y;
@@ -177,12 +177,12 @@ void Frame::display()
 	int r, g, b;
 	int y, u, v;
 	Frame f = std::move(convert(YUV_444));
-	int yRows(f.rows()), yCols(f.cols());
+	int yRows(f.uvRows()), yCols(f.uvCols());
 	cv::Mat img = cv::Mat(cv::Size(yCols, yRows), CV_8UC3);
 	unsigned char *buffer;
 
 	buffer = (uchar*)img.ptr();
-	for(int i = 0; i < f.rows() * f.cols() * 3; i += 3) {
+	for(int i = 0; i < f.uvRows() * f.uvCols() * 3; i += 3) {
 		y = f.y()[i / 3];
 		u = f.u()[(i / 3)];
 		v = f.v()[(i / 3)];
@@ -214,7 +214,7 @@ void Frame::display()
  */
 unsigned int Frame::rows()
 {
-	return m_uvRows;
+	return m_nRows;
 }
 
 /**
@@ -222,6 +222,24 @@ unsigned int Frame::rows()
  * /returns unsigned int - Number of columns
  */
 unsigned int Frame::cols()
+{
+	return m_nCols;
+}
+
+/**
+ * Gets the number of rows of the defined frame.
+ * /returns unsigned int - Number of rows
+ */
+unsigned int Frame::uvRows()
+{
+	return m_uvRows;
+}
+
+/**
+ * Gets the number of columns of the defined frame.
+ * /returns unsigned int - Number of columns
+ */
+unsigned int Frame::uvCols()
 {
 	return m_uvCols;
 }
