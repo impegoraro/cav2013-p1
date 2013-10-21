@@ -5,7 +5,11 @@
 #include <assert.h>
 
 #include "frame.h"
+#include "framergb.h"
+#include "frame444.h"
 #include "frame422.h"
+#include "frame420.h"
+
 #include "video-format.h"
 
 Frame422::Frame422(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols, nRows, (nCols / 2), YUV_422)

@@ -3,6 +3,7 @@
 
 enum VideoFormat
 {
+	RGB,
 	YUV_444,
 	YUV_422,
 	YUV_420

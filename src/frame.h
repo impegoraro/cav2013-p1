@@ -15,6 +15,8 @@ public:
 	Frame(Frame&& f);
 	virtual ~Frame();
 
+	VideoFormat getFormat();
+
 	void setBlock(const Block &y, const Block &u, const Block &v);
 	void getBlock(Block& y, Block& u, Block& v);
 	

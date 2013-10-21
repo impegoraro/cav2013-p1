@@ -10,6 +10,7 @@ libcav_a_SOURCES = block.h block.cc \
               frame422.h frame422.cc \
               frame420.h frame420.cc \
               frame444.h frame444.cc \
+              framergb.h framergb.cc \
               video.h video.cc \
               video-formats.h \
               exceptions/cav-exceptions.h

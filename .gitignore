@@ -29,3 +29,4 @@ src/libcav.a
 src/yuvShow
 src/yuvComp
 src/yuvCopy
+doc/

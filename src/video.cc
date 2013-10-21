@@ -5,6 +5,7 @@
 
 #include "video-format.h"
 #include "frame.h"
+#include "framergb.h"
 #include "frame444.h"
 #include "frame422.h"
 #include "frame420.h"
@@ -12,7 +13,7 @@
 
 using namespace cv;
 
-Video::Video()
+Video::Video() : Video(0)
 {
 }
 
@@ -22,12 +23,14 @@ Video::Video()
 Video::Video(int number)
 {
 	std::string device("/dev/video");
+	VideoCapture cap = VideoCapture(0);
+	
 	device += number;
 	m_stream.open(device);
-	m_cols = 720;
-	m_rows = 480;
 	m_fps = 25;
-	m_type = YUV_444;
+	m_cols= (int)cap.get(CV_CAP_PROP_FRAME_WIDTH);
+	m_rows = (int)cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+	m_type = RGB;
 }
 
 /** Construct a Video object from a file.	
@@ -75,6 +78,12 @@ Frame* Video::getFrame()
 		throw VideoEndedException();
 	
 	switch(m_type) {
+		case RGB:
+			rows = m_rows;
+			cols = m_cols;
+			size = m_rows * m_cols * 3;
+			f = new FrameRGB(m_rows, m_cols);
+		break;
 		case YUV_444:
 			rows = m_rows;
 			cols = m_cols;
@@ -101,7 +110,7 @@ Frame* Video::getFrame()
 		/* Accessing to planar infor */
 		y = buffer[i / 3];
 		f->y()[i / 3] = y;
-		if(m_type == YUV_444 || ((i/3) < f->u().size())) {
+		if(m_type == RGB || m_type == YUV_444 || ((i/3) < f->u().size())) {
 			u = buffer[(i / 3) + (m_rows * m_cols)]; 
 			v = buffer[(i / 3) + (m_rows * m_cols + rows * cols)];
 			f->u()[i / 3] = u;

@@ -170,28 +170,46 @@ void Frame::getPixel(int pos, int& y, int& u, int& v)
 	v = (*m_v)[pos];
 }
 
+VideoFormat Frame::getFormat()
+{
+	return m_format;
+}
+
 void Frame::display()
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
 	// Move the converted frame instead of just copying it.
 	int r, g, b;
 	int y, u, v;
-	Frame f = std::move(convert(YUV_444));
-	int yRows(f.rows()), yCols(f.cols());
-	cv::Mat img = cv::Mat(cv::Size(yCols, yRows), CV_8UC3);
+	Frame f;
+	int yRows, yCols;
 	unsigned char *buffer;
+	
+	if(m_format == RGB) 
+		f = std::move(convert(RGB));
+	else
+		f =std::move(convert(YUV_444));
+	
+	yRows = f.rows();
+	yCols = f.cols();
+	cv::Mat img = cv::Mat(cv::Size(yCols, yRows), CV_8UC3);
 
 	buffer = (uchar*)img.ptr();
 	for(int i = 0; i < f.rows() * f.cols() * 3; i += 3) {
-		y = f.y()[i / 3];
-		u = f.u()[(i / 3)];
-		v = f.v()[(i / 3)];
+		if(m_format == RGB) {
+			r = f.y()[i / 3];
+			g = f.u()[(i / 3)];
+			b = f.v()[(i / 3)];
+		} else {
+			y = f.y()[i / 3];
+			u = f.u()[(i / 3)];
+			v = f.v()[(i / 3)];
 
-		/* convert to RGB */
-		b = (int)(1.164*(y - 16) + 2.018*(u-128));
-		g = (int)(1.164*(y - 16) - 0.813*(u-128) - 0.391*(v-128));
-		r = (int)(1.164*(y - 16) + 1.596*(v-128));
-
+			/* convert to RGB */
+			b = (int)(1.164*(y - 16) + 2.018*(u-128));
+			g = (int)(1.164*(y - 16) - 0.813*(u-128) - 0.391*(v-128));
+			r = (int)(1.164*(y - 16) + 1.596*(v-128));
+		}
 		/* clipping to [0 ... 255] */
 		if(r < 0) r = 0;
 		if(g < 0) g = 0;

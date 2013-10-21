@@ -5,13 +5,16 @@
 #include "video-format.h"
 
 
+/**
+ * Intialiazes frame for 422
+ */
 class Frame422 : public Frame
 {
 public:
 	Frame422(unsigned int nRows, unsigned int nCols);
 
-protected:
 	virtual Frame convert(VideoFormat dest);
+protected:
 };
 
 #endif
