@@ -5,10 +5,10 @@
 
 #include "block.h"
 
-//Block::Block()
-//{
-//
-//}
+Block::Block()
+	: shouldClean(false)
+{
+}
 
 /**
  * Block Constructor.
@@ -17,10 +17,8 @@
  * /param unsigned int - Number of columns
  */
 Block::Block(unsigned int rows, unsigned cols)
+	: shouldClean(true), m_nRows(rows), m_nCols(cols)
 {
-	this->m_nRows = rows;
-	this->m_nCols = cols;
-
 	m_buffer = new int[m_nRows * m_nCols];
 }
 
@@ -30,7 +28,7 @@ Block::Block(unsigned int rows, unsigned cols)
  * /param Block& - a reference to a block
  */
 Block::Block(const Block& b)
-	: m_nRows(b.m_nRows), m_nCols(b.m_nCols)
+	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), shouldClean(true)
 {
 	this->m_buffer = new int[m_nRows * m_nCols];
 	// Aparently the memmove does not copies the buffer correctly
@@ -48,7 +46,7 @@ Block::Block(const Block& b)
  * /param Block& - a reference to a block
  */
 Block::Block(Block&& b)
-	: m_nRows(b.m_nRows), m_nCols(b.m_nCols)
+	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), shouldClean(true)
 {
 	m_buffer = b.m_buffer;
 	b.m_buffer = NULL;
@@ -60,7 +58,7 @@ Block::Block(Block&& b)
  */
 Block::~Block()
 {
-	if(m_buffer != NULL)
+	if(m_buffer != NULL && shouldClean)
 		delete []m_buffer;
 }
 
@@ -129,6 +127,33 @@ Block* Block::dup()
 	
 	assert (*b == *this);
 	return b;
+}
+
+/**
+ * Returns a sub block. Note that the sub block is not a copy that means that any change to any of its elements will be made to the original block.
+ * /return Block - A subblock 
+ */
+Block Block::getSubBlock(unsigned int begin, unsigned int end)
+{
+	assert(begin > end && end <= m_nRows * m_nCols);
+	Block b;
+	b.m_nRows = begin;
+	b.m_nCols = end;
+	b.m_buffer = &m_buffer[begin];
+
+	return b;
+}
+
+/**
+ * Copies the values of the a sub block to the internal data.
+ * 
+ */
+ /*TODO: implement const methods to let the 3rd parameter to be a const Block& */
+void Block::setSubBlock(unsigned int begin, unsigned int end, Block& b)
+{
+	assert(begin > end && end <= m_nRows * m_nCols);
+	for(int i = begin; i < end; i++)
+		m_buffer[i] = b.m_buffer[i / begin];
 }
 
 /**

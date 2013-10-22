@@ -18,7 +18,7 @@ Video::Video() : Video(0)
 }
 
 /** Construct a Video object from a device.
-	/param int - device number
+ * /param int - device number
  */
 Video::Video(int number)
 {
@@ -34,16 +34,17 @@ Video::Video(int number)
 }
 
 /** Construct a Video object from a file.	
-	/param string - file path of the  
+ * /param string - file path of the  
  */
 Video::Video(const std::string& fpath)
 	: m_stream(fpath)
 {
 	int type;
+	char c; // to get the newline
 	if(!m_stream.good())
 		throw FileNotFoundException();
 
-	m_stream>> m_cols>> m_rows>> m_fps>> type;
+	m_stream>> m_cols>> m_rows>> m_fps>> type>> c;
 	switch(type) {
 		case 444:
 			m_type = YUV_444;
@@ -57,6 +58,20 @@ Video::Video(const std::string& fpath)
 		default:
 			throw int();
 	}
+}
+
+/** Construct a Video object for writing.	
+ * /param string - file path of the 
+ *
+ */
+Video::Video(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat type)
+	: m_stream(fpath), m_type(type), m_cols(cols), m_rows(rows), m_fps(fps)
+{
+	if(!m_stream.good())
+		throw FileNotFoundException();
+
+	m_stream<< m_cols<< " "<< m_rows<< " "<< m_fps<< " "<< type<< std::endl;
+
 }
 
 /**
@@ -120,6 +135,48 @@ Frame* Video::getFrame()
 	return f;
 }
 
+void Video::putFrame(Frame& f)
+{
+	assert(f.getFormat() == m_type);
+	unsigned char buffer[m_cols * m_rows * 3];
+	int cols, rows;
+	int size;
+	
+	switch(m_type) {
+		case RGB:
+			rows = m_rows;
+			cols = m_cols;
+			size = m_rows * m_cols * 3;
+		break;
+		case YUV_444:
+			rows = m_rows;
+			cols = m_cols;
+			size = m_rows * m_cols * 3;
+		break;
+		case YUV_422:
+			rows = m_rows;
+			cols = m_cols / 2;
+			size = m_rows * m_cols + m_rows * cols * 2;
+		break;
+		case YUV_420:
+			rows = m_rows / 2;
+			cols = m_cols / 2;
+			size = m_rows * m_cols + rows * cols * 2;
+		break;
+	}
+
+	for(int i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
+	{
+		/* Accessing to planar infor */
+		buffer[i / 3] = f.y()[i / 3];
+		if(m_type == RGB || m_type == YUV_444 || ((i/3) < f.u().size())) {
+			buffer[(i / 3) + (m_rows * m_cols)] = f.u()[i / 3]; 
+			buffer[(i / 3) + (m_rows * m_cols + rows * cols)] = f.v()[i / 3];
+		}
+	}
+	m_stream.write((char*)buffer, size);
+}
+
 /**
  * Gets the rows that each frame represents
  * /returns int - Number of rows
@@ -148,6 +205,15 @@ int Video::fps()
 }
 
 /**
+ * Gets the video's format.
+ * /returns VideosFormat - Current video format.
+ */
+VideoFormat Video::format()
+{
+	return m_type;
+}
+
+/**
  * Sets the posistion of the file to the begining.
  */
 void Video::reset()
@@ -165,7 +231,7 @@ void Video::reset()
  */
 void Video::display()
 {
-	Frame *f;
+	Frame *f = NULL;
 	int end = false, playing = true, inputKey;
 
 	while(!end) {

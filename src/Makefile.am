@@ -1,5 +1,5 @@
 lib_LIBRARIES=libcav.a
-bin_PROGRAMS=yuvShow yuvComp
+bin_PROGRAMS=yuvShow yuvComp yuvCopy
 
 # Definition of the configuration flag
 AM_CXXFLAGS=-std=c++0x
@@ -26,3 +26,8 @@ yuvShow_SOURCES=yuvShow.cc
 # yuvComp program 
 yuvComp_LDADD=$(DEPS_LIBS) libcav.a
 yuvComp_SOURCES=yuvComp.cc
+
+
+# yuvComp program 
+yuvCopy_LDADD=$(DEPS_LIBS) libcav.a
+yuvCopy_SOURCES=yuvCopy.cc

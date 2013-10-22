@@ -6,7 +6,6 @@
 class Block
 {
 public:
-	//Block();
 	Block(unsigned int rows, unsigned int cols);
 	Block(Block&& b);
 	Block(const Block& b);
@@ -30,10 +29,17 @@ public:
 	int& operator[](unsigned int index);
 	int operator[](unsigned int index) const;
 
+	Block getSubBlock(unsigned int begin, unsigned int end);
+	void setSubBlock(unsigned int begin, unsigned int end, Block& b);
+	
 	void print();
-private:
+
+
+protected:
+	Block();
 	unsigned int m_nRows;
 	unsigned int m_nCols;
+	bool shouldClean;
 
 	int *m_buffer;
 
