@@ -6,7 +6,7 @@
 #include "block.h"
 
 Block::Block()
-	: shouldClean(false)
+	: m_shouldClean(false)
 {
 }
 
@@ -17,7 +17,7 @@ Block::Block()
  * /param unsigned int - Number of columns
  */
 Block::Block(unsigned int rows, unsigned cols)
-	: shouldClean(true), m_nRows(rows), m_nCols(cols)
+	: m_shouldClean(true), m_nRows(rows), m_nCols(cols)
 {
 	m_buffer = new int[m_nRows * m_nCols];
 }
@@ -28,7 +28,7 @@ Block::Block(unsigned int rows, unsigned cols)
  * /param Block& - a reference to a block
  */
 Block::Block(const Block& b)
-	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), shouldClean(true)
+	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_shouldClean(true)
 {
 	this->m_buffer = new int[m_nRows * m_nCols];
 	// Aparently the memmove does not copies the buffer correctly
@@ -46,7 +46,7 @@ Block::Block(const Block& b)
  * /param Block& - a reference to a block
  */
 Block::Block(Block&& b)
-	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), shouldClean(true)
+	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_shouldClean(b.m_shouldClean)
 {
 	m_buffer = b.m_buffer;
 	b.m_buffer = NULL;
@@ -58,7 +58,7 @@ Block::Block(Block&& b)
  */
 Block::~Block()
 {
-	if(m_buffer != NULL && shouldClean)
+	if(m_buffer != NULL && m_shouldClean)
 		delete []m_buffer;
 }
 
@@ -220,11 +220,12 @@ int Block::operator[](unsigned int index) const
 Block& Block::operator=(const Block& rhs)
 {
 	if(m_nRows != rhs.m_nRows || m_nCols != rhs.m_nCols) {
-		delete []m_buffer;
+		if(m_shouldClean)
+			delete []m_buffer;
 		m_nRows = rhs.m_nRows;
 		m_nCols = rhs.m_nCols;
 	}
-
+	m_shouldClean = true;
 	for(int i = 0; i < (m_nRows * m_nCols); i++)
 		m_buffer[i] = rhs.m_buffer[i];
 
@@ -255,9 +256,10 @@ Block& Block::operator=(Block&& rhs)
 	if(m_nRows != rhs.m_nRows && m_nCols != rhs.m_nCols)
 		throw InvalidDimensionException();
 	
-	if(this->m_buffer != NULL)
+	if(this->m_buffer != NULL && m_shouldClean)
 		delete []this->m_buffer;
-
+	
+	this->m_shouldClean = rhs.m_shouldClean;
 	this->m_buffer = rhs.m_buffer;
 	rhs.m_buffer = NULL;
 	return *this;

@@ -39,7 +39,7 @@ protected:
 	Block();
 	unsigned int m_nRows;
 	unsigned int m_nCols;
-	bool shouldClean;
+	bool m_shouldClean;
 
 	int *m_buffer;
 
