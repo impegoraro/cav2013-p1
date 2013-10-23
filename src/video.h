@@ -24,7 +24,7 @@ public:
 	void putFrame(Frame& f);
 
 	void reset();
-	void display();
+	void display(int playing = true);
 
 protected:
 	std::fstream m_stream;

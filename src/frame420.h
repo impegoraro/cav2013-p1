@@ -10,6 +10,7 @@ public:
 	Frame420(unsigned int nRows, unsigned int nCols);
 
 	virtual Frame convert(VideoFormat dest);
+protected:
 };
 
 #endif

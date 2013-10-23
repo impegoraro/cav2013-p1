@@ -30,3 +30,5 @@ src/yuvShow
 src/yuvComp
 src/yuvCopy
 doc/
+yuvConvert
+videoEffects

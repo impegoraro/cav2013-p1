@@ -265,14 +265,16 @@ void Video::reset()
 /**
  * Displays the video in a window.
  */
-void Video::display()
+void Video::display(int playing)
 {
 	Frame *f = NULL;
-	int end = false, playing = true, inputKey;
+	int end = false, inputKey;
 
 	while(!end) {
 		try {
 			f = getFrame();
+			//Frame f422 = std::move(f->convert(YUV_422));
+			//f422.write("/home/ilan/img2.yuv422");
 		} catch (VideoEndedException& e) {
 			end = true;
 			continue;

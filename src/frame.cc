@@ -60,7 +60,7 @@ Frame::Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned
  * /param Frame - a constant reference to the Frame to copy
  */
 Frame::Frame(const Frame &f)
-	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_format(YUV_444)
+	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_format(f.m_format)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
 	
@@ -75,7 +75,7 @@ Frame::Frame(const Frame &f)
  */
 
 Frame::Frame(Frame &&f)
-	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_y(std::move(f.m_y)), m_u(std::move(f.m_u)), m_v(std::move(f.m_v)), m_format(YUV_444)
+	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_y(std::move(f.m_y)), m_u(std::move(f.m_u)), m_v(std::move(f.m_v)), m_format(m_format)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
 
@@ -96,7 +96,7 @@ Frame::~Frame()
 
 Frame& Frame::operator=(const Frame& rhs)
 {
-	assert(m_uvRows <= rhs.m_uvRows && m_uvCols <= rhs.m_uvCols);
+	assert(m_uvRows <= rhs.m_uvRows && m_uvCols <= rhs.m_uvCols && m_format == rhs.m_format);
 
 	if(m_y != NULL)
 		delete m_y;
@@ -114,6 +114,7 @@ Frame& Frame::operator=(Frame&& rhs)
 {
 	m_uvRows = rhs.rows();
 	m_uvCols = rhs.cols();
+	m_format = rhs.m_format;
 
 	if(m_y != NULL)
 		delete m_y;

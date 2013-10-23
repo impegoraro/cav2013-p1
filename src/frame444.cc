@@ -54,11 +54,48 @@ Frame Frame444::convert(VideoFormat dest)
 	} case YUV_444:
 		return Frame(*this);
 		break;
-	case YUV_422:
+	case YUV_422: {
+		Frame422 f(m_uvRows, m_uvCols);
 
+		f.y() = y();
+		//for(int r = 0; r < m_uvRows; r++)
+		//	for(int c = 0; c < m_uvCols; c += 2)
+		//	{
+		//		f.u()[r * f.cols() + c / 2] = u()[m_uvCols + c];
+		//		f.v()[r * f.cols() + c / 2] = v()[m_uvCols + c];
+		//	}
+
+		for(int i = 0; i< m_uvRows * m_uvCols / 2; i++) {
+			f.u()[i] = u()[i * 2];
+			f.v()[i] = v()[i * 2];
+		}
+
+		return f;
 		break;
-	case YUV_420:
+	}
+	case YUV_420: {
+		Frame420 f(m_uvRows, m_uvCols);
 
+		f.y() = y();
+		//for(int r = 0; r < m_uvRows; r += 2)
+		//	for(int c = 0; c < m_uvCols; c += 2)
+		//	{
+		//		f.u()[(r / 2) * f.u().cols() + c / 2] = u()[m_uvCols + c];
+		//		f.v()[(r / 2) * f.v().cols() + c / 2] = v()[m_uvCols + c];
+		//	}
+		
+
+		for (unsigned int l = 0, lr = 0; lr < m_uvRows / 2; l += 2, lr++) {
+	        for (unsigned int c = 0, cr = 0; cr < m_uvCols / 2; c += 2, cr++) {
+	                unsigned int pos = c + (l * m_uvCols);
+	                unsigned int posRaw = cr + (lr * (m_uvCols / 2));
+
+	                f.u()[posRaw] = u()[pos];
+	                f.v()[posRaw] = v()[pos];
+	        }
+        }
+		return f;
+		}
 		break;
 	}
 	return Frame(m_uvRows, m_uvCols);

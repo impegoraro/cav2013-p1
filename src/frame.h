@@ -41,9 +41,9 @@ public:
 	Block& v();
 
 	virtual void write(const std::string& path);
-	static Frame* create_from_file(const std::string& path);
 
 	virtual Frame convert(VideoFormat dest);
+	static Frame* create_from_file(const std::string& path);
 protected:
 	unsigned int m_uvRows;
 	unsigned int m_uvCols;
