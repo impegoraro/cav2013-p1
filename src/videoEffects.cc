@@ -1,5 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <getopt.h>
 
 #include "video.h"
 #include "block.h"
@@ -13,23 +14,71 @@ using namespace cv;
 
 int main(int argc, char** argv)
 {
-	bool cont = true;
+	bool cont = true, showHelp = false;
 	string ans;
-	if(argc > 1 && (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))) {
-		cerr<< "Usage: videoEffects <video>"<<endl<<endl;
-		cout<< "The program is able to set effects on videos and play them in the following formats: RGB, YUV444, YUV422 and YUV420."<<endl;
-		cout<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl;
-		cout<< "Authors:"<<endl;
-		cout<< "    Ilan Pegoraro N. 41450"<<endl;
-		cout<< "    Luis Neves    N. 41528"<<endl;
+	int nextOp;
+	float luminance;
+	char *src = NULL;
+	int operation(0); // 0 -> invert; 1 black and white; 2 - luminance
+	const char* shortops = "s:ibl:h";
+	const struct option longops[] = {
+		"help", 0, NULL, 'h',
+		"invert", 0, NULL, 'i',
+		"black-white", 0, NULL, 'b',
+		"luminance", 1, NULL, 'l',
+		"source", 1, NULL, 's'
+	};
+
+	do {
+		nextOp = getopt_long(argc, argv, shortops, longops, NULL);
+		switch(nextOp) {
+			case 'h':
+				nextOp = -1;
+				showHelp = true;
+			break;
+			case 'i':
+				operation = 0;
+			break;
+			case 'b':
+				operation = 1;
+			break;
+			case 'l':
+				operation = 2;
+				luminance = atof(optarg);
+			break;
+			case 's':
+				src = optarg;
+			break;
+			case '?':
+			default:
+				showHelp = false;
+			break;
+		}
+	} while(nextOp !=- 1);
+
+	if(showHelp) {
+		cerr<< "Usage: videoEffects [OPTIONS] <source>"<<endl<<endl;
+		cout<<"Options are:"<<endl
+			<<"  -h, --help           Shows this help message."<<endl
+			<<"  -l, --luminance      Changes the luminance of each video frame."<<endl
+			<<"  -i, --invert         Inverts the colors of each video frame."<<endl
+			<<"  -b, --black-white    Turns the video to black and white."<<endl
+			<<"  -s, --source         Video file path."<<endl
+			<<endl<< "The program is able to apply effects in the following formats: RGB, YUV444, YUV422 and YUV420."<<endl
+			<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl
+			<< "Authors:"<<endl
+			<< "    Ilan Pegoraro N. 41450"<<endl
+			<< "    Luis Neves    N. 41528"<<endl;
 		return 1;
 	}
+
+
 	try {
 		Video *v;
-		if(argc <= 1)
-			v = new Video();
+		if(src == NULL)
+			v = new Video(0);
 		else {
-			string path(argv[1]);
+			string path(src);
 			v = new Video(path);
 		}
 		
@@ -40,8 +89,17 @@ int main(int argc, char** argv)
 			while(!end) {
 				try {
 					f = v->getFrame();
-					//f->setBlackWhite();
-					f->setInvertColors();
+					switch(operation){
+					case 1:
+						f->setBlackWhite();
+						break;
+					case 0:
+						f->setInvertColors();
+						break;
+					case 2:
+						f->changeLuminance(luminance);
+						break;
+					}
 				} catch (VideoEndedException& e) {
 					end = true;
 					continue;

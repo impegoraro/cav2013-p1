@@ -54,7 +54,8 @@ int main(int argc, char** argv)
 
 	if(src == NULL || dst == NULL) {
 		cerr<< "Usage: yuvCopy [OPTIONS] -s <source> -d <destination>"<<endl<<endl;
-		cout<<"  -h, --help           Shows this help message."<<endl
+		cout<<"Options are:"<<endl
+			<<"  -h, --help           Shows this help message."<<endl
 			<<"  -s, --source         Specifies the input video filepath."<<endl
 			<<"  -d, --destination    Specifies the output video filepath."<<endl
 			<<"  -c, --columns        Columns for the custom block."<<endl

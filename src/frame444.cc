@@ -49,6 +49,7 @@ Frame Frame444::convert(VideoFormat dest)
 			f.u()[i] = g;
 			f.v()[i] = b;
 		}
+		return f;
 		break;
 	} case YUV_444:
 		return Frame(*this);

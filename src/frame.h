@@ -27,6 +27,7 @@ public:
 
 	void setBlackWhite();
 	void setInvertColors();
+	void changeLuminance(float factor);
 
 	unsigned int rows();
 	unsigned int cols();

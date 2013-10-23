@@ -246,6 +246,23 @@ void Frame::setInvertColors()
 }
 
 /**
+ * Change the luminance of the frame.
+ */
+void Frame::changeLuminance(float factor)
+{
+	int y_;
+	for(int i = 0; i < y().rows() * y().cols(); i++) {
+		y_ = y()[i] * factor;
+
+		if(y_ < 0)
+			y_ = 0;
+		else if(y_ > 255)
+			y_ = 255;
+		y()[i] = y_;
+	}
+}
+
+/**
  * Gets the number of rows of the defined frame.
  * /returns unsigned int - Number of rows
  */
