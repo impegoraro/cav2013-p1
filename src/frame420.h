@@ -9,7 +9,6 @@ class Frame420 : public Frame
 public:
 	Frame420(unsigned int nRows, unsigned int nCols);
 
-protected:
 	virtual Frame convert(VideoFormat dest);
 };
 

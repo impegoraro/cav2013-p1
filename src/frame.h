@@ -10,6 +10,7 @@
 class Frame
 {
 public:
+	Frame();
 	Frame(unsigned int nRows, unsigned int nCols);
 	Frame(const Frame& f);
 	Frame(Frame&& f);
@@ -42,6 +43,7 @@ public:
 	virtual void write(const std::string& path);
 	static Frame* create_from_file(const std::string& path);
 
+	virtual Frame convert(VideoFormat dest);
 protected:
 	unsigned int m_uvRows;
 	unsigned int m_uvCols;
@@ -53,9 +55,7 @@ protected:
 	VideoFormat m_format;
 	// Dumb constructor that doesnt initializes anything. 
 	// Its purpose is to help the parse function without using the heap.
-	Frame();
 	Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols, VideoFormat format);
-	virtual Frame convert(VideoFormat dest);
 };
 
 #endif

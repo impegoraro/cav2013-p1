@@ -14,7 +14,6 @@ public:
 	Frame422(unsigned int nRows, unsigned int nCols);
 
 	virtual Frame convert(VideoFormat dest);
-protected:
 };
 
 #endif

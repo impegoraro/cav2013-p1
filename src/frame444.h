@@ -9,7 +9,6 @@ class Frame444 : public Frame
 public:
 	Frame444(unsigned int nRows, unsigned int nCols);
 
-protected:
 	virtual Frame convert(VideoFormat dest);
 };
 
