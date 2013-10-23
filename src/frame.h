@@ -25,6 +25,9 @@ public:
 	void getPixel(int pos, int& y, int& u, int& v);
 	void display();
 
+	void setBlackWhite();
+	void setInvertColors();
+
 	unsigned int rows();
 	unsigned int cols();
 

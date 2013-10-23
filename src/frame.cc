@@ -221,6 +221,31 @@ void Frame::display()
 }
 
 /**
+ * Converts the frame to black and white.
+ */
+void Frame::setBlackWhite()
+{
+	for(int i = 0; i < m_uvRows * m_uvCols; i++) {
+		u()[i] = 127;
+		v()[i] = 127;
+	}
+}
+
+/**
+ * Inverts the colors of the current frame.
+ */
+void Frame::setInvertColors()
+{
+	for(int i = 0; i < y().rows() * y().cols(); i++)
+		y()[i] = 255 - y()[i];
+
+	for(int i = 0; i < m_uvRows * m_uvCols; i++) {
+		u()[i] = 255 - u()[i];
+		v()[i] = 255 - v()[i];
+	}
+}
+
+/**
  * Gets the number of rows of the defined frame.
  * /returns unsigned int - Number of rows
  */

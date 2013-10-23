@@ -1,5 +1,5 @@
 lib_LIBRARIES=libcav.a
-bin_PROGRAMS=yuvShow yuvComp yuvCopy
+bin_PROGRAMS=yuvShow yuvComp yuvCopy videoEffects
 
 # Definition of the configuration flag
 AM_CXXFLAGS=-std=c++0x
@@ -31,3 +31,7 @@ yuvComp_SOURCES=yuvComp.cc
 # yuvComp program 
 yuvCopy_LDADD=$(DEPS_LIBS) libcav.a
 yuvCopy_SOURCES=yuvCopy.cc
+
+# videoEffects program 
+videoEffects_LDADD=$(DEPS_LIBS) libcav.a
+videoEffects_SOURCES=videoEffects.cc

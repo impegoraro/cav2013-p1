@@ -37,7 +37,7 @@ Video::Video(int number)
  * /param string - file path of the  
  */
 Video::Video(const std::string& fpath)
-	: m_stream(fpath), m_fromCam(false), m_video(fpath)
+	: m_stream(fpath), m_fromCam(false)
 {
 	int type;
 	char c; // to get the newline
@@ -45,6 +45,7 @@ Video::Video(const std::string& fpath)
 		throw FileNotFoundException();
 	if(fpath.find(".yuv") != std::string::npos) {
 		m_stream>> m_cols>> m_rows>> m_fps>> type>> c;
+		m_video.release();
 		switch(type) {
 			case 444:
 				m_type = YUV_444;
@@ -59,6 +60,7 @@ Video::Video(const std::string& fpath)
 				throw int();
 		}
 	} else {
+		m_video.open(fpath);
 		// In AVI Mode
 		m_fps = 30; //(int)m_video.get(CV_CAP_PROP_FPS);
 		m_cols= (int)m_video.get(CV_CAP_PROP_FRAME_WIDTH);

@@ -17,7 +17,7 @@ using namespace cv;
 int main(int argc, char** argv)
 {
 	int nextOp;
-	int rows = 3, cols = 3;
+	uint rows = 1, cols = 1;
 	char *src = NULL, *dst = NULL;
 	const char* shortops = "r:c:hs:d:";
 	const struct option longops[] = {
@@ -69,15 +69,21 @@ int main(int argc, char** argv)
 
 	try {
 		bool cont(true);
+		uint fSize, bSize(rows * cols);
 		Video vsrc((string)src);
 		Video dsrc((string)dst, vsrc.rows(), vsrc.cols(), vsrc.fps(), vsrc.format());
 
 		while(cont) {
 			try {
 				Frame *f;
-				
 				f = vsrc.getFrame();
-				dsrc.putFrame(*f);
+				if(rows == cols == 1) {
+					dsrc.putFrame(*f);
+				} else {
+				//	while()
+
+					dsrc.putFrame(*f);
+				}
 				delete f;
 			} catch(VideoEndedException& e) {
 				cont = false;
