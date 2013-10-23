@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <opencv2/opencv.hpp>
 #include "frame.h"
 
 class Video
@@ -31,6 +32,8 @@ protected:
 	unsigned int m_rows;
 	unsigned int m_cols;
 	unsigned int m_fps;
+	bool m_fromCam;
+	cv::VideoCapture m_video;
 	VideoFormat m_type;
 };
 

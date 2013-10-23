@@ -185,10 +185,8 @@ void Frame::display()
 	int yRows, yCols;
 	unsigned char *buffer;
 	
-	if(m_format == RGB) 
-		f = std::move(convert(RGB));
-	else
-		f =std::move(convert(YUV_444));
+	
+	f = std::move(convert(YUV_444));
 	
 	yRows = f.rows();
 	yCols = f.cols();
@@ -196,20 +194,16 @@ void Frame::display()
 
 	buffer = (uchar*)img.ptr();
 	for(int i = 0; i < f.rows() * f.cols() * 3; i += 3) {
-		if(m_format == RGB) {
-			r = f.y()[i / 3];
-			g = f.u()[(i / 3)];
-			b = f.v()[(i / 3)];
-		} else {
-			y = f.y()[i / 3];
-			u = f.u()[(i / 3)];
-			v = f.v()[(i / 3)];
+		
+		y = f.y()[i / 3];
+		u = f.u()[(i / 3)];
+		v = f.v()[(i / 3)];
 
-			/* convert to RGB */
-			b = (int)(1.164*(y - 16) + 2.018*(u-128));
-			g = (int)(1.164*(y - 16) - 0.813*(u-128) - 0.391*(v-128));
-			r = (int)(1.164*(y - 16) + 1.596*(v-128));
-		}
+		/* convert to RGB */
+		b = (int)(1.164*(y - 16) + 2.018*(u-128));
+		g = (int)(1.164*(y - 16) - 0.813*(u-128) - 0.391*(v-128));
+		r = (int)(1.164*(y - 16) + 1.596*(v-128));
+
 		/* clipping to [0 ... 255] */
 		if(r < 0) r = 0;
 		if(g < 0) g = 0;
@@ -327,12 +321,13 @@ Frame* Frame::create_from_file(const std::string& path)
 	std::ifstream stream(path);
 	int cols, rows, type;
 	int uvCols, uvRows, size;
+	char c;
 	Frame *f(NULL);
 
 	if(!stream.good())
 		throw FileNotFoundException();
 
-	stream>>cols>>rows>>type;
+	stream>>cols>>rows>>type>>c;
 	unsigned char buffer[cols * rows * 3];
 
 	switch(type) {
