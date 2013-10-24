@@ -8,6 +8,8 @@
 #include "block.h"
 #include "frame.h"
 #include "exceptions/cav-exceptions.h"
+#include "framergb.h"
+#include "frame444.h"
 #include "frame422.h"
 #include "frame420.h"
 
@@ -72,18 +74,68 @@ int main(int argc, char** argv)
 		bool cont(true);
 		uint fSize, bSize(rows * cols);
 		Video vsrc((string)src);
-		Video dsrc((string)dst, vsrc.rows(), vsrc.cols(), vsrc.fps(), vsrc.format());
+		Video vdst((string)dst, vsrc.rows(), vsrc.cols(), vsrc.fps(), vsrc.format());
 
 		while(cont) {
 			try {
 				Frame *f;
 				f = vsrc.getFrame();
-				if(rows == cols == 1) {
-					dsrc.putFrame(*f);
-				} else {
-				//	while()
 
-					dsrc.putFrame(*f);
+				if(rows == cols == 1) {
+					vdst.putFrame(*f);
+				} else {
+					//cout<< "Here"<<endl;
+					int nBlocks = (rows * cols), remaining = f->y().size() % (rows * cols);
+					Frame444 f2(f->rows(), f->cols());
+					int i(0);
+
+					for(i = 0; i < f->y().size() - remaining; i+=nBlocks) {
+						Block b = std::move(f->y().getSubBlock(i, rows, cols));
+						Block b2(1,1);
+						f2.y().setSubBlock(i, b);
+						//cout<<"Comparing Y component using sublocks..."<<endl;
+						//b2 = std::move(f2.y().getSubBlock(i, rows, cols));
+						//assert(b2 == b);
+
+						b = std::move(f->u().getSubBlock(i, rows, cols));
+						f2.u().setSubBlock(i, b);
+						//cout<<"Comparing U component using sublocks..."<<endl;
+						//b2 = std::move(f2.u().getSubBlock(i, rows, cols));
+						//assert(b2 == b);
+
+
+						b = std::move(f->v().getSubBlock(i, rows, cols));
+						f2.v().setSubBlock(i, b);
+						//cout<<"Comparing V component using sublocks..."<<endl;
+						//b2 = std::move(f2.v().getSubBlock(i, rows, cols));
+						//assert(b2 == b);
+
+					}
+					if(remaining) {
+						cout<< "Copying remaining "<< remaining<< " bytes..."<<endl;
+						Block b = std::move(f->y().getSubBlock(i, 1, remaining));
+						Block b2(1,1);
+						f2.y().setSubBlock(i, b);
+						//cout<<"Comparing Y component using sublocks..."<<endl;
+						//b2 = std::move(f2.y().getSubBlock(i, 1, remaining));
+						//assert(b2 == b);
+
+						b = std::move(f->u().getSubBlock(i, 1, remaining));
+						f2.u().setSubBlock(i, b);
+						//cout<<"Comparing U component using sublocks..."<<endl;
+						//b2 = std::move(f2.u().getSubBlock(i, 1, remaining));
+						//assert(b2 == b);
+
+
+						b = std::move(f->v().getSubBlock(i, 1, remaining));
+						f2.v().setSubBlock(i, b);
+						//cout<<"Comparing V component using sublocks..."<<endl;
+						//b2 = std::move(f2.v().getSubBlock(i, 1, remaining));
+						//assert(b2 == b);
+					}
+
+
+					vdst.putFrame(f2);
 				}
 				delete f;
 			} catch(VideoEndedException& e) {

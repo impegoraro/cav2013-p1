@@ -29,8 +29,8 @@ public:
 	int& operator[](unsigned int index);
 	int operator[](unsigned int index) const;
 
-	Block getSubBlock(unsigned int begin, unsigned int end);
-	void setSubBlock(unsigned int begin, unsigned int end, Block& b);
+	Block getSubBlock(uint begin, uint rows, uint cols);
+	void setSubBlock(uint begin, Block& b);
 	
 	void print();
 

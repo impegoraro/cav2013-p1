@@ -1,6 +1,8 @@
 #include <algorithm>
 
 #include "frame.h"
+#include "frame444.h"
+#include "frame422.h"
 #include "frame420.h"
 #include "video-format.h"
 
@@ -12,9 +14,10 @@ Frame420::Frame420(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols,
 Frame Frame420::convert(VideoFormat dest)
 {
 	switch(dest) {
-		case RGB:
+		case RGB: {
 			Frame f = std::move(convert(YUV_444));
 			return f.convert(RGB);
+		}
 		break;
 		case YUV_444: {
 			Frame444 f((m_uvRows * 2), (m_uvCols * 2));
@@ -42,8 +45,9 @@ Frame Frame420::convert(VideoFormat dest)
 			return f.convert(dest);
 		}
 		break;
-		case YUV_420: 
+		case YUV_420: {
 			return Frame420(*this);
+		}
 		break;
 	}
 

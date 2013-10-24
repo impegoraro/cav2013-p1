@@ -336,12 +336,11 @@ Frame Frame::convert(VideoFormat dest)
 void Frame::write(const std::string& path)
 {
 	std::ofstream stream(path);
-	int cols, rows, type;
 
 	if(!stream.good())
 		throw FileNotFoundException();
 
-	stream<<m_uvCols<<m_uvRows<<m_format;
+	stream<<m_uvCols<< " "<<m_uvRows<< " "<<m_format<<std::endl;
 	unsigned char buffer[m_uvRows * m_uvCols * 3];
 
 	for(int i = 0; i < m_uvRows * m_uvCols; i++) {
@@ -349,7 +348,7 @@ void Frame::write(const std::string& path)
 		buffer[i * 3 + m_uvRows * m_uvCols] = (*m_u)[i];
 		buffer[i * 3 + m_uvRows * m_uvCols * 2] = (*m_v)[i];
 	}
-	stream.write((char*)buffer, (cols * rows * 3));
+	stream.write((char*)buffer, (m_uvRows * m_uvCols * 3));
 	stream.close();
 }
 

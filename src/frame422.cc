@@ -18,16 +18,36 @@ Frame422::Frame422(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols,
 
 Frame Frame422::convert(VideoFormat dest)
 {
-	Frame f(m_uvRows, (m_uvCols * 2));
-	int l = 0;
+	switch(dest) {
+		case RGB: {
+			Frame f = std::move(convert(YUV_444));
+			return f.convert(RGB);
+		}
+		break;
+		case YUV_444: {
+			Frame f(m_uvRows, (m_uvCols * 2));
+			int l = 0;
 
-	f.y() = *m_y; // copies the Y buffer as is
-	int cols = f.cols();
+			f.y() = *m_y; // copies the Y buffer as is
+			int cols = f.cols();
 
-	for (uint i = 0; i < f.cols() * f.rows(); i+=2) { 
-		f.u()[i + 1] = f.u()[i] = u()[i / 2]; 
-		f.v()[i + 1] = f.v()[i] = v()[i / 2];
-	} 
-	
-	return f;
+			for (uint i = 0; i < f.cols() * f.rows(); i+=2) { 
+				f.u()[i + 1] = f.u()[i] = u()[i / 2]; 
+				f.v()[i + 1] = f.v()[i] = v()[i / 2];
+			}
+			return f;
+		}
+		break;
+		case YUV_422: {
+			return Frame(*this);
+		}
+		break;
+		case YUV_420: {
+			Frame f = std::move(convert(YUV_444));
+			return f.convert(dest);
+		}
+		break;
+	}
+ 
+	return Frame(m_uvRows, m_uvCols);
 }

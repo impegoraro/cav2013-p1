@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 		}
 		
 		while(cont) {
-			v->display(false);
+			v->display();
 			
 			do {
 				cout<< "Do you want to play it again? [y/n]: ";

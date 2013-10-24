@@ -75,7 +75,7 @@ Video::Video(const std::string& fpath)
  *
  */
 Video::Video(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat type)
-	: m_stream(fpath), m_type(type), m_cols(cols), m_rows(rows), m_fps(fps), m_fromCam(false)
+	: m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_type(type), m_cols(cols), m_rows(rows), m_fps(fps), m_fromCam(false)
 {
 	if(!m_stream.good())
 		throw FileNotFoundException();
@@ -200,7 +200,6 @@ void Video::putFrame(Frame& f)
 			size = m_rows * m_cols + rows * cols * 2;
 		break;
 	}
-
 	for(int i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
 	{
 		/* Accessing to planar infor */

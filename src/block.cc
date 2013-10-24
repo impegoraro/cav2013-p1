@@ -133,12 +133,12 @@ Block* Block::dup()
  * Returns a sub block. Note that the sub block is not a copy that means that any change to any of its elements will be made to the original block.
  * /return Block - A subblock 
  */
-Block Block::getSubBlock(unsigned int begin, unsigned int end)
+Block Block::getSubBlock(uint begin, uint rows, uint cols)
 {
-	assert(begin > end && end <= m_nRows * m_nCols);
+	assert(begin + rows * cols <= m_nRows * m_nCols);
 	Block b;
-	b.m_nRows = begin;
-	b.m_nCols = end;
+	b.m_nRows = rows;
+	b.m_nCols = cols;
 	b.m_buffer = &m_buffer[begin];
 
 	return b;
@@ -149,11 +149,12 @@ Block Block::getSubBlock(unsigned int begin, unsigned int end)
  * 
  */
  /*TODO: implement const methods to let the 3rd parameter to be a const Block& */
-void Block::setSubBlock(unsigned int begin, unsigned int end, Block& b)
+void Block::setSubBlock(uint begin, Block& b)
 {
-	assert(begin > end && end <= m_nRows * m_nCols);
-	for(int i = begin; i < end; i++)
-		m_buffer[i] = b.m_buffer[i / begin];
+	assert(begin + b.rows() * b.cols() <= m_nRows * m_nCols);
+	
+	for(uint i = begin, c = 0; c < b.rows() * b.cols(); i++, c++)
+		m_buffer[i] = b.m_buffer[c];
 }
 
 /**
@@ -252,13 +253,11 @@ Block& Block::operator=(const char *rhs)
  */
 Block& Block::operator=(Block&& rhs)
 {
-	// TODO: Check if smaller blocks could be used
-	if(m_nRows != rhs.m_nRows && m_nCols != rhs.m_nCols)
-		throw InvalidDimensionException();
-	
 	if(this->m_buffer != NULL && m_shouldClean)
 		delete []this->m_buffer;
 	
+	this->m_nRows = rhs.m_nRows;
+	this->m_nCols = rhs.m_nCols;
 	this->m_shouldClean = rhs.m_shouldClean;
 	this->m_buffer = rhs.m_buffer;
 	rhs.m_buffer = NULL;
