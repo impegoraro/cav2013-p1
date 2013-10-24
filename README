@@ -1,0 +1,45 @@
+First project of Audio and Video Coding.
+
+The project structure uses the following directories:
+	* doc - lies all the documentation generate by doxygen. To get it execute: $ doxygen Doxyfile
+	* src - here lies all the project source files.
+
+Introduction.
+
+The project uses a core library where all the main classes are put together to be used by the rest of the test programs.
+This classes are:
+	* Block
+	* Frame
+	* Frame444
+	* Frame422
+	* Frame420
+	* FrameRGB
+	* Video
+
+The test programs are:
+	yuvShow - shows a video from a file or from the webcam.
+	yuvComp - Compares 2 given videos.
+	yuvCopy - Copies a video (by frame and/or by blocks).
+	yuvConvert - Converts a video between the various formats.
+	videoEffects - Applies some effect before displaying the video.
+	yuvResize - Resizes a given video 
+
+Compilation
+The project uses the autotools to compile the project. The code uses C++11 standard heavily, this means that if the
+compiler used does not support C++11 standard, the compilation will fail. Version of GCC tested are 4.7.x and 4.8.x.
+
+Note that the library libcav.a relies heavily on programming by contract so disabling the assertion can be problematic 
+when in development. All the test programs were tested and so far are runs reliable without the assertions turn on, 
+so disabling them could lead to a performance gain.
+
+Do the following steps:
+	$ autoreconf
+	$ ./configure
+	$ make
+If the make command is successful the library libcav.a is created under the source directory with all the test programs.
+Each program may have some command options that may change the way it runs, to get the full picture run the program 
+with the --help option. For example:
+	$ videoEffects --help
+
+
+

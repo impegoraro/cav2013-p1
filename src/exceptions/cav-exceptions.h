@@ -2,7 +2,9 @@
 #define CAV_EXCEPTIONS_H_
 
 #include <exception>
-
+/**
+ * Exception for when the dimensions given are invalid
+ */
 class InvalidDimensionException : public std::exception
 {
 public:
@@ -12,6 +14,9 @@ public:
 	}	
 };
 
+/**
+ * Exception for when the array is accessed with an invalid index
+ */
 class IndexOutOfBoundsException : public std::exception
 {
 public:
@@ -21,6 +26,9 @@ public:
 	}
 };
 
+/**
+ * Exception for when file path given could not be located 
+ */
 class FileNotFoundException : public std::exception
 {
 public:
@@ -30,6 +38,9 @@ public:
 	}
 };
 
+/**
+ * Exception for when the video type is invalid
+ */
 class InvalidVideoTypeException : public std::exception
 {
 public:
@@ -39,6 +50,9 @@ public:
 	}
 };
 
+/**
+ * Exception for when the file is not open to be read or written on
+ */
 class FileNotOpenException : public std::exception
 {
 public:
@@ -48,6 +62,9 @@ public:
 	}
 };
 
+/**
+ * Exception for when the video reaches the end
+ */
 class VideoEndedException : public std::exception
 {
 public:
