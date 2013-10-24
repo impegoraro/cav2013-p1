@@ -12,12 +12,14 @@
 
 #include "video-format.h"
 
-Frame422::Frame422(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols, nRows, (nCols / 2), YUV_422)
+Frame422::Frame422(uint nRows, uint nCols) : Frame(nRows, nCols, nRows, (nCols / 2), YUV_422)
 {
 }
 
 Frame Frame422::convert(VideoFormat dest)
 {
+	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
+
 	switch(dest) {
 		case RGB: {
 			Frame f = std::move(convert(YUV_444));

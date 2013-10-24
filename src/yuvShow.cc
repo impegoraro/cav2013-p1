@@ -66,9 +66,11 @@ int main(int argc, char** argv)
 	}
 	try {
 		Video *v;
-		if(src == NULL)
+		if(src == NULL) {
+			cout<< "Using webcam..."<<endl;
 			v = new Video();
-		else {
+		} else {
+			cout<< "Using file..."<<endl;
 			string path(src);
 			v = new Video(path);
 		}

@@ -11,15 +11,10 @@
 #include "frame420.h"
 
 
-
-
 FrameRGB::FrameRGB(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols, nRows, nCols, RGB)
 {
 }
 
-/**
- * Converts a Frame to the specified format.
- */
 Frame FrameRGB::convert(VideoFormat dest)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
@@ -56,12 +51,16 @@ Frame FrameRGB::convert(VideoFormat dest)
 			return f;
 		}
 		break;
-	} case YUV_422:
-
+	} case YUV_422: {
+		Frame f = std::move(convert(YUV_444));
+		return f.convert(dest);
 		break;
-	case YUV_420:
-
+	}
+	case YUV_420: {
+		Frame f = std::move(convert(YUV_444));
+		return f.convert(dest);
 		break;
+	}
 	}
 	return Frame(m_uvRows, m_uvCols);
 }

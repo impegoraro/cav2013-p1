@@ -17,9 +17,6 @@ Video::Video() : Video(0)
 {
 }
 
-/** Construct a Video object from a device.
- * /param int - device number
- */
 Video::Video(int number)
 	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB)
 {
@@ -33,11 +30,8 @@ Video::Video(int number)
 	m_type = RGB;
 }
 
-/** Construct a Video object from a file.	
- * /param string - file path of the  
- */
 Video::Video(const std::string& fpath)
-	:m_stream(fpath), m_rows(0), m_cols(0), m_fps(0), m_fromCam(false), m_video(0), m_type(RGB)
+	:m_stream(fpath), m_rows(0), m_cols(0), m_fps(0), m_fromCam(false), m_video(), m_type(RGB)
 {
 	int type;
 	char c; // to get the newline
@@ -60,8 +54,9 @@ Video::Video(const std::string& fpath)
 				throw int();
 		}
 	} else {
-		m_video.open(fpath);
 		// In AVI Mode
+
+		m_video.open(fpath);
 		m_fps = 30; //(int)m_video.get(CV_CAP_PROP_FPS);
 		m_cols= (int)m_video.get(CV_CAP_PROP_FRAME_WIDTH);
 		m_rows = (int)m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -70,24 +65,16 @@ Video::Video(const std::string& fpath)
 	}
 }
 
-/** Construct a Video object for writing.	
- * /param string - file path of the 
- *
- */
-Video::Video(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat type)
-	: m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_rows(rows), m_cols(cols), m_fps(fps), m_fromCam(false), m_type(type)
+Video::Video(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat format)
+	: m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_rows(rows), m_cols(cols), m_fps(fps), m_fromCam(false), m_type(format)
 {
 	if(!m_stream.good())
 		throw FileNotFoundException();
 
-	m_stream<< m_cols<< " "<< m_rows<< " "<< m_fps<< " "<< type<< std::endl;
+	m_stream<< m_cols<< " "<< m_rows<< " "<< m_fps<< " "<< format<< std::endl;
 
 }
 
-/**
- * Video Destructor.
- * Cleans the internal state of the class, closes the stream.
- */
 Video::~Video()
 {
 	if(!m_fromCam)
@@ -219,45 +206,26 @@ void Video::putFrame(Frame& f)
 	m_stream.write((char*)buffer, size);
 }
 
-/**
- * Gets the rows that each frame represents
- * /returns int - Number of rows
- */
-int Video::rows()
+uint Video::rows()
 {
 	return m_rows;
 }
 
-/**
- * Gets the columns that each frame represents
- * /returns int - Number of columns
- */
-int Video::cols()
+uint Video::cols()
 {
 	return m_cols;
 }
 
-/**
- * Gets the frames per second
- * /returns int - Number of frames per second
- */
-int Video::fps()
+uint Video::fps()
 {
 	return m_fps;
 }
 
-/**
- * Gets the video's format.
- * /returns VideosFormat - Current video format.
- */
 VideoFormat Video::format()
 {
 	return m_type;
 }
 
-/**
- * Sets the posistion of the file to the begining.
- */
 void Video::reset()
 {
 	string tmp;
@@ -268,10 +236,7 @@ void Video::reset()
 	getline(m_stream, tmp); // skip the header
 }
 
-/**
- * Displays the video in a window.
- */
-void Video::display(int playing)
+void Video::display(bool playing)
 {
 	Frame *f = NULL;
 	int end = false, inputKey;

@@ -5,17 +5,12 @@
 
 #include "block.h"
 
+
 Block::Block()
 	: m_nRows(0), m_nCols(0), m_shouldClean(false), m_buffer(NULL)
 {
 }
 
-/**
- * Block Constructor.
- * Initializes the block with the size rows * cols.
- * /param uint - Number of rows
- * /param uint - Number of columns
- */
 Block::Block(uint rows, uint cols)
 	: m_nRows(rows), m_nCols(cols), m_shouldClean(true)
 {
@@ -23,11 +18,6 @@ Block::Block(uint rows, uint cols)
 	m_buffer = new int[m_nRows * m_nCols];
 }
 
-/**
- * Block Copy Constructor.
- * Initializes the block of the same size of b and copies its content.
- * /param Block& - a reference to a block
- */
 Block::Block(const Block& b)
 	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_shouldClean(true)
 {
@@ -41,11 +31,6 @@ Block::Block(const Block& b)
 	assert(*this == b);
 }
 
-/**
- * Block Copy Constructor.
- * Initializes the block of the same size of b and copies its content.
- * /param Block& - a reference to a block
- */
 Block::Block(Block&& b)
 	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_shouldClean(b.m_shouldClean)
 {
@@ -53,22 +38,12 @@ Block::Block(Block&& b)
 	b.m_buffer = NULL;
 }
 
-/**
- * Block destructores.
- * Removes heap allocated objects.
- */
 Block::~Block()
 {
 	if(m_buffer != NULL && m_shouldClean)
 		delete []m_buffer;
 }
 
-/**
- * Sets the value in the buffer int a given row and column
- * /param uint - Row number 
- * /param uint - Column number
- * /param int - the value
- */
 void Block::setPoint(uint row, uint col, int value)
 {
 	assert(row > m_nRows || col > m_nCols);
@@ -76,12 +51,6 @@ void Block::setPoint(uint row, uint col, int value)
 	m_buffer[row * m_nCols + col] = value;
 }
 
-/**
- * Gets the value of a given position in the block.
- * /param uint - Row number
- * /param uint - Column number
- * /returns uint - Number of rows
- */
 int Block::getPoint(uint row, uint col)
 {
 	assert(row > m_nRows || col > m_nCols);
@@ -89,38 +58,21 @@ int Block::getPoint(uint row, uint col)
 	return m_buffer[row * m_nCols + col];
 }
 
-/**
- * Gets the number of rows of the defined block.
- * /returns uint - Number of rows
- */
 uint Block::rows(void)
 {
 	return m_nRows;
 }
 
-/**
- * Gets the number of columns of the defined block.
- * /returns uint - Number of columns
- */
 uint Block::cols(void)
 {
 	return m_nCols;
 }
 
-/**
- * Gets the size of the block
- * /returns uint - size of the block
- */
 uint Block::size(void)
 {
 	return m_nRows * m_nCols;
 }
 
-/**
- * Duplicates the block.
- * The row, column and the block's content is duplicated. Note that the deletion of the block is delegated to the caller.
- * /returns Block* - a pointer to the newly heap allocated block.
- */
 Block* Block::dup()
 {
 	Block* b = new Block(m_nRows, m_nCols);
@@ -130,10 +82,6 @@ Block* Block::dup()
 	return b;
 }
 
-/**
- * Returns a sub block. Note that the sub block is not a copy that means that any change to any of its elements will be made to the original block.
- * /return Block - A subblock 
- */
 Block Block::getSubBlock(uint begin, uint rows, uint cols)
 {
 	assert(begin + rows * cols <= m_nRows * m_nCols);
@@ -145,10 +93,6 @@ Block Block::getSubBlock(uint begin, uint rows, uint cols)
 	return b;
 }
 
-/**
- * Copies the values of the a sub block to the internal data.
- * 
- */
  /*TODO: implement const methods to let the 3rd parameter to be a const Block& */
 void Block::setSubBlock(uint begin, Block& b)
 {
@@ -158,12 +102,6 @@ void Block::setSubBlock(uint begin, Block& b)
 		m_buffer[i] = b.m_buffer[c];
 }
 
-/**
- * Operator== Overloaded
- * Checks whether the blocks are equal.
- * /param const Block& - Constant reference to a block
- * /returns bool - true if the blocks are equal, otherwise false.
- */
 bool Block::operator==(const Block& rhs)
 {
 	if(this->m_nRows != rhs.m_nRows || this->m_nCols != rhs.m_nCols)
@@ -176,12 +114,6 @@ bool Block::operator==(const Block& rhs)
 	return true;
 }
 
-/**
- * Operator== Overloaded
- * Checks whether the block's buffer is equal to a chunk of memory of the same size.
- * /param const const char* - array of bytes.
- * /returns bool - true if the blocks are equal, otherwise false.
- */
 bool Block::operator==(const char* rhs)
 {
 	bool res = true;
@@ -191,10 +123,6 @@ bool Block::operator==(const char* rhs)
 	return res;
 }
 
-/**
- * Overloaded operator[] allows positioning within the block to get or set the value in that position.
- * /returns uint& - a reference to the value.
- */ 
 int& Block::operator[](uint index)
 {
 	assert(index < m_nRows * m_nCols);
@@ -202,10 +130,6 @@ int& Block::operator[](uint index)
 	return m_buffer[index];
 }
 
-/**
- * Overloaded operator[] allows positioning within the block to get the value in that position.
- * /returns uint - a reference to the value.
- */ 
 int Block::operator[](uint index) const
 {
 	assert(index < m_nRows * m_nCols);
@@ -213,12 +137,6 @@ int Block::operator[](uint index) const
 	return m_buffer[index];
 }
 
-/**
- * Copy operator assignment
- * Copies the block contents, if the block is the same size the buffer is reused otherwise the block is recreated freeing the previously allocated buffer.
- * /param const Block& - a reference to the block 
- * /returns Block& - a reference to the to object itself.
- */
 Block& Block::operator=(const Block& rhs)
 {
 	if(m_nRows != rhs.m_nRows || m_nCols != rhs.m_nCols) {
@@ -235,11 +153,6 @@ Block& Block::operator=(const Block& rhs)
 	return *this;
 }
 
-/**
- * Copies the buffer rhs into the internal data. Note that the size of the array must be equal to the internal size of the Block, if not the result is unknown.
- * /param const char * - array of bytes.
- * /returns Block& - a reference to the to object itself.
- */
 Block& Block::operator=(const char *rhs)
 {
 	for(uint i = 0; i < m_nRows * m_nCols; i++)
@@ -248,11 +161,6 @@ Block& Block::operator=(const char *rhs)
 	return *this;
 }
 
-/**
- * Move operator assigment,
- * Moves the buffer from the parameter
- * /param Block&& a rvalue reference of the object to move
- */
 Block& Block::operator=(Block&& rhs)
 {
 	if(this->m_buffer != NULL && m_shouldClean)
@@ -266,9 +174,6 @@ Block& Block::operator=(Block&& rhs)
 	return *this;
 }
 
-/**
- * Prints the content of the block.
- */
 void Block::print()
 {
 	for(uint i = 0; i < m_nRows; i++) {

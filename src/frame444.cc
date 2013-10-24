@@ -12,17 +12,13 @@
 #include "frame420.h"
 
 
-
 Frame444::Frame444(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols, nRows, nCols, YUV_444)
 {
 }
 
-/**
- * Converts a Frame to YUV 444
- */
 Frame Frame444::convert(VideoFormat dest)
 {
-	assert(m_uvRows > 0 && m_uvCols > 0);
+	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 	
 	switch(dest) {
 	case RGB: {
