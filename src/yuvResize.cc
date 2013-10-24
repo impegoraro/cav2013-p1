@@ -13,34 +13,15 @@
 using namespace std;
 using namespace cv;
 
-void my_reduce(Frame& f, Frame& f2, int factor){
+void my_reduce(Frame& f, Frame& f2, uint factor){
         
-        int r, c; // row, column in the original frame
-        int i ,j; // pixels created by the resizing
-        int rIdx = 0; // pixel positions in resized buffer
-
-        int sumY, sumU, sumV;
-        int summed;
+        uint r, c; // row, column
+        uint rIdx = 0; // pixel index in resized frame
+		
         //Y
         for(r = 0 ; r < f.y().rows() ; r += factor) {
                 for(c = 0 ; c < f.y().rows(); c += factor) {
-                        
-                        // the value of the new pixel is the average of the reduced(removed) pixels
-                        /*if (improved){
-                                sumY = 0;
-                                summed = 0;
-                                //~ f2.yBufferRaw[rIdx];
-                                for (int i=-factor/2; i<factor/2;i++)
-                                        for (int j=-factor/2; j<factor/2; j++){
-                                                if (r+i >=0 && r+i<f.nRows && c+j>=0 && c+j<=f.nCols){
-                                                        sumY += f.yBufferRaw[(r+i)*f.nCols + (c+j)];
-                                                        summed++;
-                                                }
-                                        }
-                                f2.yBufferRaw[rIdx]=sumY/summed;
-                        } else {*/
-                                f2.y()[rIdx] = f.y()[r*f.y().cols() + c];
-                        //}
+						f2.y()[rIdx] = f.y()[r*f.y().cols() + c];
                         rIdx++;
                 }
         }
@@ -49,83 +30,27 @@ void my_reduce(Frame& f, Frame& f2, int factor){
         rIdx = 0;
         for(r = 0 ; r < f.rows() ; r += factor) {
                 for(c = 0 ; c < f.cols() ; c += factor) {
-                        
-                       /* if (improved){
-                                sumU = 0;
-                                sumV = 0;
-                                summed = 0;
-                                for (int i=-factor/2; i<factor/2;i++)
-                                        for (int j=-factor/2; j<factor/2; j++){
-                                                if (r+i >=0 && r+i<f.nRows && c+j>=0 && c+j<=f.nCols){
-                                                        sumU+= f.uBufferRaw[(r+i)*f.nCols + (c+j)];
-                                                        sumV+= f.vBufferRaw[(r+i)*f.nCols + (c+j)];
-                                                        summed++;
-                                                }
-                                        }
-                                f2.uBufferRaw[rIdx]=sumU/summed;
-                                f2.vBufferRaw[rIdx]=sumV/summed;
-                        } else {*/
-                                f2.u()[rIdx] = f.u()[r*f.u().cols() + c];
-                                f2.v()[rIdx] = f.v()[r*f.u().cols() + c];
-                        //}
-                        rIdx++;
+						f2.u()[rIdx] = f.u()[r*f.u().cols() + c];
+						f2.v()[rIdx] = f.v()[r*f.u().cols() + c];
+						rIdx++;
                 }
         }
 }
         
-void my_expand(Frame& f, Frame& f2, int factor){
+void my_expand(Frame& f, Frame& f2, uint factor){
         
-        int r, c; // row, column in the original frame
-        int i ,j; // pixels created by the resizing
-        int rIdx, oIdx = 0; // pixel positions in original and resized buffers
-
-        // for bilinear interpolation
-        uint val; //current pixel value
-        uint rpos, rval; // righ pixel x position, right pixel value;
-        uint bpos, bval; // bottom pixel y position, bottom pixel value;
-        uint rbval; // right-bottom pixel value, position is (rpos, bpos)
-        
-        uint tival, bival;// top "line" interpolation value, bottom "line" interpolation value
+        uint r, c; // row, column
+        uint i ,j;
+        uint rIdx, oIdx = 0; 	// pixel index in original and resized frames
         
         //Y
         for(r = 0 ; r < f.y().rows() ; r++) {
                 for(c = 0 ; c < f.y().cols() ; c++) {
                         rIdx = r*factor*f2.y().cols() + c*factor;
-                        /*
-                        if (improved){
-                                val = f.yBufferRaw[r*f.nCols + c];
-                                
-                                rpos = (r+1)*factor;
-                                if ( c + 1 < f.nCols){ // handle interpolation with pixels out of bounds
-                                        rval = f.yBufferRaw[r*f.nCols + c +1];
-                                } else {
-                                        rval = f.yBufferRaw[r*f.nCols + c]; //keep last pixel value
-                                }
-                                bpos = (c+1)*factor;
-                                
-                                if ( r + 1 < f.nRows){ // handle interpolation with pixels out of bounds
-                                        bval = f.yBufferRaw[(r+1)*f.nCols + c];
-                                } else {
-                                        bval = f.yBufferRaw[r*f.nCols + c]; //keep last pixel value
-                                }
-                                
-                                if ( r + 1 < f.nRows && c + 1 < f.nCols){
-                                        bval = f.yBufferRaw[(r+1)*f.nCols + c + 1];
-                                } else {
-                                        bval = f.yBufferRaw[r*f.nCols + c];
-                                }
-                        }*/
                         
                         for(i = 0 ; i < factor ; i++) {
-                                for(j = 0 ; j < factor ; j++) {
-                                        /*if (improved) {
-                                                tival = interpolate(r, val, rpos, rval, r+i);
-                                                bival = interpolate(r, bval, rpos, rbval, r+i);
-                                                
-                                                f2.yBufferRaw[rIdx + j + i*f2.nCols] = interpolate(c, tival, bpos, bival, c+j);
-                                        } else {*/
-                                                f2.y()[rIdx + j + i*f2.y().cols()] = f.y()[oIdx];        
-                                        //}
+                                for(j = 0 ; j < factor ; j++) {  
+                                    f2.y()[rIdx + j + i*f2.y().cols()] = f.y()[oIdx];
                                 }
                         }
                         oIdx++;
@@ -148,15 +73,10 @@ void my_expand(Frame& f, Frame& f2, int factor){
                 }
         }
 }
-/*
-int YuvResize::interpolate(int a, int aVal, int b, int bVal, int c){
-        return aVal + (((c-a)*bVal-(c-a)*aVal)/(b-a));
-}*/
 
 int main(int argc, char** argv)
 {
-	int nextOp, factor;
-	uint rows = 1, cols = 1;
+	int nextOp, factor = 0;
 	char *src = NULL, *dst = NULL;
     bool showHelp = false;
 	string oper;
@@ -189,11 +109,11 @@ int main(int argc, char** argv)
 				else if(oper != "R" && oper != "Reduce" && oper != "reduce") {
 				oper = "RE";
 				}
-				else {showHelp = true; nextOp = -1; break;} // erro
+				else {showHelp = true; nextOp = -1; break;}
 			break;
 			case 'f':
 				factor = atoi(optarg);
-                if(factor <= 0) {showHelp = true; nextOp = -1; break;} // erro
+                if(factor <= 0) {showHelp = true; nextOp = -1; break;}
 			break;
 			case '?':
 				nextOp = -1;
@@ -228,7 +148,6 @@ int main(int argc, char** argv)
 
         Frame *f, *f2;
         int end = false;
-        //int sumY, sumU, sumV, frames;
 		while(!end) {
 			try {
 				
@@ -245,13 +164,8 @@ int main(int argc, char** argv)
 			}
 			delete f;
 		}
-		
-		//printf("Y: %f, U:%f, V:%f\n", sumY/(float)frames, sumU/(float)frames, sumV/(float)frames);
-
-
 	} catch (FileNotFoundException& e) {
 		cerr<< "File not found"<< endl;
 	}
-	
 	return 0;
 }
