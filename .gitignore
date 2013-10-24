@@ -32,3 +32,4 @@ src/yuvCopy
 doc/
 yuvConvert
 videoEffects
+yuvResize

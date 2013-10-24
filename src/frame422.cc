@@ -26,11 +26,8 @@ Frame Frame422::convert(VideoFormat dest)
 		break;
 		case YUV_444: {
 			Frame f(m_uvRows, (m_uvCols * 2));
-			int l = 0;
 
 			f.y() = *m_y; // copies the Y buffer as is
-			int cols = f.cols();
-
 			for (uint i = 0; i < f.cols() * f.rows(); i+=2) { 
 				f.u()[i + 1] = f.u()[i] = u()[i / 2]; 
 				f.v()[i + 1] = f.v()[i] = v()[i / 2];

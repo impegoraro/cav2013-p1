@@ -1,8 +1,8 @@
 lib_LIBRARIES=libcav.a
-bin_PROGRAMS=yuvShow yuvComp yuvCopy yuvConvert videoEffects
+bin_PROGRAMS=yuvShow yuvComp yuvCopy yuvConvert videoEffects yuvResize
 
 # Definition of the configuration flag
-AM_CXXFLAGS=-std=c++0x
+AM_CXXFLAGS=-std=c++0x -Wall
 AM_CFLAGS=$(DEPS_CFLAGS)
 
 libcav_a_SOURCES = block.h block.cc \
@@ -14,7 +14,7 @@ libcav_a_SOURCES = block.h block.cc \
               video.h video.cc \
               video-formats.h \
               exceptions/cav-exceptions.h
-libcav_a_LDFLAGS=-static 
+#libcav_a_LDFLAGS=-static 
 #libcav_a_LIBADD=$(DEPS_LIBS)
 #libcav_a_CPPFLAGS=$(DEPS)
 
@@ -38,3 +38,7 @@ yuvConvert_SOURCES=yuvConvert.cc
 # videoEffects program 
 videoEffects_LDADD=$(DEPS_LIBS) libcav.a
 videoEffects_SOURCES=videoEffects.cc
+
+# yuvResize program 
+yuvResize_LDADD=$(DEPS_LIBS) libcav.a
+yuvResize_SOURCES=yuvResize.cc

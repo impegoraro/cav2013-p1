@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	bool cont = true, showHelp = false;
 	string ans;
 	int nextOp;
-	float luminance;
+	float luminance = 0.5;
 	char *src = NULL;
 	int operation(0); // 0 -> invert; 1 black and white; 2 - luminance
 	const char* shortops = "s:ibl:h";

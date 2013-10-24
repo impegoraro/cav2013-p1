@@ -31,7 +31,7 @@ Frame FrameRGB::convert(VideoFormat dest)
 	case YUV_444: {
 		Frame444 f(this->m_uvRows, this->m_uvRows);
 		int r, g, b, y, u, v;
-		for(int i = 0; i < this->m_uvRows * this->m_uvCols; i++) {
+		for(uint i = 0; i < this->m_uvRows * this->m_uvCols; i++) {
 			r = this->y()[i];
 			g = this->u()[i];
 			b = this->v()[i];

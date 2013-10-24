@@ -78,7 +78,6 @@ int main(int argc, char** argv)
 
 	try {
 		bool cont(true);
-		uint fSize, bSize(rows * cols);
 		Video vsrc((string)src);
 		Video vdst((string)dst, vsrc.rows(), vsrc.cols(), vsrc.fps(), vsrc.format());
 
@@ -87,13 +86,13 @@ int main(int argc, char** argv)
 				Frame *f;
 				f = vsrc.getFrame();
 
-				if(rows == cols == 1) {
+				if((rows == cols) == 1) {
 					vdst.putFrame(*f);
 				} else {
 					//cout<< "Here"<<endl;
-					int nBlocks = (rows * cols), remaining = f->y().size() % (rows * cols);
+					uint nBlocks = (rows * cols), remaining = f->y().size() % (rows * cols);
 					Frame444 f2(f->rows(), f->cols());
-					int i(0);
+					uint i(0);
 
 					for(i = 0; i < f->y().size() - remaining; i+=nBlocks) {
 						Block b = std::move(f->y().getSubBlock(i, rows, cols));

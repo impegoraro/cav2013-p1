@@ -23,10 +23,10 @@ Frame::Frame()
 /**
  * Frame constructor
  * Constructs an frame with the specified rows and columns with all buffers of the same size. The data of the buffer is uninitialized.
- * /param unsigned int - Number of Rows
- * /param unsigned int - Number of Columns
+ * /param uint - Number of Rows
+ * /param uint - Number of Columns
  */
-Frame::Frame(unsigned int nRows, unsigned int nCols)
+Frame::Frame(uint nRows, uint nCols)
 	: m_uvRows(nRows), m_uvCols(nCols), m_format(YUV_444)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
@@ -39,12 +39,12 @@ Frame::Frame(unsigned int nRows, unsigned int nCols)
 /**
  * Frame constructor
  * A Protected constructor used by the hierarchy of Frames (422 and 420) to initialize the internal structure of the frame.
- * /param unsigned int - rows of the Y component
- * /param unsigned int - cols of the Y component
- * /param unsigned int - uvRows of U and V component
- * /param unsigned int - uvCols of U and V component
+ * /param uint - rows of the Y component
+ * /param uint - cols of the Y component
+ * /param uint - uvRows of U and V component
+ * /param uint - uvCols of U and V component
  */
-Frame::Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols, VideoFormat format)
+Frame::Frame(uint rows, uint cols, uint uvRows, uint uvCols, VideoFormat format)
 	: m_uvRows(uvRows), m_uvCols(uvCols), m_format(format)
 {
 	assert(rows > 0 && cols > 0 && m_uvRows > 0 && m_uvCols > 0);
@@ -75,7 +75,7 @@ Frame::Frame(const Frame &f)
  */
 
 Frame::Frame(Frame &&f)
-	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_y(std::move(f.m_y)), m_u(std::move(f.m_u)), m_v(std::move(f.m_v)), m_format(m_format)
+	: m_uvRows(f.m_uvRows), m_uvCols(f.m_uvCols), m_y(std::move(f.m_y)), m_u(std::move(f.m_u)), m_v(std::move(f.m_v)), m_format(f.m_format)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
 
@@ -108,6 +108,8 @@ Frame& Frame::operator=(const Frame& rhs)
 	(*m_y) = *rhs.m_y;
 	(*m_u) = *rhs.m_u;
 	(*m_v) = *rhs.m_v;
+
+	return *this;
 }
 
 Frame& Frame::operator=(Frame&& rhs)
@@ -129,6 +131,8 @@ Frame& Frame::operator=(Frame&& rhs)
 	rhs.m_u = NULL;
 	(m_v) = rhs.m_v;
 	rhs.m_v = NULL;
+
+	return *this;
 }
 
 void Frame::setBlock(const Block &y, const Block &u, const Block &v)
@@ -147,7 +151,7 @@ void Frame::getBlock(Block& y, Block& u, Block& v)
 	v = *m_v;
 }
 
-void Frame::setPixel(int row, int col, int y, int u, int v)
+void Frame::setPixel(uint row, uint col, int y, int u, int v)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
 	m_y->setPoint(row, col, y);
@@ -155,7 +159,7 @@ void Frame::setPixel(int row, int col, int y, int u, int v)
 	m_v->setPoint(row, col, v);
 }
 
-void Frame::getPixel(int row, int col, int& y, int& u, int& v)
+void Frame::getPixel(uint row, uint col, int& y, int& u, int& v)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
 	y = m_y->getPoint(row, col);
@@ -163,11 +167,11 @@ void Frame::getPixel(int row, int col, int& y, int& u, int& v)
 	v = m_v->getPoint(row, col);
 }
 
-void Frame::getPixel(int pos, int& y, int& u, int& v)
+void Frame::getPixel(uint pos, int& y, int& u, int& v)
 {
-	assert(m_uvRows > 0 && m_uvCols > 0);
+	assert(m_uvRows > 0 && m_uvCols > 0 && pos < (m_uvRows * m_uvCols));
 	y = (*m_y)[pos];
-	u = (*m_u)[pos];	
+	u = (*m_u)[pos];
 	v = (*m_v)[pos];
 }
 
@@ -179,14 +183,13 @@ VideoFormat Frame::getFormat()
 void Frame::display()
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
-	// Move the converted frame instead of just copying it.
 	int r, g, b;
 	int y, u, v;
 	Frame f;
-	int yRows, yCols;
+	uint yRows, yCols;
 	unsigned char *buffer;
 	
-	
+	// Move the converted frame instead of just copying it.
 	f = std::move(convert(YUV_444));
 	
 	yRows = f.rows();
@@ -194,7 +197,7 @@ void Frame::display()
 	cv::Mat img = cv::Mat(cv::Size(yCols, yRows), CV_8UC3);
 
 	buffer = (uchar*)img.ptr();
-	for(int i = 0; i < f.rows() * f.cols() * 3; i += 3) {
+	for(uint i = 0; i < f.rows() * f.cols() * 3; i += 3) {
 		
 		y = f.y()[i / 3];
 		u = f.u()[(i / 3)];
@@ -226,7 +229,7 @@ void Frame::display()
  */
 void Frame::setBlackWhite()
 {
-	for(int i = 0; i < m_uvRows * m_uvCols; i++) {
+	for(uint i = 0; i < m_uvRows * m_uvCols; i++) {
 		u()[i] = 127;
 		v()[i] = 127;
 	}
@@ -237,10 +240,10 @@ void Frame::setBlackWhite()
  */
 void Frame::setInvertColors()
 {
-	for(int i = 0; i < y().rows() * y().cols(); i++)
+	for(uint i = 0; i < y().rows() * y().cols(); i++)
 		y()[i] = 255 - y()[i];
 
-	for(int i = 0; i < m_uvRows * m_uvCols; i++) {
+	for(uint i = 0; i < m_uvRows * m_uvCols; i++) {
 		u()[i] = 255 - u()[i];
 		v()[i] = 255 - v()[i];
 	}
@@ -252,7 +255,7 @@ void Frame::setInvertColors()
 void Frame::changeLuminance(float factor)
 {
 	int y_;
-	for(int i = 0; i < y().rows() * y().cols(); i++) {
+	for(uint i = 0; i < y().rows() * y().cols(); i++) {
 		y_ = y()[i] * factor;
 
 		if(y_ < 0)
@@ -265,18 +268,18 @@ void Frame::changeLuminance(float factor)
 
 /**
  * Gets the number of rows of the defined frame.
- * /returns unsigned int - Number of rows
+ * /returns uint - Number of rows
  */
-unsigned int Frame::rows()
+uint Frame::rows()
 {
 	return m_uvRows;
 }
 
 /**
  * Gets the number of columns of the defined frame.
- * /returns unsigned int - Number of columns
+ * /returns uint - Number of columns
  */
-unsigned int Frame::cols()
+uint Frame::cols()
 {
 	return m_uvCols;
 }
@@ -314,8 +317,12 @@ Block& Frame::v()
 Frame Frame::convert(VideoFormat dest)
 {
 	assert(m_uvRows > 0 && m_uvCols > 0);
+
 	Frame f;
+	
 	switch(dest) {
+	case RGB:
+	break;
 	case YUV_444:
 		f = std::move(Frame(*this));
 		break;
@@ -335,7 +342,7 @@ Frame Frame::convert(VideoFormat dest)
  */
 void Frame::write(const std::string& path)
 {
-	std::ofstream stream(path);
+	std::ofstream stream(path, std::ios::trunc | std::ios::out);
 
 	if(!stream.good())
 		throw FileNotFoundException();
@@ -343,7 +350,7 @@ void Frame::write(const std::string& path)
 	stream<<m_uvCols<< " "<<m_uvRows<< " "<<m_format<<std::endl;
 	unsigned char buffer[m_uvRows * m_uvCols * 3];
 
-	for(int i = 0; i < m_uvRows * m_uvCols; i++) {
+	for(uint i = 0; i < m_uvRows * m_uvCols; i++) {
 		buffer[i * 3] = (*m_y)[i];
 		buffer[i * 3 + m_uvRows * m_uvCols] = (*m_u)[i];
 		buffer[i * 3 + m_uvRows * m_uvCols * 2] = (*m_v)[i];
@@ -355,14 +362,16 @@ void Frame::write(const std::string& path)
 /************************************
  *          Static Methods          * 
  ***********************************/
+
+
 /**
  * Creates a frame from the a filename
  */
 Frame* Frame::create_from_file(const std::string& path)
 {
 	std::ifstream stream(path);
-	int cols, rows, type;
-	int uvCols, uvRows, size;
+	uint cols, rows, type;
+	uint uvCols(0), uvRows(0), size(0);
 	char c;
 	Frame *f(NULL);
 
@@ -397,9 +406,9 @@ Frame* Frame::create_from_file(const std::string& path)
 		throw InvalidVideoTypeException();
 	}
 	
-	stream.read((char*)buffer, (cols * rows * 3));
+	stream.read((char*)buffer, size);
 	int y,u,v;
-	for(int i = 0 ; i < rows * cols * 3 ; i += 3)
+	for(uint i = 0 ; i < rows * cols * 3 ; i += 3)
 	{ 
 		/* Accessing to planar infor */
 		y = buffer[i / 3]; 

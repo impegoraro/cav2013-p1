@@ -21,7 +21,7 @@ Video::Video() : Video(0)
  * /param int - device number
  */
 Video::Video(int number)
-	: m_fromCam(true), m_video(0)
+	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB)
 {
 	std::string device("/dev/video");
 	
@@ -37,7 +37,7 @@ Video::Video(int number)
  * /param string - file path of the  
  */
 Video::Video(const std::string& fpath)
-	: m_stream(fpath), m_fromCam(false)
+	:m_stream(fpath), m_rows(0), m_cols(0), m_fps(0), m_fromCam(false), m_video(0), m_type(RGB)
 {
 	int type;
 	char c; // to get the newline
@@ -75,7 +75,7 @@ Video::Video(const std::string& fpath)
  *
  */
 Video::Video(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat type)
-	: m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_type(type), m_cols(cols), m_rows(rows), m_fps(fps), m_fromCam(false)
+	: m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_rows(rows), m_cols(cols), m_fps(fps), m_fromCam(false), m_type(type)
 {
 	if(!m_stream.good())
 		throw FileNotFoundException();
@@ -96,10 +96,10 @@ Video::~Video()
 
 Frame* Video::getFrame()
 {
-	Frame *f;
+	Frame *f(NULL);
 	unsigned char buffer[m_cols * m_rows * 3];
-	int cols, rows;
-	int size;
+	uint cols(0), rows(0), size(0);
+	int y, u, v;
 
 	if(m_stream.eof())
 		throw VideoEndedException();
@@ -130,16 +130,20 @@ Frame* Video::getFrame()
 			f = new Frame420(m_rows, m_cols);
 		break;
 	}
-	int y, u, v;
+
+	assert(f != NULL);
 	if(m_fromCam) {
 		int r, g, b, y, u, v;
 		Mat tmpFrame;
-		if(!m_video.read(tmpFrame))
+		
+		delete f;
+		if(!m_video.read(tmpFrame)) {
 			throw VideoEndedException();
-
+		}
+		// Unneeded
 		f = new Frame444(rows, cols);
 
-		for(int i = 0; i < rows * cols * 3; i += 3) {
+		for(uint i = 0; i < rows * cols * 3; i += 3) {
 			b = tmpFrame.ptr()[i];
 			g = tmpFrame.ptr()[i + 1];
 			r = tmpFrame.ptr()[i + 2];
@@ -148,6 +152,14 @@ Frame* Video::getFrame()
 			u = r * -.169 + g * -.332 + b *  .500  + 128.;
 			v = r *  .500 + g * -.419 + b * -.0813 + 128.;
 
+			/* clipping to [0 ... 255] */
+			if(y < 0) y = 0;
+			if(u < 0) u = 0;
+			if(v < 0) v = 0;
+			if(y > 255) y = 255;
+			if(u > 255) u = 255;
+			if(v > 255) v = 255;
+
 			f->y()[i / 3] = y;
 			f->u()[i / 3] = u;
 			f->v()[i / 3] = v;
@@ -155,7 +167,7 @@ Frame* Video::getFrame()
 	} else {
 	
 		m_stream.read((char*)buffer, size);
-		for(int i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
+		for(uint i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
 		{
 			/* Accessing to planar infor */
 			y = buffer[i / 3];
@@ -175,15 +187,10 @@ void Video::putFrame(Frame& f)
 {
 	assert(f.getFormat() == m_type);
 	unsigned char buffer[m_cols * m_rows * 3];
-	int cols, rows;
-	int size;
+	uint cols(0), rows(0), size(0);
 	
 	switch(m_type) {
 		case RGB:
-			rows = m_rows;
-			cols = m_cols;
-			size = m_rows * m_cols * 3;
-		break;
 		case YUV_444:
 			rows = m_rows;
 			cols = m_cols;
@@ -200,7 +207,7 @@ void Video::putFrame(Frame& f)
 			size = m_rows * m_cols + rows * cols * 2;
 		break;
 	}
-	for(int i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
+	for(uint i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
 	{
 		/* Accessing to planar infor */
 		buffer[i / 3] = f.y()[i / 3];
@@ -272,8 +279,6 @@ void Video::display(int playing)
 	while(!end) {
 		try {
 			f = getFrame();
-			//Frame f422 = std::move(f->convert(YUV_422));
-			//f422.write("/home/ilan/img2.yuv422");
 		} catch (VideoEndedException& e) {
 			end = true;
 			continue;

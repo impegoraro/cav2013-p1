@@ -19,6 +19,7 @@ int main(int argc, char** argv)
 	int nextOp;
 	string format;
 	char *src = NULL, *dst = NULL;
+	VideoFormat vf(YUV_444);
 	const char* shortops = "s:d:f:h";
 	const struct option longops[] = {
 		"help", 0, NULL, 'h',
@@ -26,7 +27,7 @@ int main(int argc, char** argv)
 		"destination", 1, NULL, 'd',
 		"source", 1, NULL, 's'
 	};
-	VideoFormat vf;
+	
 	do {
 		nextOp = getopt_long(argc, argv, shortops, longops, NULL);
 		switch(nextOp) {
@@ -58,7 +59,7 @@ int main(int argc, char** argv)
 		}
 	} while(nextOp !=- 1);
 
-	if(src == NULL || dst == NULL) {
+	if(showHelp || src == NULL || dst == NULL) {
 		cerr<< "Usage: yuvConvert [OPTIONS] -s <source> -d <destination>"<<endl<<endl;
 		cout<<"Options are:"<<endl
 			<<"  -h, --help           Shows this help message."<<endl
@@ -77,9 +78,8 @@ int main(int argc, char** argv)
 	try {
 		Video v((string)src);
 		Video vdst((string)dst, v.rows(), v.cols(), v.fps(), vf);
-	
 		Frame *f = NULL, f2;
-		int end = false, playing = true, inputKey;
+		int end = false;
 			
 
 		while(!end) {

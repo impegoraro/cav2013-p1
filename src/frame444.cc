@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <opencv2/opencv.hpp>
 #include <assert.h>
 
 #include "video-format.h"
@@ -28,7 +29,7 @@ Frame Frame444::convert(VideoFormat dest)
 		FrameRGB f(m_uvRows, m_uvRows);
 		int r, g, b, y, u, v;
 		
-		for(int i = 0; i < this->m_uvRows * this->m_uvCols; i++) {
+		for(uint i = 0; i < this->m_uvRows * this->m_uvCols; i++) {
 			y = this->y()[i];
 			u = this->u()[i];
 			v = this->v()[i];
@@ -59,11 +60,10 @@ Frame Frame444::convert(VideoFormat dest)
 
 		f.y() = y();
 
-		for(int i = 0; i< m_uvRows * m_uvCols / 2; i++) {
+		for(uint i = 0; i < m_uvRows * m_uvCols / 2; i++) {
 			f.u()[i] = u()[i * 2];
 			f.v()[i] = v()[i * 2];
 		}
-
 		return f;
 		break;
 	}
@@ -71,23 +71,12 @@ Frame Frame444::convert(VideoFormat dest)
 		Frame420 f(m_uvRows, m_uvCols);
 
 		f.y() = y();
-		for(int r = 0; r < m_uvRows; r += 2)
-			for(int c = 0; c < m_uvCols; c += 2)
+		for(uint r = 0; r < m_uvRows; r += 2)
+			for(uint c = 0; c < m_uvCols; c += 2)
 			{
 				f.u()[(r / 2) * f.u().cols() + c / 2] = u()[m_uvCols + c];
 				f.v()[(r / 2) * f.v().cols() + c / 2] = v()[m_uvCols + c];
 			}
-		
-
-		/*for (unsigned int l = 0, lr = 0; lr < m_uvRows / 2; l += 2, lr++) {
-	        for (unsigned int c = 0, cr = 0; cr < m_uvCols / 2; c += 2, cr++) {
-	                unsigned int pos = c + (l * m_uvCols);
-	                unsigned int posRaw = cr + (lr * (m_uvCols / 2));
-
-	                f.u()[posRaw] = u()[pos];
-	                f.v()[posRaw] = v()[pos];
-	        }
-        }*/
 		return f;
 		}
 		break;

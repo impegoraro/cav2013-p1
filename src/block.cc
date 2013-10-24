@@ -6,19 +6,20 @@
 #include "block.h"
 
 Block::Block()
-	: m_shouldClean(false)
+	: m_nRows(0), m_nCols(0), m_shouldClean(false), m_buffer(NULL)
 {
 }
 
 /**
  * Block Constructor.
  * Initializes the block with the size rows * cols.
- * /param unsigned int - Number of rows
- * /param unsigned int - Number of columns
+ * /param uint - Number of rows
+ * /param uint - Number of columns
  */
-Block::Block(unsigned int rows, unsigned cols)
-	: m_shouldClean(true), m_nRows(rows), m_nCols(cols)
+Block::Block(uint rows, uint cols)
+	: m_nRows(rows), m_nCols(cols), m_shouldClean(true)
 {
+	assert(m_nRows > 0 && m_nCols > 0);
 	m_buffer = new int[m_nRows * m_nCols];
 }
 
@@ -35,7 +36,7 @@ Block::Block(const Block& b)
 	//std::memmove(this->m_buffer, b.m_buffer, (m_nRows * m_nCols));
 
 	//Falling back to copying byte by byte
-	for(int i = 0; i < m_nRows * m_nCols; i++)
+	for(uint i = 0; i < m_nRows * m_nCols; i++)
 		m_buffer[i] = b.m_buffer[i];
 	assert(*this == b);
 }
@@ -64,11 +65,11 @@ Block::~Block()
 
 /**
  * Sets the value in the buffer int a given row and column
- * /param unsigned int - Row number 
- * /param unsigned int - Column number
+ * /param uint - Row number 
+ * /param uint - Column number
  * /param int - the value
  */
-void Block::setPoint(unsigned int row, unsigned int col, int value)
+void Block::setPoint(uint row, uint col, int value)
 {
 	assert(row > m_nRows || col > m_nCols);
 
@@ -77,11 +78,11 @@ void Block::setPoint(unsigned int row, unsigned int col, int value)
 
 /**
  * Gets the value of a given position in the block.
- * /param unsigned int - Row number
- * /param unsigned int - Column number
- * /returns unsigned int - Number of rows
+ * /param uint - Row number
+ * /param uint - Column number
+ * /returns uint - Number of rows
  */
-int Block::getPoint(unsigned int row, unsigned int col)
+int Block::getPoint(uint row, uint col)
 {
 	assert(row > m_nRows || col > m_nCols);
 
@@ -90,27 +91,27 @@ int Block::getPoint(unsigned int row, unsigned int col)
 
 /**
  * Gets the number of rows of the defined block.
- * /returns unsigned int - Number of rows
+ * /returns uint - Number of rows
  */
-unsigned int Block::rows(void)
+uint Block::rows(void)
 {
 	return m_nRows;
 }
 
 /**
  * Gets the number of columns of the defined block.
- * /returns unsigned int - Number of columns
+ * /returns uint - Number of columns
  */
-unsigned int Block::cols(void)
+uint Block::cols(void)
 {
 	return m_nCols;
 }
 
 /**
  * Gets the size of the block
- * /returns unsigned int - size of the block
+ * /returns uint - size of the block
  */
-unsigned int Block::size(void)
+uint Block::size(void)
 {
 	return m_nRows * m_nCols;
 }
@@ -168,7 +169,7 @@ bool Block::operator==(const Block& rhs)
 	if(this->m_nRows != rhs.m_nRows || this->m_nCols != rhs.m_nCols)
 		return false;
 
-	for(int i = 0; i < m_nRows * m_nCols; i++) {
+	for(uint i = 0; i < m_nRows * m_nCols; i++) {
 		if(m_buffer[i] != rhs.m_buffer[i])
 			return false;
 	}
@@ -184,7 +185,7 @@ bool Block::operator==(const Block& rhs)
 bool Block::operator==(const char* rhs)
 {
 	bool res = true;
-	for(int i = 0; i < (m_nRows * m_nCols); i++)
+	for(uint i = 0; i < (m_nRows * m_nCols); i++)
 		if(m_buffer[i] != rhs[i])
 			res = false;
 	return res;
@@ -192,9 +193,9 @@ bool Block::operator==(const char* rhs)
 
 /**
  * Overloaded operator[] allows positioning within the block to get or set the value in that position.
- * /returns int& - a reference to the value.
+ * /returns uint& - a reference to the value.
  */ 
-int& Block::operator[](unsigned int index)
+int& Block::operator[](uint index)
 {
 	assert(index < m_nRows * m_nCols);
 	
@@ -203,9 +204,9 @@ int& Block::operator[](unsigned int index)
 
 /**
  * Overloaded operator[] allows positioning within the block to get the value in that position.
- * /returns int - a reference to the value.
+ * /returns uint - a reference to the value.
  */ 
-int Block::operator[](unsigned int index) const
+int Block::operator[](uint index) const
 {
 	assert(index < m_nRows * m_nCols);
 	
@@ -227,7 +228,7 @@ Block& Block::operator=(const Block& rhs)
 		m_nCols = rhs.m_nCols;
 	}
 	m_shouldClean = true;
-	for(int i = 0; i < (m_nRows * m_nCols); i++)
+	for(uint i = 0; i < (m_nRows * m_nCols); i++)
 		m_buffer[i] = rhs.m_buffer[i];
 
 	assert (*this == rhs);
@@ -241,9 +242,10 @@ Block& Block::operator=(const Block& rhs)
  */
 Block& Block::operator=(const char *rhs)
 {
-	for(int i = 0; i < m_nRows * m_nCols; i++)
+	for(uint i = 0; i < m_nRows * m_nCols; i++)
 		m_buffer[i] = rhs[i];
 	assert (*this == rhs);
+	return *this;
 }
 
 /**
@@ -269,8 +271,8 @@ Block& Block::operator=(Block&& rhs)
  */
 void Block::print()
 {
-	for(int i = 0; i < m_nRows; i++) {
-		for(int j = 0; j < m_nCols; j++) 
+	for(uint i = 0; i < m_nRows; i++) {
+		for(uint j = 0; j < m_nCols; j++) 
 			std::cout<< m_buffer[i * m_nCols + j] << " ";
 		std::cout<< std::endl;
 	}

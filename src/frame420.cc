@@ -24,8 +24,8 @@ Frame Frame420::convert(VideoFormat dest)
 			
 			f.y() = y();
 
-			for(int r = 0; r < m_uvRows; r++) {
-				for(int c = 0; c < m_uvCols; c++) {
+			for(uint r = 0; r < m_uvRows; r++) {
+				for(uint c = 0; c < m_uvCols; c++) {
 					f.u()[(r * 2) * f.cols() + c * 2] = u()[r * m_uvCols + c];
 					f.u()[(r * 2) * f.cols() + c * 2+1] = u()[r * m_uvCols + c];
 					f.u()[(r * 2 + 1) * f.cols() + c * 2] = u()[r * m_uvCols + c];
@@ -38,6 +38,7 @@ Frame Frame420::convert(VideoFormat dest)
 					
 				}
 			}
+			return f;
 		}
 		break;
 		case YUV_422: {

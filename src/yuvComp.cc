@@ -15,32 +15,33 @@ using namespace cv;
 float calcESq(Frame& f, Frame& f2, uint component) {
         //TODO: check dimensions
         
-        int lim = 1;
-        Block *fBuffer, *f2Buffer;
-        
+        int lim(1);
+        int sum(0);
+        float eSq(0);
+        Block *fBuffer(NULL), *f2Buffer(NULL);
+
         switch (component){
-                case 0:
-                        fBuffer = &f.y();
-                        f2Buffer = &f2.y();
-                        lim = fBuffer->rows() * fBuffer->cols();
-                        break;
-                case 1:
-                        fBuffer = &f.u();
-                        f2Buffer = &f2.u();
-                        lim = fBuffer->rows() * fBuffer->cols();
-                        break;
-                case 2:
-                        fBuffer = &f.v();
-                        f2Buffer = &f2.v();
-                        lim = fBuffer->rows() * fBuffer->cols();
-                        break;
+        case 0:
+                fBuffer = &f.y();
+                f2Buffer = &f2.y();
+                lim = fBuffer->rows() * fBuffer->cols();
+                break;
+        case 1:
+                fBuffer = &f.u();
+                f2Buffer = &f2.u();
+                lim = fBuffer->rows() * fBuffer->cols();
+                break;
+        case 2:
+                fBuffer = &f.v();
+                f2Buffer = &f2.v();
+                lim = fBuffer->rows() * fBuffer->cols();
+                break;
         }
+        assert(fBuffer != NULL && f2Buffer != NULL); // safety check, usually not needed.
+        eSq = 1.0/lim;
         
-        int sum = 0, i = 0;
-        float eSq = 1.0/lim;
-        
-        for(i = 0 ; i < lim; i++) {
-                sum += ((*fBuffer)[i] - (*f2Buffer)[i]) * ((*fBuffer)[i] - (*f2Buffer)[i]);
+        for(int i = 0; i < lim; i++) {
+            sum += ((*fBuffer)[i] - (*f2Buffer)[i]) * ((*fBuffer)[i] - (*f2Buffer)[i]);
         }
 
         eSq *= sum;
@@ -48,7 +49,7 @@ float calcESq(Frame& f, Frame& f2, uint component) {
 }
 
 float inline calcPSNR(Frame& f, Frame& f2, int component){
-        return 10.0 * log10f(255.0 * 255.0 / calcESq(f,f2,component));
+    return 10.0 * log10f(255.0 * 255.0 / calcESq(f,f2,component));
 }
 
 int main(int argc, char** argv)

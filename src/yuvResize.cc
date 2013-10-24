@@ -13,7 +13,7 @@
 using namespace std;
 using namespace cv;
 
-void YuvResize::reduce(Frame& f, Frame& f2, int factor){
+void my_reduce(Frame& f, Frame& f2, int factor){
         
         int r, c; // row, column in the original frame
         int i ,j; // pixels created by the resizing
@@ -39,7 +39,7 @@ void YuvResize::reduce(Frame& f, Frame& f2, int factor){
                                         }
                                 f2.yBufferRaw[rIdx]=sumY/summed;
                         } else {*/
-                                f2.y()rIdx] = f.y()[r*f.y().cols() + c];
+                                f2.y()[rIdx] = f.y()[r*f.y().cols() + c];
                         //}
                         rIdx++;
                 }
@@ -65,15 +65,15 @@ void YuvResize::reduce(Frame& f, Frame& f2, int factor){
                                 f2.uBufferRaw[rIdx]=sumU/summed;
                                 f2.vBufferRaw[rIdx]=sumV/summed;
                         } else {*/
-                                f2.u()[rIdx] = f.u()[r*f.uvCols + c];
-                                f2.v()[rIdx] = f.v()[r*f.uvCols + c];
+                                f2.u()[rIdx] = f.u()[r*f.u().cols() + c];
+                                f2.v()[rIdx] = f.v()[r*f.u().cols() + c];
                         //}
                         rIdx++;
                 }
         }
 }
         
-void YuvResize::expand(Frame& f, Frame& f2, factor){
+void my_expand(Frame& f, Frame& f2, int factor){
         
         int r, c; // row, column in the original frame
         int i ,j; // pixels created by the resizing
@@ -158,8 +158,9 @@ int main(int argc, char** argv)
 	int nextOp, factor;
 	uint rows = 1, cols = 1;
 	char *src = NULL, *dst = NULL;
+    bool showHelp = false;
 	string oper;
-	const char* shortops = "hs:d:o:f";
+	const char* shortops = "hs:d:o:f:";
 	const struct option longops[] = {
 		"help", 0, NULL, 'h',
 		"factor", 1, NULL, 'f',
@@ -173,6 +174,7 @@ int main(int argc, char** argv)
 		switch(nextOp) {
 			case 'h':
 				nextOp = -1;
+                showHelp = true;
 			break;
 			case 's':
 				src = optarg;
@@ -181,17 +183,17 @@ int main(int argc, char** argv)
 				dst = optarg;
 			break;
 			case 'o':
-				if(oper != 'E' && oper != 'Expand' && oper != 'expand') {
-				oper = 'EX';
+				if(oper != "E" && oper != "Expand" && oper != "expand") {
+				oper = "EX";
 				}
-				else if(oper != 'R' && oper != 'Reduce' && oper != 'reduce') {
-				oper = 'RE';
+				else if(oper != "R" && oper != "Reduce" && oper != "reduce") {
+				oper = "RE";
 				}
-				else {return 1} // erro
+				else {showHelp = true; nextOp = -1; break;} // erro
 			break;
 			case 'f':
-				if(factor <= 0) return 2; // erro
 				factor = atoi(optarg);
+                if(factor <= 0) {showHelp = true; nextOp = -1; break;} // erro
 			break;
 			case '?':
 				nextOp = -1;
@@ -199,39 +201,44 @@ int main(int argc, char** argv)
 		}
 	} while(nextOp !=- 1);
 
-	if(argc != 4 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
-		cerr<< "Usage: yuvResize [OPTIONS] -s <src1> -d <dest> -o <op> -f <factor>"<<endl<<endl;
+	if(showHelp) {
+		cerr<< "Usage: yuvResize [OPTIONS] <src1> <dest> <op> <factor>"<<endl<<endl;
 		cout<<"  -h, --help           Shows this help message."<<endl
 			<<"  -s, --source         Specifies the input video filepath."<<endl
 			<<"  -d, --destination    Specifies the output video filepath."<<endl
 			<<"  -o, --operation      Operation that will take place: Reduce (R) / Expand (E)."<<endl
-			<<"  -f, --factor         Factor used by the operation 1:F."<<endl
-			<< "The program is able to resize the source by a factor."<<endl;
-			<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl;
-			<< "Authors:"<<endl;
-			<< "    Ilan Pegoraro N. 41450"<<endl;
-			<< "    Luis Neves    N. 41528"<<endl;
+			<<"  -f, --factor         Factor used by the operation 1:F."<<endl;
+		cout<< "The program is able to resize the source by a factor."<<endl;
+		cout<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl;
+		cout<< "Authors:"<<endl;
+		cout<< "    Ilan Pegoraro N. 41450"<<endl;
+		cout<< "    Luis Neves    N. 41528"<<endl;
+        showHelp = false;
 		return 1;
 	}
 
 	try {
-		int newRows = (oper==EX ? orig.nRows*factor : orig.nRows/factor);
-        int newCols = (oper==EX ? orig.nCols*factor : orig.nCols/factor);
 
-		string path(argv[1]);
-		string path2(argv[2]);
-		Video vsrc((string)src);
-		Video dsrc((string)dst, newRows, newCols, vsrc.fps(), vsrc.format());
+        string path(argv[1]);
+        string path2(argv[2]);
+        Video vsrc((string)src);
+		int newRows = (oper=="EX" ? vsrc.rows()*factor : vsrc.rows()/factor);
+        int newCols = (oper=="EX" ? vsrc.cols()*factor : vsrc.cols()/factor);
+        Video dsrc((string)dst, newRows, newCols, vsrc.fps(), vsrc.format());
 
-		Frame *f, *f2;
-		int end = false;
-		
+        Frame *f, *f2;
+        int end = false;
+        //int sumY, sumU, sumV, frames;
 		while(!end) {
 			try {
 				
 				f = vsrc.getFrame();
 				f2 = new Frame(newRows, newCols);
-				dsrc.putFrame((oper==EX ? expand(*f2) : reduce(*f2)));
+                if(oper=="EX")
+                    my_expand(*f, *f2,factor);
+                else
+                    my_reduce(*f,*f2, factor);
+				dsrc.putFrame(*f2);
 			} catch (VideoEndedException& e) {
 				end = true;
 				continue;
@@ -239,7 +246,7 @@ int main(int argc, char** argv)
 			delete f;
 		}
 		
-		printf("Y: %f, U:%f, V:%f\n", sumY/(float)frames, sumU/(float)frames, sumV/(float)frames);
+		//printf("Y: %f, U:%f, V:%f\n", sumY/(float)frames, sumU/(float)frames, sumV/(float)frames);
 
 
 	} catch (FileNotFoundException& e) {

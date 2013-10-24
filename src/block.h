@@ -6,28 +6,28 @@
 class Block
 {
 public:
-	Block(unsigned int rows, unsigned int cols);
+	Block(uint rows, uint cols);
 	Block(Block&& b);
 	Block(const Block& b);
 
 	virtual ~Block();
 
-	void setPoint(unsigned int row, unsigned int col, int value);
-	int getPoint(unsigned int row, unsigned int col);
+	void setPoint(uint row, uint col, int value);
+	int getPoint(uint row, uint col);
 
 	Block* dup();
 
-	unsigned int rows(void);
-	unsigned int cols(void);
-	unsigned int size(void);
+	uint rows(void);
+	uint cols(void);
+	uint size(void);
 
 	Block& operator=(const Block& rhs);
 	Block& operator=(const char *rhs);
 	Block& operator=(Block&& rhs);
 	bool operator==(const Block& rhs);
 	bool operator==(const char* rhs);
-	int& operator[](unsigned int index);
-	int operator[](unsigned int index) const;
+	int& operator[](uint index);
+	int operator[](uint index) const;
 
 	Block getSubBlock(uint begin, uint rows, uint cols);
 	void setSubBlock(uint begin, Block& b);
@@ -37,8 +37,8 @@ public:
 
 protected:
 	Block();
-	unsigned int m_nRows;
-	unsigned int m_nCols;
+	uint m_nRows;
+	uint m_nCols;
 	bool m_shouldClean;
 
 	int *m_buffer;

@@ -29,9 +29,9 @@ public:
 protected:
 	std::fstream m_stream;
 	
-	unsigned int m_rows;
-	unsigned int m_cols;
-	unsigned int m_fps;
+	uint m_rows;
+	uint m_cols;
+	uint m_fps;
 	bool m_fromCam;
 	cv::VideoCapture m_video;
 	VideoFormat m_type;

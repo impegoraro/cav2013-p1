@@ -21,17 +21,17 @@ public:
 	void setBlock(const Block &y, const Block &u, const Block &v);
 	void getBlock(Block& y, Block& u, Block& v);
 	
-	void setPixel(int row, int col, int y, int u, int v);
-	void getPixel(int row, int col, int& y, int& u, int& v);
-	void getPixel(int pos, int& y, int& u, int& v);
+	void setPixel(uint row, uint col, int y, int u, int v);
+	void getPixel(uint row, uint col, int& y, int& u, int& v);
+	void getPixel(uint pos, int& y, int& u, int& v);
 	void display();
 
 	void setBlackWhite();
 	void setInvertColors();
 	void changeLuminance(float factor);
 
-	unsigned int rows();
-	unsigned int cols();
+	uint rows();
+	uint cols();
 
 	Frame& operator=(const Frame& rhs);
 	Frame& operator=(Frame&& rhs);
@@ -45,8 +45,8 @@ public:
 	virtual Frame convert(VideoFormat dest);
 	static Frame* create_from_file(const std::string& path);
 protected:
-	unsigned int m_uvRows;
-	unsigned int m_uvCols;
+	uint m_uvRows;
+	uint m_uvCols;
 
 	Block* m_y;
 	Block* m_u;
@@ -55,7 +55,7 @@ protected:
 	VideoFormat m_format;
 	// Dumb constructor that doesnt initializes anything. 
 	// Its purpose is to help the parse function without using the heap.
-	Frame(unsigned int rows, unsigned int cols, unsigned int uvRows, unsigned int uvCols, VideoFormat format);
+	Frame(uint rows, uint cols, uint uvRows, uint uvCols, VideoFormat format);
 };
 
 #endif
