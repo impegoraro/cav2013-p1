@@ -20,14 +20,16 @@ int main(int argc, char** argv)
 {
 	int nextOp;
 	uint rows = 1, cols = 1;
+	bool verbose(false);
 	char *src = NULL, *dst = NULL;
-	const char* shortops = "r:c:hs:d:";
+	const char* shortops = "vr:c:hs:d:";
 	const struct option longops[] = {
 		"help", 0, NULL, 'h',
 		"rows", 1, NULL, 'r',
 		"colums", 1, NULL, 'c',
 		"source", 1, NULL, 's',
-		"destination", 1, NULL, 'd'
+		"destination", 1, NULL, 'd',
+		"verbose", 0, NULL, 'v'
 	};
 
 	do {
@@ -48,6 +50,9 @@ int main(int argc, char** argv)
 			case 'r':
 				rows = atoi(optarg);
 			break;
+			case 'v':
+				verbose = true;
+			break;
 			case '?':
 				nextOp = -1;
 			break;
@@ -62,6 +67,7 @@ int main(int argc, char** argv)
 			<<"  -d, --destination    Specifies the output video filepath."<<endl
 			<<"  -c, --columns        Columns for the custom block."<<endl
 			<<"  -r, --rows           Rows for the custom block."<<endl
+			<<"  -v, --verbose        Show debugging information and do some checks."<<endl
 			<<endl<< "The program is able to copy in the following formats: YUV444, YUV422 and YUV420."<<endl
 			<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl
 			<< "Authors:"<<endl
@@ -93,45 +99,61 @@ int main(int argc, char** argv)
 						Block b = std::move(f->y().getSubBlock(i, rows, cols));
 						Block b2(1,1);
 						f2.y().setSubBlock(i, b);
-						//cout<<"Comparing Y component using sublocks..."<<endl;
-						//b2 = std::move(f2.y().getSubBlock(i, rows, cols));
-						//assert(b2 == b);
+						
+						if(verbose) {
+							cout<<"Comparing Y component using sublocks..."<<endl;
+							b2 = std::move(f2.y().getSubBlock(i, rows, cols));
+							assert(b2 == b);
+						}
 
 						b = std::move(f->u().getSubBlock(i, rows, cols));
 						f2.u().setSubBlock(i, b);
-						//cout<<"Comparing U component using sublocks..."<<endl;
-						//b2 = std::move(f2.u().getSubBlock(i, rows, cols));
-						//assert(b2 == b);
+						
+						if(verbose) {
+							cout<<"Comparing U component using sublocks..."<<endl;
+							b2 = std::move(f2.u().getSubBlock(i, rows, cols));
+							assert(b2 == b);
+						}
 
 
 						b = std::move(f->v().getSubBlock(i, rows, cols));
 						f2.v().setSubBlock(i, b);
-						//cout<<"Comparing V component using sublocks..."<<endl;
-						//b2 = std::move(f2.v().getSubBlock(i, rows, cols));
-						//assert(b2 == b);
+						
+						if(verbose) {
+							cout<<"Comparing V component using sublocks..."<<endl;
+							b2 = std::move(f2.v().getSubBlock(i, rows, cols));
+							assert(b2 == b);
+						}
 
 					}
 					if(remaining) {
-						cout<< "Copying remaining "<< remaining<< " bytes..."<<endl;
+						if(verbose)
+							cout<< "Copying remaining "<< remaining<< " bytes..."<<endl;
 						Block b = std::move(f->y().getSubBlock(i, 1, remaining));
 						Block b2(1,1);
 						f2.y().setSubBlock(i, b);
-						//cout<<"Comparing Y component using sublocks..."<<endl;
-						//b2 = std::move(f2.y().getSubBlock(i, 1, remaining));
-						//assert(b2 == b);
+						if(verbose) {
+							cout<<"Comparing Y component using sublocks..."<<endl;
+							b2 = std::move(f2.y().getSubBlock(i, 1, remaining));
+							assert(b2 == b);
+						}
 
 						b = std::move(f->u().getSubBlock(i, 1, remaining));
 						f2.u().setSubBlock(i, b);
-						//cout<<"Comparing U component using sublocks..."<<endl;
-						//b2 = std::move(f2.u().getSubBlock(i, 1, remaining));
-						//assert(b2 == b);
+						if(verbose) {
+							cout<<"Comparing U component using sublocks..."<<endl;
+							b2 = std::move(f2.u().getSubBlock(i, 1, remaining));
+							assert(b2 == b);
+						}
 
 
 						b = std::move(f->v().getSubBlock(i, 1, remaining));
 						f2.v().setSubBlock(i, b);
-						//cout<<"Comparing V component using sublocks..."<<endl;
-						//b2 = std::move(f2.v().getSubBlock(i, 1, remaining));
-						//assert(b2 == b);
+						if(verbose) {
+							cout<<"Comparing V component using sublocks..."<<endl;
+							b2 = std::move(f2.v().getSubBlock(i, 1, remaining));
+							assert(b2 == b);
+						}
 					}
 
 
