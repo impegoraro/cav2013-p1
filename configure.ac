@@ -1,4 +1,4 @@
-AC_INIT([CAVP1], [0.1])
+AC_INIT([CAVP1], [0.7])
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 -Wall no-define foreign])
 AM_PROG_AR
