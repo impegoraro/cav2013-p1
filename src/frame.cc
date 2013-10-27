@@ -273,7 +273,7 @@ Frame Frame::convert(VideoFormat format)
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 
 	Frame f;
-	
+
 	switch(format) {
 	case RGB:
 	break;

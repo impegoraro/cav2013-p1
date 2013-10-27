@@ -27,8 +27,8 @@ Frame Frame422::convert(VideoFormat dest)
 		}
 		break;
 		case YUV_444: {
-			Frame f(m_uvRows, (m_uvCols * 2));
-
+			Frame444 f(m_uvRows, (m_uvCols * 2));
+			
 			f.y() = *m_y; // copies the Y buffer as is
 			for (uint i = 0; i < f.cols() * f.rows(); i+=2) { 
 				f.u()[i + 1] = f.u()[i] = u()[i / 2]; 
@@ -42,8 +42,10 @@ Frame Frame422::convert(VideoFormat dest)
 		}
 		break;
 		case YUV_420: {
-			Frame f = std::move(convert(YUV_444));
-			return f.convert(dest);
+			Frame444* f = new Frame444(std::move(convert(YUV_444)));
+			Frame f420 = std::move(f->convert(dest));
+			delete f;
+			return f420;
 		}
 		break;
 	}

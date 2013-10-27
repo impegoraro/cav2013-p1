@@ -43,8 +43,10 @@ Frame Frame420::convert(VideoFormat dest)
 		}
 		break;
 		case YUV_422: {
-			Frame f = std::move(convert(YUV_444));
-			return f.convert(dest);
+			Frame444* f = new Frame444(std::move(convert(YUV_444)));
+			Frame f422 = std::move(f->convert(dest));
+			delete f;
+			return f422;
 		}
 		break;
 		case YUV_420: {

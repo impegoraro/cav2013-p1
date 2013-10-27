@@ -12,8 +12,14 @@
 #include "frame420.h"
 
 
+
 Frame444::Frame444(unsigned int nRows, unsigned int nCols) : Frame(nRows, nCols, nRows, nCols, YUV_444)
 {
+}
+
+Frame444::Frame444(Frame&& f) : Frame(f)
+{
+	assert(f.getFormat() == YUV_444);
 }
 
 Frame Frame444::convert(VideoFormat dest)

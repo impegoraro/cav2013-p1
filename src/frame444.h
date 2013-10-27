@@ -18,6 +18,13 @@ public:
 	Frame444(unsigned int nRows, unsigned int nCols);
 
 	/**
+	 * Move constructor.
+	 * Moves a frame (base class) of type YUV444 to a real Frame444 object
+	 * @param f Reference of the previous object.
+	 */
+	Frame444(Frame&& f);
+
+	/**
 	 * Overrided method from the frame base class. This methods converts a frame in YUV444 format to the new format.
 	 * @param dest - VideoFormat for the new Frame.
  	 */
