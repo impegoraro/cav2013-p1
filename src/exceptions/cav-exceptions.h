@@ -8,6 +8,9 @@
 class InvalidDimensionException : public std::exception
 {
 public:
+	/**
+	 * Prints a user friendly message describing the error.
+	*/
 	virtual const char* what()
 	{
 		return "Dimentions are wrong.";
@@ -20,6 +23,9 @@ public:
 class IndexOutOfBoundsException : public std::exception
 {
 public:
+	/**
+	 * Prints a user friendly message describing the error.
+	*/
 	virtual const char* what()
 	{
 		return "index out of bounds of the array.";
@@ -32,6 +38,9 @@ public:
 class FileNotFoundException : public std::exception
 {
 public:
+	/**
+	 * Prints a user friendly message describing the error.
+	*/
 	virtual const char* what()
 	{
 		return "File not found.";
@@ -44,6 +53,9 @@ public:
 class InvalidVideoTypeException : public std::exception
 {
 public:
+	/**
+	 * Prints a user friendly message describing the error.
+	*/
 	virtual const char* what()
 	{
 		return "Video must be a YUV 444, YUV 422 or YUV420.";
@@ -56,6 +68,9 @@ public:
 class FileNotOpenException : public std::exception
 {
 public:
+	/**
+	 * Prints a user friendly message describing the error.
+	*/
 	virtual const char* what()
 	{
 		return "File is not open.";
@@ -68,6 +83,9 @@ public:
 class VideoEndedException : public std::exception
 {
 public:
+	/**
+	 * Prints a user friendly message describing the error.
+	*/
 	virtual const char* what()
 	 {
 		return "Video has ended.";
