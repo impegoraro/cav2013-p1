@@ -236,6 +236,27 @@ void Video::reset()
 	getline(m_stream, tmp); // skip the header
 }
 
+void Video::convert(const std::string& path, VideoFormat dest)
+{
+	Video vdst(path, m_rows, m_cols, m_fps, dest);
+	Frame *f = NULL, f2;
+	int end = false;
+
+	reset();
+	while(!end) {
+		try {
+			f = getFrame();
+			f2 = std::move(f->convert(dest));
+			vdst.putFrame(f2);
+
+		} catch (VideoEndedException& e) {
+			end = true;
+			continue;
+		}
+		delete f;
+	}
+}
+
 void Video::display(bool playing)
 {
 	Frame *f = NULL;

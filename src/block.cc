@@ -73,6 +73,11 @@ uint Block::size(void)
 	return m_nRows * m_nCols;
 }
 
+int const* Block::buffer() const
+{
+	return m_buffer;
+}
+
 Block* Block::dup()
 {
 	Block* b = new Block(m_nRows, m_nCols);
@@ -104,14 +109,18 @@ void Block::setSubBlock(uint begin, Block& b)
 
 bool Block::operator==(const Block& rhs)
 {
-	if(this->m_nRows != rhs.m_nRows || this->m_nCols != rhs.m_nCols)
-		return false;
+	bool res(false);
 
-	for(uint i = 0; i < m_nRows * m_nCols; i++) {
-		if(m_buffer[i] != rhs.m_buffer[i])
-			return false;
+	if(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols) {
+		res = true; // assume the blocks are equals
+		for(uint i = 0; i < (m_nRows * m_nCols); i++) {
+			if(m_buffer[i] != rhs.m_buffer[i]) {
+				res = false; // first element different, return false
+				break;
+			}
+		}
 	}
-	return true;
+	return res;
 }
 
 bool Block::operator==(const char* rhs)

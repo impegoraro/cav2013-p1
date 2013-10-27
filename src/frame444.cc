@@ -74,8 +74,7 @@ Frame Frame444::convert(VideoFormat dest)
 
 		f.y() = y();
 		for(uint r = 0; r < m_uvRows; r += 2)
-			for(uint c = 0; c < m_uvCols; c += 2)
-			{
+			for(uint c = 0; c < m_uvCols; c += 2) {
 				f.u()[(r / 2) * f.u().cols() + c / 2] = u()[m_uvCols + c];
 				f.v()[(r / 2) * f.v().cols() + c / 2] = v()[m_uvCols + c];
 			}

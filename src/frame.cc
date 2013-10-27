@@ -290,6 +290,21 @@ Frame Frame::convert(VideoFormat format)
 	return f;
 }
 
+Block Frame::packedMode()
+{
+	int size = m_rows * m_cols + m_uvRows * m_uvCols * 2;
+	Block b(size, 1);
+
+	for(uint i = 0; i < m_rows * m_cols; i++)
+		b[i] = (*m_y)[i];
+
+	for(uint i = 0; i < m_uvRows * m_uvCols; i++) {
+		b[i + m_uvRows * m_uvCols] = (*m_u)[i];
+		b[i + m_uvRows * m_uvCols * 2] = (*m_v)[i];
+	}
+	return b;
+}
+
 void Frame::write(const std::string& path)
 {
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
@@ -299,15 +314,10 @@ void Frame::write(const std::string& path)
 	if(!stream.good())
 		throw FileNotFoundException();
 
+	Block b = std::move(packedMode());
+	
 	stream<<m_uvCols<< " "<<m_uvRows<< " "<<m_format<<std::endl;
-	unsigned char buffer[m_uvRows * m_uvCols * 3];
-
-	for(uint i = 0; i < m_uvRows * m_uvCols; i++) {
-		buffer[i * 3] = (*m_y)[i];
-		buffer[i * 3 + m_uvRows * m_uvCols] = (*m_u)[i];
-		buffer[i * 3 + m_uvRows * m_uvCols * 2] = (*m_v)[i];
-	}
-	stream.write((char*)buffer, (m_uvRows * m_uvCols * 3));
+	stream.write((char*)b.buffer(), b.size());
 	stream.close();
 }
 

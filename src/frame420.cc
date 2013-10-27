@@ -16,8 +16,10 @@ Frame Frame420::convert(VideoFormat dest)
 {
 	switch(dest) {
 		case RGB: {
-			Frame f = std::move(convert(YUV_444));
-			return f.convert(RGB);
+			Frame444* f = new Frame444(std::move(convert(YUV_444)));
+			Frame fdest = std::move(f->convert(dest));
+			delete f;
+			return fdest;
 		}
 		break;
 		case YUV_444: {

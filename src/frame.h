@@ -147,6 +147,11 @@ public:
 	Block& v();
 
 	/**
+	 *
+	 */
+	virtual Block packedMode();
+
+	/**
 	 * Writes a frame to the mass storage device.
 	 * @param path - The file path where the frame is to be saved on.
 	 */

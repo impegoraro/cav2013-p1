@@ -74,6 +74,12 @@ public:
 	uint size(void);
 
 	/**
+	 * Returns the internal buffer of the block.
+	 * @return const int* - A pointer to the start of array of ints.
+	 */
+	int const* buffer() const;
+
+	/**
 	 * Copy operator assignment
 	 * Copies the block contents, if the block is the same size the buffer is reused otherwise the block is recreated freeing the previously allocated buffer.
 	 * @param rhs - A reference to the block.

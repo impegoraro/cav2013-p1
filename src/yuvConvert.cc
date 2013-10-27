@@ -77,23 +77,22 @@ int main(int argc, char** argv)
 
 	try {
 		Video v((string)src);
-		Video vdst((string)dst, v.rows(), v.cols(), v.fps(), vf);
-		Frame *f = NULL, f2;
-		int end = false;
-			
-
-		while(!end) {
-			try {
-				f = v.getFrame();
-				f2 = std::move(f->convert(vf));
-				vdst.putFrame(f2);
-
-			} catch (VideoEndedException& e) {
-				end = true;
-				continue;
-			}
-			delete f;
-		}
+		v.convert((string)dst, vf);
+		//Video vdst((string)dst, v.rows(), v.cols(), v.fps(), vf);
+		//Frame *f = NULL, f2;
+		//int end = false;
+		//	
+		//while(!end) {
+		//	try {
+		//		f = v.getFrame();
+		//		f2 = std::move(f->convert(vf));
+		//		vdst.putFrame(f2);
+		//	} catch (VideoEndedException& e) {
+		//		end = true;
+		//		continue;
+		//	}
+		//	delete f;
+		//}
 	} catch (FileNotFoundException& e) {
 		cerr<< "File not found"<< endl;
 	}

@@ -84,6 +84,12 @@ public:
 	 */
 	void display(bool playing = true);
 
+	/**
+	 * Converts a video to the new format. To avoid problems the video is restart to the begining.
+	 * @param path - path to the video.
+	 * @param dest - out video format.
+	 */
+	void convert(const std::string& path, VideoFormat dest);
 protected:
 	/**
 	 * File stream to read of write the video (YUV444, YUV422 and YUV422 formats).
