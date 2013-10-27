@@ -1,3 +1,21 @@
+/*
+ * yuvConvert.cc
+ * Copyright (C) 2013  Ilan Pegoraro and Luís Neves
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <getopt.h>
@@ -22,10 +40,10 @@ int main(int argc, char** argv)
 	VideoFormat vf(YUV_444);
 	const char* shortops = "s:d:f:h";
 	const struct option longops[] = {
-		"help", 0, NULL, 'h',
-		"format", 1, NULL, 'f',
-		"destination", 1, NULL, 'd',
-		"source", 1, NULL, 's'
+		{"help", 0, NULL, 'h'},
+		{"format", 1, NULL, 'f'},
+		{"destination", 1, NULL, 'd'},
+		{"source", 1, NULL, 's'}
 	};
 	
 	do {
@@ -60,14 +78,14 @@ int main(int argc, char** argv)
 	} while(nextOp !=- 1);
 
 	if(showHelp || src == NULL || dst == NULL) {
-		cerr<< "Usage: yuvConvert [OPTIONS] -s <source> -d <destination>"<<endl<<endl;
+		cerr<< "Usage: yuvConvert [OPTIONS] -s <source> -d <destination>"<<endl;
+		cout<< "The program is able to convert between the following formats: RGB, YUV444, YUV422 and YUV420."<<endl;
 		cout<<"Options are:"<<endl
 			<<"  -h, --help           Shows this help message."<<endl
 			<<"  -s, --source         Video source."<<endl
 			<<"  -i, --destination    Video destination."<<endl
-			<<"  -f  --format         Output format."<<endl
-			<<endl<< "The program is able to convert between the following formats: RGB, YUV444, YUV422 and YUV420."<<endl
-			<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl
+			<<"  -f  --format         Output format."<<endl<<endl;
+		cout<<"yuvConvert  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding"<<endl
 			<< "Authors:"<<endl
 			<< "    Ilan Pegoraro N. 41450"<<endl
 			<< "    Luis Neves    N. 41528"<<endl;

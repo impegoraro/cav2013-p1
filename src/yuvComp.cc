@@ -1,3 +1,21 @@
+/*
+ * yuvComp.cc
+ * Copyright (C) 2013  Ilan Pegoraro and Luís Neves
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 #include <getopt.h>
 #include <opencv2/opencv.hpp>
@@ -55,9 +73,9 @@ float inline calcPSNR(Frame& f, Frame& f2, int component){
 int main(int argc, char** argv)
 {
 	if(argc != 3 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
-		cerr<< "Usage: yuvComp <src1> <src2>"<<endl<<endl;
-		cout<< "The program is able to compare in the following formats: YUV444, YUV422 and YUV420."<<endl;
-		cout<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl;
+		cerr<< "Usage: yuvComp <src1> <src2>"<<endl;
+		cout<< "The program is able to compare in the following formats: YUV444, YUV422 and YUV420."<<endl<<endl;
+        cout<<"yuvComp  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding"<<endl;
 		cout<< "Authors:"<<endl;
 		cout<< "    Ilan Pegoraro N. 41450"<<endl;
 		cout<< "    Luis Neves    N. 41528"<<endl;

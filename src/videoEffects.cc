@@ -1,3 +1,21 @@
+/*
+ * videoEffects.cc
+ * Copyright (C) 2013  Ilan Pegoraro and Luís Neves
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <getopt.h>
@@ -22,11 +40,11 @@ int main(int argc, char** argv)
 	int operation(0); // 0 -> invert; 1 black and white; 2 - luminance
 	const char* shortops = "s:ibl:h";
 	const struct option longops[] = {
-		"help", 0, NULL, 'h',
-		"invert", 0, NULL, 'i',
-		"black-white", 0, NULL, 'b',
-		"luminance", 1, NULL, 'l',
-		"source", 1, NULL, 's'
+		{"help", 0, NULL, 'h'},
+		{"invert", 0, NULL, 'i'},
+		{"black-white", 0, NULL, 'b'},
+		{"luminance", 1, NULL, 'l'},
+		{"source", 1, NULL, 's'}
 	};
 
 	do {
@@ -57,15 +75,16 @@ int main(int argc, char** argv)
 	} while(nextOp !=- 1);
 
 	if(showHelp) {
-		cerr<< "Usage: videoEffects [OPTIONS] <source>"<<endl<<endl;
+		cerr<< "Usage: videoEffects [OPTIONS] <source>"<<endl;
+		cout<< "The program is able to apply effects in the following formats: RGB, YUV444, YUV422 and YUV420."<<endl;
 		cout<<"Options are:"<<endl
 			<<"  -h, --help           Shows this help message."<<endl
 			<<"  -l, --luminance      Changes the luminance of each video frame."<<endl
 			<<"  -i, --invert         Inverts the colors of each video frame."<<endl
 			<<"  -b, --black-white    Turns the video to black and white."<<endl
-			<<"  -s, --source         Video file path."<<endl
-			<<endl<< "The program is able to apply effects in the following formats: RGB, YUV444, YUV422 and YUV420."<<endl
-			<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl
+			<<"  -s, --source         Video file path."<<endl<<endl;
+
+		cout<<"videoEffects  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding <"<<endl
 			<< "Authors:"<<endl
 			<< "    Ilan Pegoraro N. 41450"<<endl
 			<< "    Luis Neves    N. 41528"<<endl;

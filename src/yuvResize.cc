@@ -1,3 +1,21 @@
+/*
+ * yuvResize.cc
+ * Copyright (C) 2013  Ilan Pegoraro and Luís Neves
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 #include <getopt.h>
 #include <opencv2/opencv.hpp>
@@ -82,11 +100,11 @@ int main(int argc, char** argv)
 	string oper;
 	const char* shortops = "hs:d:o:f:";
 	const struct option longops[] = {
-		"help", 0, NULL, 'h',
-		"factor", 1, NULL, 'f',
-		"operation", 1, NULL, 'o',
-		"source", 1, NULL, 's',
-		"destination", 1, NULL, 'd'
+		{"help", 0, NULL, 'h'},
+		{"factor", 1, NULL, 'f'},
+		{"operation", 1, NULL, 'o'},
+		{"source", 1, NULL, 's'},
+		{"destination", 1, NULL, 'd'}
 	};
 
 	do {
@@ -122,14 +140,14 @@ int main(int argc, char** argv)
 	} while(nextOp !=- 1);
 
 	if(showHelp) {
-		cerr<< "Usage: yuvResize [OPTIONS] <src1> <dest> <op> <factor>"<<endl<<endl;
+		cerr<< "Usage: yuvResize [OPTIONS] <src1> <dest> <op> <factor>"<<endl;
+		cout<< "The program is able to resize the source by a factor."<<endl;
 		cout<<"  -h, --help           Shows this help message."<<endl
 			<<"  -s, --source         Specifies the input video filepath."<<endl
 			<<"  -d, --destination    Specifies the output video filepath."<<endl
 			<<"  -o, --operation      Operation that will take place: Reduce (R) / Expand (E)."<<endl
 			<<"  -f, --factor         Factor used by the operation 1:F."<<endl;
-		cout<< "The program is able to resize the source by a factor."<<endl;
-		cout<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl;
+		cout<<"yuvResize  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding"<<endl;
 		cout<< "Authors:"<<endl;
 		cout<< "    Ilan Pegoraro N. 41450"<<endl;
 		cout<< "    Luis Neves    N. 41528"<<endl;
