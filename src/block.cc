@@ -34,25 +34,25 @@ Block::Block(uint rows, uint cols)
 {
 	assert(m_nRows > 0 && m_nCols > 0);
 	m_buffer = new int[m_nRows * m_nCols];
+
+	//std::memset(m_buffer, 0, sizeof(int) * size());
 }
 
 Block::Block(const Block& b)
 	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_shouldClean(true)
 {
 	this->m_buffer = new int[m_nRows * m_nCols];
-	// Aparently the memmove does not copies the buffer correctly
-	//std::memmove(this->m_buffer, b.m_buffer, (m_nRows * m_nCols));
+	std::memmove(this->m_buffer, b.m_buffer, sizeof(int) * m_nRows * m_nCols);
 
-	//Falling back to copying byte by byte
-	for(uint i = 0; i < m_nRows * m_nCols; i++)
-		m_buffer[i] = b.m_buffer[i];
+	////Falling back to copying byte by byte
+	//for(uint i = 0; i < m_nRows * m_nCols; i++)
+	//	m_buffer[i] = b.m_buffer[i];
 	assert(*this == b);
 }
 
 Block::Block(Block&& b)
-	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_shouldClean(b.m_shouldClean)
+	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_shouldClean(b.m_shouldClean), m_buffer(b.m_buffer)
 {
-	m_buffer = b.m_buffer;
 	b.m_buffer = NULL;
 }
 
@@ -130,24 +130,26 @@ bool Block::operator==(const Block& rhs)
 	bool res(false);
 
 	if(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols) {
-		res = true; // assume the blocks are equals
-		for(uint i = 0; i < (m_nRows * m_nCols); i++) {
-			if(m_buffer[i] != rhs.m_buffer[i]) {
-				res = false; // first element different, return false
-				break;
-			}
-		}
+		//res = true; // assume the blocks are equals
+		//for(uint i = 0; i < (m_nRows * m_nCols); i++) {
+		//	if(m_buffer[i] != rhs.m_buffer[i]) {
+		//		res = false; // first element different, return false
+		//		break;
+		//	}
+		//}
+		return (std::memcmp(m_buffer, rhs.m_buffer, sizeof(int) * m_nRows * m_nCols) == 0);
 	}
 	return res;
 }
 
 bool Block::operator==(const char* rhs)
 {
-	bool res = true;
-	for(uint i = 0; i < (m_nRows * m_nCols); i++)
-		if(m_buffer[i] != rhs[i])
-			res = false;
-	return res;
+	return std::memcmp(m_buffer, rhs, sizeof(int) * m_nRows * m_nCols);
+	//bool res = true;
+	//for(uint i = 0; i < (m_nRows * m_nCols); i++)
+	//	if(m_buffer[i] != rhs[i])
+	//		res = false;
+	//return res;
 }
 
 int& Block::operator[](uint index)
@@ -167,14 +169,17 @@ int Block::operator[](uint index) const
 Block& Block::operator=(const Block& rhs)
 {
 	if(m_nRows != rhs.m_nRows || m_nCols != rhs.m_nCols) {
-		if(m_shouldClean)
+		if(m_buffer != NULL && m_shouldClean)
 			delete []m_buffer;
 		m_nRows = rhs.m_nRows;
 		m_nCols = rhs.m_nCols;
+		m_buffer = new int[m_nRows * m_nCols];
+		m_shouldClean = true;
 	}
-	m_shouldClean = true;
-	for(uint i = 0; i < (m_nRows * m_nCols); i++)
-		m_buffer[i] = rhs.m_buffer[i];
+	std::memcpy(m_buffer, rhs.m_buffer, sizeof(int) * m_nRows * m_nCols);
+	//Fallback method if errors occurs
+	//for(uint i = 0; i < (m_nRows * m_nCols); i++)
+	//	m_buffer[i] = rhs.m_buffer[i];
 
 	assert (*this == rhs);
 	return *this;
