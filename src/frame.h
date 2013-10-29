@@ -25,7 +25,8 @@
 #include "video-format.h"
 
 /**
- * The frame class stores the different kinds of Blocks, and has the general methods required to manipulate/access the Frame.
+ * The frame class stores the different kinds of Blocks, and has the general methods
+ * required to manipulate/access the Frame.
  * This is the base class for the following formats YUV444, YUV422, YUV420 and RGB, 
  * so all the implemented methods work in the format that the frame was created.
  */
@@ -34,12 +35,14 @@ class Frame
 public:
 	/**
 	 * Frame constructor
-	 * Protected constructor, creates an uninitialized frame. This is used internally by the class hierachy.
+	 * Protected constructor, creates an uninitialized frame. 
+	 * This is used internally by the class hierachy.
 	 */
 	Frame();
 	/**
 	 * Frame constructor
-	 * Constructs a frame with the specified rows and columns and of type YUV444 (all buffers of the same size). The buffer is uninitialized.
+	 * Constructs a frame with the specified rows and columns and of type YUV444 
+	 * (all buffers of the same size). The buffer is uninitialized.
 	 * @param nRows - Number of Rows
 	 * @param nCols - Number of Columns
 	 */
@@ -147,28 +150,35 @@ public:
 
 	/**
 	 * Gets the block defined by the component Y.
-	 * Since it returns a reference to the block all changes made to the block are apply directly in the frame.
+	 * Since it returns a reference to the block all changes made to the 
+	 * block are apply directly in the frame.
 	 * @return Block& - A reference to the block Y.
 	 */
 	Block& y();
 	/**
 	 * Gets the block defined by the component U.
-	 * Since it returns a reference to the block all changes made to the block are apply directly in the frame.
+	 * Since it returns a reference to the block all changes made to the 
+	 * block are apply directly in the frame.
 	 * @return Block& - A reference to the block U.
 	 */
 	Block& u();
 	/**
 	 * Gets the block defined by the component V.
-	 * Since it returns a reference to the block all changes made to the block are apply directly in the frame.
+	 * Since it returns a reference to the block all changes made to the 
+	 * block are apply directly in the frame.
 	 * @return Block& - A reference to the block V.
 	 */
 	Block& v();
 
 	/**
-	 *
+	 * Creates a buffer of the YUV buffers in packed mode, the size of the resulting 
+	 * buffer is returned by the first parameter. Note that the buffer is dynamically allocated
+	 * therefore must be freed by the caller.
+	 * @param size - size of the newly created buffer.
+	 * @return unsigned char* - buffer in packed mode.
 	 */
-	virtual Block packedMode();
-
+	virtual unsigned char* packedMode(uint& size) const;
+	
 	/**
 	 * Writes a frame to the mass storage device.
 	 * @param path - The file path where the frame is to be saved on.
@@ -177,13 +187,15 @@ public:
 
 	/**
 	 * Converts a Frame to format specified by the format.
-	 * Since this method is virtual the base class is allow to override is behaviour. Note that this is done by the FrameRGB, Frame444, Frame422 and Frame420 classes. 
+	 * Since this method is virtual the base class is allow to override is behaviour. Note 
+	 * that this is done by the FrameRGB, Frame444, Frame422 and Frame420 classes. 
 	 * @param format - format of the new frame.
 	 */
 	virtual Frame convert(VideoFormat format);
 	/**
 	 * Static method that creates a frame from a file.
-	 * Note that the method dynamically allocates the frame so the resposibility of removing the frame lies in the caller.
+	 * Note that the method dynamically allocates the frame so the resposibility of 
+	 * removing the frame lies in the caller.
 	 * @param path - File from where to read the frame.
 	 * @return Frame* - dyanmically allcated frame.
 	 */
@@ -227,7 +239,8 @@ protected:
 	// Its purpose is to help the parse function without using the heap.
 	/**
 	 * Frame constructor
-	 * A Protected constructor used by the hierarchy of Frames (RGB, 422 and 420) to initialize the internal structure of the frame.
+	 * A Protected constructor used by the hierarchy of Frames (RGB, 422 and 420) to 
+	 * initialize the internal structure of the frame.
 	 * @param rows - rows of the Y component
 	 * @param cols - cols of the Y component
 	 * @param uvRows - uvRows of U and V component

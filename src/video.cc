@@ -1,21 +1,3 @@
-/*
- * video.cc
- * Copyright (C) 2013  Ilan Pegoraro and Luís Neves
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <iostream>
 #include <stdio.h>
 #include <assert.h>
@@ -191,37 +173,12 @@ Frame* Video::getFrame()
 void Video::putFrame(Frame& f)
 {
 	assert(f.getFormat() == m_type);
-	unsigned char buffer[m_cols * m_rows * 3];
-	uint cols(0), rows(0), size(0);
-	
-	switch(m_type) {
-		case RGB:
-		case YUV_444:
-			rows = m_rows;
-			cols = m_cols;
-			size = m_rows * m_cols * 3;
-		break;
-		case YUV_422:
-			rows = m_rows;
-			cols = m_cols / 2;
-			size = m_rows * m_cols + m_rows * cols * 2;
-		break;
-		case YUV_420:
-			rows = m_rows / 2;
-			cols = m_cols / 2;
-			size = m_rows * m_cols + rows * cols * 2;
-		break;
-	}
-	for(uint i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
-	{
-		/* Accessing to planar infor */
-		buffer[i / 3] = f.y()[i / 3];
-		if(m_type == RGB || m_type == YUV_444 || ((i/3) < f.u().size())) {
-			buffer[(i / 3) + (m_rows * m_cols)] = f.u()[i / 3]; 
-			buffer[(i / 3) + (m_rows * m_cols + rows * cols)] = f.v()[i / 3];
-		}
-	}
+	unsigned char *buffer;
+	uint size(0);
+
+	buffer = f.packedMode(size);
 	m_stream.write((char*)buffer, size);
+	delete buffer;
 }
 
 uint Video::rows()

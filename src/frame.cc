@@ -19,6 +19,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <assert.h>
 #include <opencv2/opencv.hpp>
@@ -107,8 +108,8 @@ Frame& Frame::operator=(Frame&& rhs)
 {
 	m_rows = rhs.m_rows;
 	m_cols = rhs.m_cols;
-	m_uvRows = rhs.rows();
-	m_uvCols = rhs.cols();
+	m_uvRows = rhs.m_uvRows;
+	m_uvCols = rhs.m_uvCols;
 	m_format = rhs.m_format;
 
 	if(m_y != NULL)
@@ -308,34 +309,39 @@ Frame Frame::convert(VideoFormat format)
 	return f;
 }
 
-Block Frame::packedMode()
+unsigned char* Frame::packedMode(uint& size) const
 {
-	int size = m_rows * m_cols + m_uvRows * m_uvCols * 2;
-	Block b(size, 1);
-
-	for(uint i = 0; i < m_rows * m_cols; i++)
-		b[i] = (*m_y)[i];
-
-	for(uint i = 0; i < m_uvRows * m_uvCols; i++) {
-		b[i + m_uvRows * m_uvCols] = (*m_u)[i];
-		b[i + m_uvRows * m_uvCols * 2] = (*m_v)[i];
+	size = m_rows * m_cols + m_uvRows * m_uvCols * 2;
+	unsigned char *buffer = new unsigned char[size];
+	
+	std::memset((char*)buffer, 127, sizeof(buffer));
+	for(uint i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
+	{
+		/* Accessing to planar infor */
+		buffer[i / 3] = (*m_y)[i / 3];
+		if(m_format == RGB || m_format == YUV_444 || ((i/3) < m_u->size())) {
+			buffer[(i / 3) + (m_rows * m_cols)] = (*m_u)[i / 3];
+			buffer[(i / 3) + (m_rows * m_cols + m_uvRows * m_uvCols)] = (*m_v)[i / 3];
+		}
 	}
-	return b;
+	return buffer;	
 }
 
 void Frame::write(const std::string& path)
 {
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
-
+	uint size(0);
+	unsigned char *b; 
 	std::ofstream stream(path, std::ios::trunc | std::ios::out);
 
 	if(!stream.good())
 		throw FileNotFoundException();
 
-	Block b = std::move(packedMode());
+	b = packedMode(size);
 	
-	stream<<m_uvCols<< " "<<m_uvRows<< " "<<m_format<<std::endl;
-	stream.write((char*)b.buffer(), b.size());
+	stream<< m_cols<< " "<< m_rows<< " "<<m_format <<std::endl;
+	stream.write((char*)b, size);
+	delete b;
 	stream.close();
 }
 

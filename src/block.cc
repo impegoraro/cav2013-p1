@@ -42,7 +42,7 @@ Block::Block(const Block& b)
 	: m_nRows(b.m_nRows), m_nCols(b.m_nCols), m_shouldClean(true)
 {
 	this->m_buffer = new int[m_nRows * m_nCols];
-	std::memmove(this->m_buffer, b.m_buffer, sizeof(int) * m_nRows * m_nCols);
+	std::memcpy(this->m_buffer, b.m_buffer, sizeof(int) * m_nRows * m_nCols);
 
 	////Falling back to copying byte by byte
 	//for(uint i = 0; i < m_nRows * m_nCols; i++)
@@ -147,8 +147,10 @@ bool Block::operator==(const char* rhs)
 	return std::memcmp(m_buffer, rhs, sizeof(int) * m_nRows * m_nCols);
 	//bool res = true;
 	//for(uint i = 0; i < (m_nRows * m_nCols); i++)
-	//	if(m_buffer[i] != rhs[i])
-	//		res = false;
+	//	if(m_buffer[i] != rhs[i]) {
+	//		res = false;  // first element different, return false
+	//		break;
+	//	}
 	//return res;
 }
 
@@ -187,8 +189,10 @@ Block& Block::operator=(const Block& rhs)
 
 Block& Block::operator=(const char *rhs)
 {
-	for(uint i = 0; i < m_nRows * m_nCols; i++)
-		m_buffer[i] = rhs[i];
+	//for(uint i = 0; i < m_nRows * m_nCols; i++)
+	//	m_buffer[i] = rhs[i];
+
+	std::memcpy(this->m_buffer, rhs, sizeof(int) * m_nRows * m_nCols);
 	assert (*this == rhs);
 	return *this;
 }
