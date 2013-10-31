@@ -212,11 +212,13 @@ VideoFormat Video::format()
 void Video::reset()
 {
 	string tmp;
-	if(!m_stream.is_open())
-		throw FileNotOpenException();
-	m_stream.clear();
-	m_stream.seekg(0, std::ios_base::beg);
-	getline(m_stream, tmp); // skip the header
+	if(!m_fromCam) {
+		if(!m_stream.is_open())
+			throw FileNotOpenException();
+		m_stream.clear();
+		m_stream.seekg(0, std::ios_base::beg);
+		getline(m_stream, tmp); // skip the header
+	}
 }
 
 void Video::convert(const std::string& path, VideoFormat dest)
