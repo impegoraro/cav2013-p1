@@ -147,7 +147,7 @@ int main(int argc, char** argv)
 			<<"  -d, --destination    Specifies the output video filepath."<<endl
 			<<"  -o, --operation      Operation that will take place: Reduce (R) / Expand (E)."<<endl
 			<<"  -f, --factor         Factor used by the operation 1:F."<<endl;
-		cout<<"yuvResize  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding"<<endl;
+		cout<<"yuvResize  Copyright (C) 2013  Universidade de Aveiro  - MIECT Audio and Video Coding"<<endl;
 		cout<< "Authors:"<<endl;
 		cout<< "    Ilan Pegoraro N. 41450"<<endl;
 		cout<< "    Luis Neves    N. 41528"<<endl;

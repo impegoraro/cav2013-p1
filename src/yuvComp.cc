@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 	if(argc != 3 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
 		cerr<< "Usage: yuvComp <src1> <src2>"<<endl;
 		cout<< "The program is able to compare in the following formats: YUV444, YUV422 and YUV420."<<endl<<endl;
-        cout<<"yuvComp  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding"<<endl;
+        cout<<"yuvComp  Copyright (C) 2013  Universidade de Aveiro  - MIECT Audio and Video Coding"<<endl;
 		cout<< "Authors:"<<endl;
 		cout<< "    Ilan Pegoraro N. 41450"<<endl;
 		cout<< "    Luis Neves    N. 41528"<<endl;

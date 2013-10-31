@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 			<<"  -s, --source         Video source."<<endl
 			<<"  -i, --destination    Video destination."<<endl
 			<<"  -f  --format         Output format."<<endl<<endl;
-		cout<<"yuvConvert  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding"<<endl
+		cout<<"yuvConvert  Copyright (C) 2013  Universidade de Aveiro  - MIECT Audio and Video Coding"<<endl
 			<< "Authors:"<<endl
 			<< "    Ilan Pegoraro N. 41450"<<endl
 			<< "    Luis Neves    N. 41528"<<endl;

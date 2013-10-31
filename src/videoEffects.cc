@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 			<<"  -b, --black-white    Turns the video to black and white."<<endl
 			<<"  -s, --source         Video file path."<<endl<<endl;
 
-		cout<<"videoEffects  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding <"<<endl
+		cout<<"videoEffects  Copyright (C) 2013  Universidade de Aveiro  - MIECT Audio and Video Coding <"<<endl
 			<< "Authors:"<<endl
 			<< "    Ilan Pegoraro N. 41450"<<endl
 			<< "    Luis Neves    N. 41528"<<endl;

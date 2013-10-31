@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 			<<"  -r, --rows           Rows for the custom block."<<endl
 			<<"  -v, --verbose        Show debugging information and do some checks."<<endl
 			<<endl<< "The program is able to copy in the following formats: YUV444, YUV422 and YUV420."<<endl
-			<< "Univesidade de Aveiro 2013 - MIETC Audio and Video Coding"<<endl
+			<< "Univesidade de Aveiro 2013 - MIECT Audio and Video Coding"<<endl
 			<< "Authors:"<<endl
 			<< "    Ilan Pegoraro N. 41450"<<endl
 			<< "    Luis Neves    N. 41528"<<endl;

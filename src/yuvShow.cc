@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 			<<"  -s, --source                  Filename to read the video from. Missing this switch means to read from camera."<<endl
 			<<"  -r, --repeat                  Ask to repeat the video when finishes."<<endl
 			<<"  -m, --manual-fps              Use any key to step throughout the video instead of using the video's FPS."<<endl<<endl;
-		cout<<"yuvShow  Copyright (C) 2013  Universidade de Aveiro  - MIETC Audio and Video Coding"<<endl;
+		cout<<"yuvShow  Copyright (C) 2013  Universidade de Aveiro  - MIECT Audio and Video Coding"<<endl;
 		cout<< "Authors:"<<endl;
 		cout<< "    Ilan Pegoraro N. 41450"<<endl;
 		cout<< "    Luis Neves    N. 41528"<<endl;
