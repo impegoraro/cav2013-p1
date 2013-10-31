@@ -29,7 +29,8 @@ src/libcav.a
 src/yuvShow
 src/yuvComp
 src/yuvCopy
-doc/
+doc/html
+doc/latex
 yuvConvert
 videoEffects
 yuvResize
