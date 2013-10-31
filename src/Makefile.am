@@ -30,27 +30,27 @@ libcav_a_SOURCES = block.h block.cc \
 bin_PROGRAMS=yuvShow yuvComp yuvCopy yuvConvert videoEffects yuvResize
 
 # yuvShow program 
-yuvShow_LDADD=$(DEPS_LIBS) libcav.a
+yuvShow_LDADD=libcav.a $(DEPS_LIBS)
 yuvShow_SOURCES=yuvShow.cc
 
 
 # yuvComp program 
-yuvComp_LDADD=$(DEPS_LIBS) libcav.a
+yuvComp_LDADD=libcav.a $(DEPS_LIBS)
 yuvComp_SOURCES=yuvComp.cc
 
 # yuvCopy program 
-yuvCopy_LDADD=$(DEPS_LIBS) libcav.a
+yuvCopy_LDADD=libcav.a $(DEPS_LIBS)
 yuvCopy_SOURCES=yuvCopy.cc
 
 # yuvConvert program 
-yuvConvert_LDADD=$(DEPS_LIBS) libcav.a
+yuvConvert_LDADD=libcav.a $(DEPS_LIBS)
 yuvConvert_SOURCES=yuvConvert.cc
 
 # videoEffects program 
-videoEffects_LDADD=$(DEPS_LIBS) libcav.a
+videoEffects_LDADD=libcav.a $(DEPS_LIBS)
 videoEffects_SOURCES=videoEffects.cc
 
 # yuvResize program 
-yuvResize_LDADD=$(DEPS_LIBS) libcav.a
+yuvResize_LDADD=libcav.a $(DEPS_LIBS)
 yuvResize_SOURCES=yuvResize.cc
 
