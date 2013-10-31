@@ -19,6 +19,8 @@
 #ifndef CAV_BLOCK_H
 #define CAV_BLOCK_H
 
+#include <memory>
+
 #include "exceptions/cav-exceptions.h"
 
 
@@ -73,23 +75,23 @@ public:
 	 * The row, column and the block's content is duplicated. Note that the deletion of the block is delegated to the caller.
 	 * @return Block* - A pointer to the newly heap allocated block.
 	 */
-	Block* dup();
+	Block* dup() const;
 
 	/**
 	 * Gets the number of rows of the defined block.
 	 * @return uint - Number of rows
 	 */
-	uint rows(void);
+	uint rows(void) const;
 	/**
 	 * Gets the number of columns of the defined block.
 	 * @return uint - Number of columns
 	 */
-	uint cols(void);
+	uint cols(void) const;
 	/**
 	 * Gets the size of the block
 	 * @return uint - size of the block
 	 */
-	uint size(void);
+	uint size(void) const;
 
 	/**
 	 * Returns the internal buffer of the block.
@@ -103,45 +105,45 @@ public:
 	 * @param rhs - A reference to the block.
 	 * @return Block& - A reference to the to object itself.
 	 */
-	Block& operator=(const Block& rhs);
+	virtual Block& operator=(const Block& rhs);
 	/**
 	 * Copies the buffer rhs into the internal data. Note that the size of the array must be equal to the internal size of the Block, if not the result is unknown.
 	 * @param rhs - array of bytes.
 	 * @return Block& - a reference to the to object itself.
 	 */
-	Block& operator=(const char *rhs);
+	virtual Block& operator=(const char *rhs);
 	/**
 	 * Move operator assigment,
 	 * Moves the buffer from the parameter
 	 * @param rhs a rvalue reference of the object to move
 	 */
-	Block& operator=(Block&& rhs);
+	virtual Block& operator=(Block&& rhs);
 	/**
 	 * Operator== Overloaded
 	 * Checks whether the blocks are equal.
 	 * @param rhs - Constant reference to a block
 	 * @return bool - true if the blocks are equal, false otherwise.
 	 */
-	bool operator==(const Block& rhs);
+	virtual bool operator==(const Block& rhs);
 	/**
 	 * Operator== Overloaded
 	 * Checks whether the block's buffer is equal to a chunk of memory of the same size.
 	 * @param rhs - array of bytes.
 	 * @return bool - true if the blocks are equal, false otherwise.
 	 */
-	bool operator==(const char* rhs);
+	virtual bool operator==(const char* rhs);
 	/**
 	 * Overloaded operator[] allows positioning within the block to get or set the value in that position. Note that the return value is a reference to an int.
  	 * @param index - buffer's index to get the value from.
 	 * @return uint& - a reference to the value.
 	 */ 
-	int& operator[](uint index);
+	virtual int& operator[](uint index);
 	/**
 	 * Overloaded operator[] for const Blocks, allows positioning within the block to get the value in that position.
  	 * @param index - buffer's index to get the value from.
 	 * @return uint - The value.
 	 */ 
-	int operator[](uint index) const;
+	virtual int operator[](uint index) const;
 
 	/**
 	 * Return a sub block. Note that the sub block is not a copy, that means that any change to any of its elements will be made to the original block as well.
@@ -171,6 +173,9 @@ protected:
 	 * Creates an empty block with no associated buffer.
 	 */
 	Block();
+
+	Block(uint rows, uint cols, std::shared_ptr<int> buffer);
+
 	/**
 	 * Number of rows.
 	 */
@@ -179,15 +184,11 @@ protected:
 	 * Number of columns
 	 */
 	uint m_nCols;
-	/**
-	 * Whether destructor should clean the memory (buffer).
-	 */
-	 bool m_shouldClean;
 
 	 /**
 	 * The buffer where that values are stored.
 	 */
-	int *m_buffer;
+	std::shared_ptr<int> m_buffer;
 
 };
 

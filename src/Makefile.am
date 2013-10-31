@@ -10,6 +10,7 @@ AM_CFLAGS=$(DEPS_CFLAGS)
 
 lib_LIBRARIES=libcav.a
 libcav_a_SOURCES = block.h block.cc \
+              subblock.h subblock.cc \
               frame.h frame.cc \
               frame422.h frame422.cc \
               frame420.h frame420.cc \
