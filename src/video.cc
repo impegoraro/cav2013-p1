@@ -13,8 +13,16 @@
 
 using namespace cv;
 
-Video::Video() : Video(0)
+Video::Video()
+	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB)
 {
+	std::string device("/dev/video0");
+	
+	m_stream.open(device);
+	m_fps = 30; //(int)m_video.get(CV_CAP_PROP_FPS);
+	m_cols= (int)m_video.get(CV_CAP_PROP_FRAME_WIDTH);
+	m_rows = (int)m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
+	m_type = RGB;
 }
 
 Video::Video(int number)
