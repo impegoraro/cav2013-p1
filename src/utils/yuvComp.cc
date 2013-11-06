@@ -20,12 +20,7 @@
 #include <getopt.h>
 #include <opencv2/opencv.hpp>
 
-#include <libcav/video.h>
-#include <libcav/block.h>
-#include <libcav/frame.h>
-#include <libcav/exceptions/cav-exceptions.h>
-#include <libcav/frame422.h>
-#include <libcav/frame420.h>
+#include <libcav.h>
 
 using namespace std;
 using namespace cv;

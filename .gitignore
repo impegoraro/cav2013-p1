@@ -1,6 +1,8 @@
 *~
 *.bak
 *.o
+*.a
+*.so
 cavp1
 *.sublime-workspace
 configure
@@ -25,10 +27,10 @@ libtool
 ltmain.sh
 src/.libs/
 ar-lib
-src/libcav.a
-src/yuvShow
-src/yuvComp
-src/yuvCopy
+libcav.a
+yuvShow
+yuvComp
+yuvCopy
 doc/html
 doc/latex
 yuvConvert
