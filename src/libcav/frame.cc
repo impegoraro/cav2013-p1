@@ -220,6 +220,7 @@ void Frame::display()
 	}
 
 	imshow("rgb", img);
+	cv::waitKey(0); // giving control back to opencv 
 }
 
 void Frame::setBlackWhite()
@@ -261,17 +262,27 @@ void Frame::changeLuminance(float factor)
 	}
 }
 
-uint Frame::rows()
+uint Frame::rows() const
 {
 	return m_rows;
 }
 
-uint Frame::cols()
+uint Frame::cols() const
 {
 	return m_cols;
 }
 
+uint Frame::size() const
+{
+	return m_rows * m_cols;
+}
+
 Block& Frame::y()
+{
+	return *m_y;
+}
+
+const Block& Frame::y() const
 {
 	return *m_y;
 }
@@ -281,7 +292,17 @@ Block& Frame::u()
 	return *m_u;
 }
 
+const Block& Frame::u() const
+{
+	return *m_u;
+}
+
 Block& Frame::v()
+{
+	return *m_v;
+}
+
+const Block& Frame::v() const
 {
 	return *m_v;
 }

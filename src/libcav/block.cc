@@ -76,17 +76,17 @@ int Block::getPoint(uint row, uint col)
 	return m_buffer[row * m_nCols + col];
 }
 
-uint Block::rows(void)
+uint Block::rows(void) const
 {
 	return m_nRows;
 }
 
-uint Block::cols(void)
+uint Block::cols(void) const
 {
 	return m_nCols;
 }
 
-uint Block::size(void)
+uint Block::size(void) const
 {
 	return m_nRows * m_nCols;
 }

@@ -130,12 +130,18 @@ public:
 	 * Gets the number of rows of the defined frame.
 	 * @return uint - Number of rows
 	 */
-	uint rows();
+	uint rows() const;
 	/**
 	 * Gets the number of columns of the defined frame.
 	 * @return uint - Number of columns
 	 */
-	uint cols();
+	uint cols() const;
+
+	/**
+	 * Returns the size of the frame.
+	 * @return uint - size of the frame
+	 */
+	uint size() const;
 
 	/**
 	 * Makes a copies the frame into the internal buffers.
@@ -155,6 +161,13 @@ public:
 	 * @return Block& - A reference to the block Y.
 	 */
 	Block& y();
+
+	/**
+	 * Gets the block defined by the component Y.
+	 * @return const Block& - A constant reference to the block Y.
+	 */
+	const Block& y() const;
+	
 	/**
 	 * Gets the block defined by the component U.
 	 * Since it returns a reference to the block all changes made to the 
@@ -162,6 +175,13 @@ public:
 	 * @return Block& - A reference to the block U.
 	 */
 	Block& u();
+	
+	/**
+	 * Gets the block defined by the component U.
+	 * @return const Block& - A constant reference to the block U.
+	 */
+	const Block& u() const;
+
 	/**
 	 * Gets the block defined by the component V.
 	 * Since it returns a reference to the block all changes made to the 
@@ -169,6 +189,12 @@ public:
 	 * @return Block& - A reference to the block V.
 	 */
 	Block& v();
+
+	/**
+	 * Gets the block defined by the component V.
+	 * @return const Block& - A constant reference to the block V
+	 */
+	const Block& v() const;
 
 	/**
 	 * Creates a buffer of the YUV buffers in packed mode, the size of the resulting 

@@ -79,17 +79,17 @@ public:
 	 * Gets the number of rows of the defined block.
 	 * @return uint - Number of rows
 	 */
-	uint rows(void);
+	uint rows(void) const;
 	/**
 	 * Gets the number of columns of the defined block.
 	 * @return uint - Number of columns
 	 */
-	uint cols(void);
+	uint cols(void) const;
 	/**
 	 * Gets the size of the block
 	 * @return uint - size of the block
 	 */
-	uint size(void);
+	uint size(void) const;
 
 	/**
 	 * Returns the internal buffer of the block.
