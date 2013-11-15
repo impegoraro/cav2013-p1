@@ -17,7 +17,13 @@ libcav_a_SOURCES = block.h block.cc \
               framergb.h framergb.cc \
               video.h video.cc \
               video-formats.h \
-              exceptions/cav-exceptions.h
+              exceptions/cav-exceptions.h \
+              predictor.h \
+              linear-predictor.h linear-predictor.cc \
+              coder.h \
+              golomb.h golomb.cc \
+              bitstream.h bitstream.cc
+
 #libcav_a_LDFLAGS=-static 
 #libcav_a_LIBADD=$(DEPS_LIBS)
 #libcav_a_CPPFLAGS=$(DEPS)

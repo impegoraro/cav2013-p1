@@ -1,7 +1,7 @@
 
 
 # Definition of the configuration flag
-AM_CXXFLAGS=-std=c++0x -Wall -I../
+AM_CXXFLAGS=-std=c++0x -Wall -I../libcav
 AM_CFLAGS=$(DEPS_CFLAGS) 
 
 bin_PROGRAMS=yuvShow yuvComp yuvCopy yuvConvert videoEffects yuvResize frameExtractor
