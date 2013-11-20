@@ -41,7 +41,7 @@ public:
 	//virtual int operator[](uint index) = 0;
 	virtual std::vector<int> predict() = 0;
 
-
+	virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format) = 0;
 protected:
 	const Frame& m_f;
 };

@@ -4,7 +4,7 @@
 AM_CXXFLAGS=-std=c++0x -Wall -I../libcav
 AM_CFLAGS=$(DEPS_CFLAGS) 
 
-bin_PROGRAMS=yuvShow yuvComp yuvCopy yuvConvert videoEffects yuvResize frameExtractor
+bin_PROGRAMS=yuvShow yuvComp yuvCopy yuvConvert videoEffects yuvResize frameExtractor encodeDecode
 
 # yuvShow program 
 yuvShow_LDADD=../libcav/libcav.a $(DEPS_LIBS)
@@ -34,3 +34,6 @@ yuvResize_SOURCES=yuvResize.cc
 # frameExtractor program
 frameExtractor_LDADD=../libcav/libcav.a $(DEPS_LIBS)
 frameExtractor_SOURCES=frameExtractor.cc
+
+encodeDecode_LDADD=../libcav/libcav.a $(DEPS_LIBS)
+encodeDecode_SOURCES=encode-decode.cc

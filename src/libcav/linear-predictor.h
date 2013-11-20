@@ -45,6 +45,8 @@ public:
 	LinearPredictor(const Frame& f, std::function< int(int, int, int) >& functor);
 	
 	virtual std::vector<int> predict();
+
+	virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format);
 protected: 
 	std::function< int(int, int, int) > m_functor;
 };

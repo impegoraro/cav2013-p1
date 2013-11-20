@@ -38,3 +38,4 @@ videoEffects
 yuvResize
 test*
 frameExtractor
+encodeDecode

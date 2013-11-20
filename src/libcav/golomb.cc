@@ -18,6 +18,7 @@
 #include <iostream>
 #include <assert.h>
 #include <algorithm>
+#include <cmath>
 
 #include "golomb.h"
 #include "bitstream.h"
@@ -31,7 +32,7 @@ Golomb::Golomb(const std::vector<int>& errors, const std::string& fpath, uint m)
 void Golomb::encode()
 {
 	BitStream bs(m_fpath.c_str(), (char*)"wb");
-	uint q, r, m(m_m ^ 2);
+	uint q, r, m(pow(m_m, 2));
 	uint tmp; // temporary holding for error using the even-odd strategy 
 		
 	for(auto e : m_errors) {
@@ -49,25 +50,25 @@ void Golomb::encode()
 
 std::vector<int> Golomb::decode()
 {
-	std::vector<int> errors;
+	std::vector<int> errors(2764800);
 	BitStream bs(m_fpath.c_str(), (char*)"rb");
 	//TODO: using hardcoded values, this should go with the file.
-	uint m(m_m ^ 2);
+	uint m(pow(	m_m, 2));
 	uint q, r;
 	int bit;
 	uint i(0);
 	uint tmp;
-	while(true) {
+
+	while(i < 2764800) {
 		q = 0;
 		r = bs.readNBits(m_m);
 		if(r == EOF) break;
-		
 		do {
 			bit = bs.readBit();
 			if(bit == EOF) break;
 			q = (q << 1) | bit;
+
 		} while(bit);
-		
 		tmp = q * m + r;
 		errors[i] = (tmp % 2 == 0) ? tmp / 2 : tmp / 2 + 1;
 		i++;
