@@ -65,7 +65,7 @@ public:
 	/**
 	 * Gets the current VideoFormat.
 	 */
-	VideoFormat getFormat();
+	VideoFormat getFormat() const;
 
 	/**
 	 * Changes the frames components.
@@ -197,6 +197,15 @@ public:
 	const Block& v() const;
 
 	/**
+	 * Compares two the current frame with the one passed as a parameter.
+	 * @param rhs Frame to compare
+	 * @param y - Result for the Y component 
+	 * @param u - Result for the U component
+	 * @param v - Result for the V component
+	 */
+	void psnr(const Frame& rhs, float& y, float& u, float& v) const;
+
+	/**
 	 * Creates a buffer of the YUV buffers in packed mode, the size of the resulting 
 	 * buffer is returned by the first parameter. Note that the buffer is dynamically allocated
 	 * therefore must be freed by the caller.
@@ -204,7 +213,7 @@ public:
 	 * @return unsigned char* - buffer in packed mode.
 	 */
 	virtual unsigned char* packedMode(uint& size) const;
-	
+
 	/**
 	 * Writes a frame to the mass storage device.
 	 * @param path - The file path where the frame is to be saved on.

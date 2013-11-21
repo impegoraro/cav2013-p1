@@ -31,7 +31,7 @@
 #include "frame420.h"
 
 Frame::Frame()
-	: m_rows(0), m_cols(0), m_uvRows(0), m_uvCols(0), m_y(NULL), m_u(NULL), m_v(NULL), m_format(YUV_444)
+	: m_rows(0), m_cols(0), m_uvRows(0), m_uvCols(0), m_y(nullptr), m_u(nullptr), m_v(nullptr), m_format(YUV_444)
 {
 }
 
@@ -71,18 +71,18 @@ Frame::Frame(Frame &&f)
 {
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 
-	f.m_y = NULL;
-	f.m_u = NULL;
-	f.m_v = NULL;
+	f.m_y = nullptr;
+	f.m_u = nullptr;
+	f.m_v = nullptr;
 }
 
 Frame::~Frame()
 {
-	if(m_y != NULL)
+	if(m_y != nullptr)
 		delete m_y;
-	if(m_u != NULL)
+	if(m_u != nullptr)
 		delete m_u;
-	if(m_v != NULL)
+	if(m_v != nullptr)
 		delete m_v;	
 }
 
@@ -90,11 +90,11 @@ Frame& Frame::operator=(const Frame& rhs)
 {
 	assert(m_rows == rhs.m_rows && m_cols == rhs.m_cols && m_uvRows == rhs.m_uvRows && m_uvCols == rhs.m_uvCols && m_format == rhs.m_format);
 
-	if(m_y != NULL)
+	if(m_y != nullptr)
 		delete m_y;
-	if(m_u != NULL)
+	if(m_u != nullptr)
 		delete m_u;
-	if(m_v != NULL)
+	if(m_v != nullptr)
 		delete m_v;
 
 	(*m_y) = *rhs.m_y;
@@ -112,19 +112,19 @@ Frame& Frame::operator=(Frame&& rhs)
 	m_uvCols = rhs.m_uvCols;
 	m_format = rhs.m_format;
 
-	if(m_y != NULL)
+	if(m_y != nullptr)
 		delete m_y;
-	if(m_u != NULL)
+	if(m_u != nullptr)
 		delete m_u;
-	if(m_v != NULL)
+	if(m_v != nullptr)
 		delete m_v;
 
 	(m_y) = rhs.m_y;
-	rhs.m_y = NULL;
+	rhs.m_y = nullptr;
 	(m_u) = rhs.m_u;
-	rhs.m_u = NULL;
+	rhs.m_u = nullptr;
 	(m_v) = rhs.m_v;
-	rhs.m_v = NULL;
+	rhs.m_v = nullptr;
 
 	return *this;
 }
@@ -173,7 +173,7 @@ void Frame::getPixel(uint pos, int& y, int& u, int& v)
 	v = (*m_v)[pos];
 }
 
-VideoFormat Frame::getFormat()
+VideoFormat Frame::getFormat() const
 {
 	return m_format;
 }
@@ -376,7 +376,7 @@ Frame* Frame::create_from_file(const std::string& path)
 	uint cols, rows, type;
 	uint uvCols(0), uvRows(0), size(0);
 	char c;
-	Frame *f(NULL);
+	Frame *f(nullptr);
 
 	if(!stream.good())
 		throw FileNotFoundException();
@@ -426,4 +426,28 @@ Frame* Frame::create_from_file(const std::string& path)
 	}
 	stream.close();
 	return f;
+}
+
+void Frame::psnr(const Frame& rhs, float& y, float& u, float& v) const
+{
+	assert(m_y != nullptr && m_u != nullptr && m_v != nullptr);
+    float sumY(0), sumU(0), sumV(0);
+    float eSqY(0), eSqU(0), eSqV(0);
+
+    eSqY = 1.0 / m_y->size();
+    eSqU = 1.0 / m_u->size();
+    eSqV = 1.0 / m_v->size();
+
+    for(uint i = 0; i < m_y->size(); i++) {
+        sumY += ((*m_y)[i] - rhs.y()[i]) * ((*m_y)[i] - rhs.y()[i]);
+    }
+
+    for(uint i = 0; i < m_y->size(); i++) {
+        sumU += ((*m_u)[i] - rhs.u()[i]) * ((*m_u)[i] - rhs.u()[i]);
+        sumV += ((*m_v)[i] - rhs.v()[i]) * ((*m_v)[i] - rhs.v()[i]);
+    }
+
+	y = 10.0 * log10f(255.0 * 255.0 / (eSqY * sumY));
+	u = 10.0 * log10f(255.0 * 255.0 / (eSqU * sumU));
+	v = 10.0 * log10f(255.0 * 255.0 / (eSqV * sumV));
 }
