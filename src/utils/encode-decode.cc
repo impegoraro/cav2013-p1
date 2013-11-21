@@ -35,16 +35,7 @@ using namespace cv;
 
 int main(int argc, char** argv)
 {
-//	FILE* fd = fopen("/home/ilan/Downloads/CAV/tmp/golomb-0.gmb", "rb");
-//	int b;
-//	assert(fd != NULL);
-//	while((b = fgetc(fd)) != EOF)
-//		printf("%d ", b);
-//
-//	return 0;
-	int nl = 0;
 	Frame *f;
-	std::vector<int> errors;
 
 
 	if(argc == 1) {
@@ -55,19 +46,17 @@ int main(int argc, char** argv)
 	//for (int i=0; i < f->cols(); i++)
 	//	cout<< f->y()[i]<< endl;
 
-	for (int i = 0; i <= 0; i++) {
+	for (int i = 0; i <= 6; i++) {
 		stringstream ss;
 		LinearPredictor lp(*f, i);
-		Predictor &p = lp;
-		errors = move(p.predict());
 		ss<< "/home/ilan/Downloads/CAV/tmp/golomb-"<< i<< ".gmb";
 		cout<<"Main: writing "<< ss.str()<< endl;
-		Golomb g(errors, ss.str(), 1);
+		std::vector<int> errors = lp.predict();
+
+		Golomb g(lp, ss.str(), 16);
 		g.encode();
-		
-		Golomb g2(errors, ss.str(), 1);
-		std::vector<int> errors2 = std::move(g2.decode());
-		assert(errors == errors2);
+		Golomb g2(lp, ss.str(), 16);
+		std::vector<int> errors2 = g2.decode();
 
 		Frame444 f2 = lp.guess(errors2, 720, 1280, YUV_444);
 		f2.display();

@@ -27,7 +27,7 @@
 #include "predictor.h"
 #include "linear-predictor.h"
 
-static const std::function<int (int, int, int) > m_defFunctors [] = {
+static std::function<int (int, int, int) > m_defFunctors[7]{
 	{[](int a, int b, int c) -> int { return a; }},
 	{[](int a, int b, int c) -> int { return b; }},
 	{[](int a, int b, int c) -> int { return c; }},
@@ -42,18 +42,18 @@ LinearPredictor::LinearPredictor(const Frame& f)
 {
 }
 
-LinearPredictor::LinearPredictor(const Frame& f, uint type)
-	: Predictor(f), m_functor(m_defFunctors[type])
+LinearPredictor::LinearPredictor(const Frame& f, int type)
+	: Predictor(f, type), m_functor(m_defFunctors[type])
 {
 	assert(type <= 6);
 }
 	 
 LinearPredictor::LinearPredictor(const Frame& f, std::function< int(int, int, int) >& functor)
-	: Predictor(f), m_functor(functor)
+	: Predictor(f, -1), m_functor(functor)
 {
 }
 
-std::vector<int> LinearPredictor::predict()
+std::vector<int> LinearPredictor::predict() const 
 {
 	uint uSize = (m_f.u().rows() * m_f.u().cols()), i(0);
 	std::vector<int> errors(m_f.size() + uSize * 2);
@@ -138,7 +138,7 @@ std::vector<int> LinearPredictor::predict()
 
 /* Predictor */
 
-Frame LinearPredictor::guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format)
+Frame LinearPredictor::guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format) const 
 {
 	Frame444 f(nRows, nCols);
 	int e, ev;

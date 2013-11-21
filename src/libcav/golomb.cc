@@ -18,13 +18,15 @@
 #include <iostream>
 #include <assert.h>
 #include <algorithm>
+#include <sstream>
 #include <cmath>
 
+#include "predictor.h"
 #include "golomb.h"
 #include "bitstream.h"
 
-Golomb::Golomb(const std::vector<int>& errors, const std::string& fpath, uint m)
-	: Coder(errors, fpath), m_m(m)
+Golomb::Golomb(Predictor& pred, const std::string& fpath, uint m)
+	: Coder(pred, fpath), m_m(m)
 {
 	assert(m_m > 0 && m_fpath.size() > 0);
 }
@@ -34,8 +36,16 @@ void Golomb::encode()
 	BitStream bs(m_fpath.c_str(), (char*)"wb");
 	uint q, r, m(pow(m_m, 2));
 	uint tmp; // temporary holding for error using the even-odd strategy 
-		
-	for(auto e : m_errors) {
+	auto errors = m_pred.predict();
+	std::stringstream ss;
+
+	ss<< m_pred.frame().cols()<< " "
+	  << m_pred.frame().rows()<< " "
+	  << 1 << " " // get predictors 
+	  << m_pred.index();
+	bs.writeHeader(ss.str());
+
+	for(auto e : errors) {
 		// handles positives as even numbers and negatives as odd numbers
 		tmp = (e >= 0) ? 2 * e : 2 * abs(e) - 1; 
 		
@@ -50,29 +60,31 @@ void Golomb::encode()
 
 std::vector<int> Golomb::decode()
 {
-	std::vector<int> errors(2764800);
 	BitStream bs(m_fpath.c_str(), (char*)"rb");
 	//TODO: using hardcoded values, this should go with the file.
-	uint m(pow(	m_m, 2));
+	uint m(pow(m_m, 2));
 	uint q, r;
-	int bit;
-	uint i(0);
-	uint tmp;
+	int bit, index;
+	PredictorType pred;
+	uint cols(0), rows(0), tmp, i(0);
 
-	while(i < 2764800) {
+	bs.readHeader(cols, rows, pred, index);
+
+	std::vector<int> errors(cols * rows * 3);
+	while(i < (cols * rows * 3)) {
 		q = 0;
 		r = bs.readNBits(m_m);
 		if(r == EOF) break;
 		do {
 			bit = bs.readBit();
-			if(bit == EOF) break;
+			if(bit == EOF || !bit) break;
 			q = (q << 1) | bit;
 
 		} while(bit);
 		tmp = q * m + r;
-		errors[i] = (tmp % 2 == 0) ? tmp / 2 : tmp / 2 + 1;
+		errors[i] = (tmp % 2 == 0) ? tmp / 2 : -1 * ((tmp+1) / 2); 
 		i++;
 	}
 	
-	return m_errors;
+	return errors;
 }

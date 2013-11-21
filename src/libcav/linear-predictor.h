@@ -23,10 +23,11 @@
 
 #include "predictor.h"
 
+
 /**
  * @class Implementation of linear predictors
  * @author Ilan Pegoraro (impegoraro@ua.pt)
- * @author Luís Neves (luispneves@ua.pt) 
+ * @author Luís Neves (lui\spneves@ua.pt) 
  */
 class LinearPredictor : public Predictor
 {
@@ -38,15 +39,15 @@ public:
 	/**
 	 * @param f - const reference to a frame
 	 */
-	LinearPredictor(const Frame& f, uint type);
+	LinearPredictor(const Frame& f, int type);
 	/**
 	 * @param f - const reference to a frame
 	 */
 	LinearPredictor(const Frame& f, std::function< int(int, int, int) >& functor);
 	
-	virtual std::vector<int> predict();
+	virtual std::vector<int> predict() const ;
 
-	virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format);
+	virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format) const ;
 protected: 
 	std::function< int(int, int, int) > m_functor;
 };

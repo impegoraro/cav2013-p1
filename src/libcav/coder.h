@@ -20,7 +20,7 @@
 #define LIBCAV_CODER_H_
 
 #include <utility>
-#include <vector>
+#include "predictor.h"
 
 /**
  * @class Coder abstract class that serves as a base of each coder specialization like Golomb.
@@ -31,16 +31,24 @@ class Coder
 {
 public:
 	
-	Coder(const std::vector<int>& errors, const std::string& fpath)
-		: m_errors(std::move(errors)), m_fpath(fpath)
+	Coder(Predictor& pred, const std::string& fpath)
+		: m_pred(pred), m_fpath(fpath)
 	{
 	}
 
 	virtual void encode() = 0;
-
+	
+	virtual Predictor& predictor()
+	{
+		return m_pred;
+	}
+	virtual const Predictor& predictor() const
+	{
+		return m_pred;
+	}
 	virtual std::vector<int> decode() = 0;
 protected:
-	const std::vector<int>& m_errors;
+	Predictor& m_pred;
 	std::string m_fpath;
 };
 

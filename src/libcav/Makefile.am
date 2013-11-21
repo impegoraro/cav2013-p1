@@ -22,7 +22,8 @@ libcav_a_SOURCES = block.h block.cc \
               linear-predictor.h linear-predictor.cc \
               coder.h \
               golomb.h golomb.cc \
-              bitstream.h bitstream.cc
+              bitstream.h bitstream.cc 
+#              file.h file.cc
 
 #libcav_a_LDFLAGS=-static 
 #libcav_a_LIBADD=$(DEPS_LIBS)

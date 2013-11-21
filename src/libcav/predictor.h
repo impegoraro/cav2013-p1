@@ -23,6 +23,14 @@
 
 #include "frame.h"
 
+
+
+enum PredictorType
+{
+	LINEAR_PREDICTOR = 1,
+	NONLINEAR_PREDICTOR
+};
+
 /**
  * @class Predictors
  * @author Ilan Pegoraro <impegoraro@ua.pt>
@@ -34,16 +42,32 @@ public:
 	/**
 	 * @param f - Constant reference to a frame
 	 */
-	Predictor(const Frame& f) : m_f(f)
+	Predictor(const Frame& f, uint index) : m_f(f), m_functorIndex(index)
 	{
 	}
+	/**
+	 * Get the frame the predictor's working on.
+	 * @return constant reference  to the Frame
+	 */
+	virtual const Frame& frame() const
+	{
+		return m_f;
+	}
+	virtual std::vector<int> predict() const = 0;
+	//virtual void set_predictor(uint predictor) = 0;
 
-	//virtual int operator[](uint index) = 0;
-	virtual std::vector<int> predict() = 0;
-
-	virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format) = 0;
+	int index() const
+	{
+		return m_functorIndex;
+	}
+	virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format)  const = 0;
 protected:
 	const Frame& m_f;
+	/**
+	 * Index of the function used to predict.
+	 * A negative number means is used defined and not one of the library defaults.
+	 */
+	int m_functorIndex;
 };
 
 class NonLinearPredictor : public Predictor

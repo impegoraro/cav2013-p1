@@ -33,7 +33,7 @@ public:
 	 * Constructs the golomb class
 	 * @param errors - reference to the array of errors.
 	 */
-	Golomb(const std::vector<int>& errors, const std::string& fpath, uint m);
+	Golomb(Predictor& pred, const std::string& fpath, uint m);
 
 	/**
 	 * Encodes the array of errors to a file stream

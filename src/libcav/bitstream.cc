@@ -37,6 +37,29 @@ BitStream::~BitStream()
 	fclose(fp);
 }
 
+void BitStream::writeHeader(const std::string& header)
+{
+	if(mode) {
+		fprintf(fp, "%s\n", header.c_str());
+	}
+}
+
+void BitStream::readHeader(uint& nCols, uint& nRows, PredictorType& predictor, int& index)
+{
+	if(!mode) {
+		int pred;
+		fscanf(fp, (char*) "%u %u %d %d\n", &nCols, &nRows, &pred, &index);
+
+		switch(pred) {
+			case 1: predictor = LINEAR_PREDICTOR; break;
+			case 2: predictor = NONLINEAR_PREDICTOR; break;
+			default:
+				fprintf(stderr, "Invalid predictor in header\n");
+				abort();
+		}
+	}
+}
+
 void BitStream::writeBit(int value)
 {
 	if(pos == 0)
