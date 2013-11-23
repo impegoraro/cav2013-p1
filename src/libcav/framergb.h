@@ -35,6 +35,13 @@ public:
 	 */
 	FrameRGB(unsigned int nRows, unsigned int nCols);
 	/**
+	 * Move constructor
+	 * @param f - Frame
+	 */
+	FrameRGB(FrameRGB&& f) : Frame(f)
+	{
+	}
+	/**
 	 * Overrided method from the frame base class. This methods converts a frame in RGB format to the new format.
 	 * @param format - VideoFormat for the new Frame.
 	 */

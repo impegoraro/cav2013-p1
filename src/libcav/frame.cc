@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <string>
 #include <cstring>
+#include <cstdlib>
+#include <sstream>
 #include <fstream>
 #include <assert.h>
 #include <opencv2/opencv.hpp>
@@ -29,6 +31,7 @@
 #include "frame444.h"
 #include "frame422.h"
 #include "frame420.h"
+#include "framergb.h"
 
 Frame::Frame()
 	: m_rows(0), m_cols(0), m_uvRows(0), m_uvCols(0), m_y(nullptr), m_u(nullptr), m_v(nullptr), m_format(YUV_444)
@@ -178,7 +181,7 @@ VideoFormat Frame::getFormat() const
 	return m_format;
 }
 
-void Frame::display()
+void Frame::display(bool wait, std::string name)
 {
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 	int r, g, b;
@@ -218,9 +221,16 @@ void Frame::display()
 		buffer[i + 1] = g;
 		buffer[i + 2] = r;
 	}
+	std::string winName;
+	if(name.size() == 0) {
+		std::stringstream ss;
 
-	imshow("rgb", img);
-	cv::waitKey(0); // giving control back to opencv 
+		ss<< "rgb-"<<rand() % 10000;
+		winName = std::move(ss.str());
+	} else 
+		winName = name;
+	imshow(winName.c_str(), img);
+	if(wait) cv::waitKey(0); // giving control back to opencv 
 }
 
 void Frame::setBlackWhite()
@@ -309,7 +319,7 @@ const Block& Frame::v() const
 
 Frame Frame::convert(VideoFormat format)
 {
-
+	assert(false);
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 
 	Frame f;
@@ -335,7 +345,6 @@ unsigned char* Frame::packedMode(uint& size) const
 	size = m_rows * m_cols + m_uvRows * m_uvCols * 2;
 	unsigned char *buffer = new unsigned char[size];
 	
-	std::memset((char*)buffer, 127, sizeof(buffer));
 	for(uint i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
 	{
 		/* Accessing to planar infor */
@@ -366,68 +375,6 @@ void Frame::write(const std::string& path)
 	stream.close();
 }
 
-/************************************
- *          Static Methods          * 
- ***********************************/
-
-Frame* Frame::create_from_file(const std::string& path)
-{
-	std::ifstream stream(path);
-	uint cols, rows, type;
-	uint uvCols(0), uvRows(0), size(0);
-	char c;
-	Frame *f(nullptr);
-
-	if(!stream.good())
-		throw FileNotFoundException();
-
-	stream>>cols>>rows>>type>>c;
-	unsigned char buffer[cols * rows * 3];
-
-	switch(type) {
-	case 444: {
-		uvRows = rows;
-		uvCols = cols;
-		size = rows * cols * 3;
-		f = new Frame444(rows, cols);
-		break;
-	} case 422: {
-		uvRows = rows;
-		uvCols = cols / 2;
-		size = rows * cols + uvRows * uvCols * 2;
-		f = new Frame422(rows, cols);
-		cols /= 2;
-		break;
-	} case 420: {
-		rows = rows / 2;
-		cols = cols / 2;
-		size = rows * cols + uvRows * uvCols * 2;
-
-		f = new Frame420(rows, cols);
-		break;
-	} default:
-		throw InvalidVideoTypeException();
-	}
-	
-	stream.read((char*)buffer, size);
-	int y,u,v;
-	for(uint i = 0 ; i < rows * cols * 3 ; i += 3)
-	{ 
-		/* Accessing to planar infor */
-		y = buffer[i / 3]; 
-		f->y()[i / 3] = y;
-		
-		if(type == YUV_444 || ((i/3) < f->u().size())) {
-			u = buffer[(i / 3) + (rows * cols)]; 
-			v = buffer[(i / 3) + (rows * cols + uvRows * uvCols)];
-			f->u()[i / 3] = u;
-			f->v()[i / 3] = v;
-		}
-	}
-	stream.close();
-	return f;
-}
-
 void Frame::psnr(const Frame& rhs, float& y, float& u, float& v) const
 {
 	assert(m_y != nullptr && m_u != nullptr && m_v != nullptr);
@@ -442,7 +389,7 @@ void Frame::psnr(const Frame& rhs, float& y, float& u, float& v) const
         sumY += ((*m_y)[i] - rhs.y()[i]) * ((*m_y)[i] - rhs.y()[i]);
     }
 
-    for(uint i = 0; i < m_y->size(); i++) {
+    for(uint i = 0; i < m_u->size(); i++) {
         sumU += ((*m_u)[i] - rhs.u()[i]) * ((*m_u)[i] - rhs.u()[i]);
         sumV += ((*m_v)[i] - rhs.v()[i]) * ((*m_v)[i] - rhs.v()[i]);
     }
@@ -450,4 +397,67 @@ void Frame::psnr(const Frame& rhs, float& y, float& u, float& v) const
 	y = 10.0 * log10f(255.0 * 255.0 / (eSqY * sumY));
 	u = 10.0 * log10f(255.0 * 255.0 / (eSqU * sumU));
 	v = 10.0 * log10f(255.0 * 255.0 / (eSqV * sumV));
+}
+
+/************************************
+ *          Static Methods          * 
+ ***********************************/
+
+Frame* Frame::create_from_file(const std::string& path)
+{
+	std::ifstream stream(path);
+	uint cols, rows, type;
+	char c;
+	Frame *f(nullptr);
+
+	if(!stream.good())
+		throw FileNotFoundException();
+
+	stream>>cols>>rows>>type>>c;
+	unsigned char buffer[cols * rows * 3];
+
+	switch(type) {
+	case 444: {
+		f = new Frame444(rows, cols);
+		break;
+	} case 422: {
+		f = new Frame422(rows, cols);
+		break;
+	} case 420: {
+		f = new Frame420(rows, cols);
+		break;
+	} default:
+		throw InvalidVideoTypeException();
+	}
+	
+	stream.read((char*)buffer, f->size() * 3);
+	int y, u, v;
+	for(uint i = 0 ; i < f->size() * 3; i += 3)
+	{ 
+		/* Accessing to planar infor */
+		y = buffer[i / 3]; 
+		f->y()[i / 3] = y;
+		
+		if(type == YUV_444 || ((i/3) < f->u().size())) {
+			u = buffer[(i / 3) + f->y().size()]; 
+			v = buffer[(i / 3) + f->y().size() + f->u().size()];
+			f->u()[i / 3] = u;
+			f->v()[i / 3] = v;
+		}
+	}
+	stream.close();
+	return f;
+}
+
+
+Frame* Frame::create(uint nRows, uint nCols, VideoFormat format)
+{
+	switch (format)
+	{
+		case YUV_444: return new Frame444(nRows, nCols);
+		case YUV_422: return new Frame422(nRows, nCols);
+		case YUV_420: return new Frame420(nRows, nCols);
+		case RGB: return new FrameRGB(nRows, nCols);
+	}
+	assert(false);
 }

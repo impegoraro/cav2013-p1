@@ -111,7 +111,7 @@ public:
 	/**
 	 * Displays the current frame in a window.
 	 */
-	void display();
+	void display(bool wait = true, std::string name = "");
 
 	/**
 	 * Converts the frame to black and white.
@@ -147,12 +147,12 @@ public:
 	 * Makes a copies the frame into the internal buffers.
 	 * @param rhs - The source frame.
 	 */
-	Frame& operator=(const Frame& rhs);
+	virtual Frame& operator=(const Frame& rhs);
 	/**
 	 * Moves the buffers of rhs into the internal buffers.
 	 * @param rhs - The source frame.
 	 */
-	Frame& operator=(Frame&& rhs);
+	virtual Frame& operator=(Frame&& rhs);
 
 	/**
 	 * Gets the block defined by the component Y.
@@ -235,6 +235,14 @@ public:
 	 * @return Frame* - dyanmically allcated frame.
 	 */
 	static Frame* create_from_file(const std::string& path);
+
+	/**
+	 * Creates a new frame in the specified format.
+	 * @param nRows - Number of Rows
+	 * @param nCols - Number of Columns
+	 * @param format - Frame format
+	 */
+	static Frame* create(uint nRows, uint nCols, VideoFormat format);
 protected:
 	/**
 	 * Number of rows

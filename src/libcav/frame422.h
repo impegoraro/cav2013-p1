@@ -37,6 +37,14 @@ public:
 	Frame422(unsigned int nRows, unsigned int nCols);
 
 	/**
+	 * Move constructor
+	 * @param f - Frame
+	 */
+	Frame422(Frame422&& f) : Frame(f)
+	{
+	}
+
+	/**
 	 * Overrided method from the frame base class. This methods converts a frame in YUV422 format to the new format.
 	 * @param dest - VideoFormat for the new Frame.
 	 */
