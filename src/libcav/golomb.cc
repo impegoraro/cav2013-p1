@@ -25,6 +25,7 @@
 #include "video-format.h"
 #include "predictor.h"
 #include "linear-predictor.h"
+#include "nonlinear-predictor.h"
 #include "golomb.h"
 #include "bitstream.h"
 
@@ -118,14 +119,14 @@ Predictor Golomb::decode(const std::string& fpath)
 		i++;
 	}
 	switch(header.predictor) {
-		case 1: {
+		case LINEAR_PREDICTOR: {
 			LinearPredictor lp(header.index, header.nRows, header.nCols, vformat, errors);
 			return lp;
 		break;
-		} case 2: {
+		} case NONLINEAR_PREDICTOR: {
 			// Non linear
-			LinearPredictor lp(header.index, header.nRows, header.nCols, vformat, errors);
-			return lp;
+			NonLinearPredictor nlp(header.nRows, header.nCols, vformat, errors);
+			return nlp;
 		break;
 		}default:
 

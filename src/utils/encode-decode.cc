@@ -48,10 +48,11 @@ int main(int argc, char** argv)
 	for (int i = 0; i <= 6; i++) {
 		stringstream ss;
 		//Predictor lp(*f, i, [](int a, int b, int c, int d) -> int { return a; });
-		LinearPredictor lp(*f, i);
+		NonLinearPredictor lp(*f);
 		ss<< "/home/ilan/Downloads/CAV/tmp/golomb-"<< i<< ".gmb";
 		cout<<"Main: writing "<< ss.str()<< endl;
 		std::vector<int> errors = lp.errors();
+		cout<< "Predictor is: "<< (lp.type() == LINEAR_PREDICTOR ? "linear predictor" : "non-linear predictor")<<endl;
 
 		Golomb g(lp, ss.str(), 4);
 		g.encode();
@@ -59,6 +60,7 @@ int main(int argc, char** argv)
 
 		Golomb g2(ss.str());
 		Predictor pred2 = g2.predictor();
+		cout<< "Predictor is: "<< (pred2.type() == LINEAR_PREDICTOR ? "linear predictor" : "non-linear predictor")<<endl;
 		//assert(errors == pred2.predict());
 		Frame* f2 = pred2.guess();
 		f->display(false, "original");

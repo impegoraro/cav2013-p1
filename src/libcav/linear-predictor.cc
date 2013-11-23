@@ -29,7 +29,7 @@
 
 constexpr int N_FUNCTORS = 7;
 /* One more argument for the nonlinear JPEG LS predictors  */
-std::function<int (int, int, int, int) > m_defFunctors[N_FUNCTORS]{
+static std::function<int (int, int, int, int) > m_defFunctors[N_FUNCTORS]{
 	{[](int a, int b, int c, int d) -> int { return a; }},
 	{[](int a, int b, int c, int d) -> int { return b; }},
 	{[](int a, int b, int c, int d) -> int { return c; }},

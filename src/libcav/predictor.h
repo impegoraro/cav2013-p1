@@ -29,7 +29,7 @@
 enum PredictorType
 {
 	LINEAR_PREDICTOR = 1,
-	NONLINEAR_PREDICTOR
+	NONLINEAR_PREDICTOR = 2
 };
 
 /**

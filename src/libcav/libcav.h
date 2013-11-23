@@ -12,6 +12,7 @@
 
 #include <predictor.h>
 #include <linear-predictor.h>
+#include <nonlinear-predictor.h>
 #include <coder.h>
 #include <golomb.h>
 #include <bitstream.h>

@@ -20,6 +20,7 @@ libcav_a_SOURCES = block.h block.cc \
               exceptions/cav-exceptions.h \
               predictor.h predictor.cc \
               linear-predictor.h linear-predictor.cc \
+              nonlinear-predictor.h nonlinear-predictor.cc \
               coder.h \
               golomb.h golomb.cc \
               bitstream.h bitstream.cc 
