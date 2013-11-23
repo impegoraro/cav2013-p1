@@ -34,22 +34,24 @@ public:
 	 * @param errors - reference to the array of errors.
 	 */
 	Golomb(Predictor& pred, const std::string& fpath, uint m);
-
+	Golomb(const std::string& fpath);
 	/**
 	 * Encodes the array of errors to a file stream
 	 */
 	virtual void encode();
 	
-	/**
-	 * Recreates the array of errors from a file stream
-	 */
-	virtual std::vector<int> decode();
+
 
 protected:
 	/**
 	 * Golomb's parameter in a power of two.
 	 */
 	uint m_m;
+
+	/**
+	 * Recreates the array of errors from a file stream
+	 */
+	virtual Predictor decode(const std::string& fpath);
 };
 
 

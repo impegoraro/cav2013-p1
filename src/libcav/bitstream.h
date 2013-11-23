@@ -4,6 +4,7 @@
 #include <string>
 #include <stdio.h>
 
+#include "cav-header.h"
 #include "predictor.h"
 
 /* 
@@ -15,21 +16,11 @@ class BitStream
 public:
 	/** Constructor 
 		\param fileName The string containing the name of the encoded file.
-		\param mode The string wb or rb. */
-	BitStream(const char *fileName, char *mode);
+		\param mode The string wb or rb.
+		\param header - Coding header previously allocated */
+	BitStream(const char *fileName, char *mode, CAVHeader* header);
 	/** Destructor */ 
 	~BitStream();
-	/** Method to write the header.
-		\param header The image header. */
-	void writeHeader(const std::string& header);
-	/**
-	 * Reads the header from the bitstream.
-	 * \param nCols number of columns
-	 * \param nRows number of rows
-	 * \param predictor predictor's type that encoded the frame
-	 * \param index value that indexes the internal table of predictor functions. Non negative is a custo predictor and non negative means custom predictor.
-	 */
-	void readHeader(uint& nCols, uint& nRows, PredictorType& predictor, int& index);
 	/** Method to write a bit in the bitstream.
 		\param value The bit to be written. */
 	void writeBit(int value);
@@ -58,6 +49,14 @@ protected:
 
 	/** Read or Write mode */
 	int mode;
+
+
+	/** Method to write the header.
+		\param header The coding header. */
+	void writeHeader(const CAVHeader* header);
+	/** Reads the header from the bitstream.
+	 	\param header Where to store the coding header.*/
+	void readHeader(CAVHeader* header);
 };
 
 #endif

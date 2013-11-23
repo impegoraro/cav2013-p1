@@ -31,12 +31,15 @@ class Coder
 {
 public:
 	
-	Coder(Predictor& pred, const std::string& fpath)
+	Coder(const Predictor& pred, const std::string& fpath)
 		: m_pred(pred), m_fpath(fpath)
 	{
 	}
 
-	virtual void encode() = 0;
+	Coder(Predictor&& pred, const std::string& fpath)
+		: m_pred(pred), m_fpath(fpath)
+	{
+	}
 	
 	virtual Predictor& predictor()
 	{
@@ -46,10 +49,14 @@ public:
 	{
 		return m_pred;
 	}
-	virtual std::vector<int> decode() = 0;
+	
+	virtual void encode() = 0;
+	
 protected:
-	Predictor& m_pred;
+	Predictor m_pred;
 	std::string m_fpath;
+
+	virtual Predictor decode(const std::string& fpath) = 0;
 };
 
 #endif

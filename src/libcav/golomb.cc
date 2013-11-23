@@ -21,9 +21,19 @@
 #include <sstream>
 #include <cmath>
 
+#include "cav-header.h"
+#include "video-format.h"
 #include "predictor.h"
+#include "linear-predictor.h"
 #include "golomb.h"
 #include "bitstream.h"
+
+constexpr uint GOLOMB_MAGIC = 0x4D47;
+
+static bool isPowerOf2(uint x)
+{
+	return (x != 0) && ((x & (x-1)) == 0);
+}
 
 Golomb::Golomb(Predictor& pred, const std::string& fpath, uint m)
 	: Coder(pred, fpath), m_m(m)
@@ -31,19 +41,28 @@ Golomb::Golomb(Predictor& pred, const std::string& fpath, uint m)
 	assert(m_m > 0 && m_fpath.size() > 0);
 }
 
+Golomb::Golomb(const std::string& fpath)
+	: Coder(decode(fpath), fpath)
+{
+	assert(m_m > 0 && m_fpath.size() > 0);
+}
+
 void Golomb::encode()
 {
-	BitStream bs(m_fpath.c_str(), (char*)"wb");
+	struct GolombCAVHeader header;
 	uint q, r, m(pow(m_m, 2));
 	uint tmp; // temporary holding for error using the even-odd strategy 
-	auto errors = m_pred.predict();
-	std::stringstream ss;
+	auto errors = m_pred.errors();
 
-	ss<< m_pred.frame().cols()<< " "
-	  << m_pred.frame().rows()<< " "
-	  << 1 << " " // get predictors 
-	  << m_pred.index();
-	bs.writeHeader(ss.str());
+	header.magic = GOLOMB_MAGIC;
+	header.nCols = m_pred.cols();
+	header.nRows = m_pred.rows();
+	header.format = m_pred.getFormat();
+	header.predictor = m_pred.type();
+	header.index = m_pred.index();
+	header.m = m_m;
+	
+	BitStream bs(m_fpath.c_str(), (char*)"wb", (CAVHeader*) &header);
 
 	for(auto e : errors) {
 		// handles positives as even numbers and negatives as odd numbers
@@ -58,33 +77,60 @@ void Golomb::encode()
 	}
 }
 
-std::vector<int> Golomb::decode()
+Predictor Golomb::decode(const std::string& fpath)
 {
-	BitStream bs(m_fpath.c_str(), (char*)"rb");
-	//TODO: using hardcoded values, this should go with the file.
+	GolombCAVHeader header;
+	BitStream bs(fpath.c_str(), (char*)"rb", (CAVHeader*) &header);
+	VideoFormat vformat;
+	uint q, r, size, tmp, i(0);
+	int bit;
+	m_m = header.m;
 	uint m(pow(m_m, 2));
-	uint q, r;
-	int bit, index;
-	PredictorType pred;
-	uint cols(0), rows(0), tmp, i(0);
 
-	bs.readHeader(cols, rows, pred, index);
+	assert(header.magic == GOLOMB_MAGIC && isPowerOf2(header.m));
+	switch(header.format) {
+		case 422: 
+			vformat = YUV_422; 
+			size = header.nCols * header.nRows + ((header.nCols / 2) * header.nRows) * 2; 
+			break;
+		case 420: 
+			vformat = YUV_420; 
+			size = header.nCols * header.nRows + ((header.nCols / 2)  * (header.nRows / 2)) * 2; 
+			break;
+		case 444:
+		default: vformat = YUV_444; size = header.nCols * header.nRows * 3; break;
 
-	std::vector<int> errors(cols * rows * 3);
-	while(i < (cols * rows * 3)) {
+	}
+
+	std::vector<int> errors(size);
+	while(i < size) {
 		q = 0;
 		r = bs.readNBits(m_m);
 		if(r == EOF) break;
 		do {
 			bit = bs.readBit();
 			if(bit == EOF || !bit) break;
-			q = (q << 1) | bit;
+			++q;
 
 		} while(bit);
 		tmp = q * m + r;
 		errors[i] = (tmp % 2 == 0) ? tmp / 2 : -1 * ((tmp+1) / 2); 
 		i++;
 	}
-	
-	return errors;
+	switch(header.predictor) {
+		case 1: {
+			LinearPredictor lp(header.index, header.nRows, header.nCols, vformat, errors);
+			return lp;
+		break;
+		} case 2: {
+			// Non linear
+			LinearPredictor lp(header.index, header.nRows, header.nCols, vformat, errors);
+			return lp;
+		break;
+		}default:
+
+			fprintf(stderr, "Invalid predictor in header\n");
+			abort();
+	}
+	//return Predictor(errors);
 }

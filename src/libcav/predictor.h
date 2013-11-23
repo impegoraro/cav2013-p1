@@ -20,9 +20,10 @@
 #define LIBCAV_PREDICTOR_H_
 
 #include <vector>
+#include <functional>
+
 
 #include "frame.h"
-
 
 
 enum PredictorType
@@ -42,39 +43,78 @@ public:
 	/**
 	 * @param f - Constant reference to a frame
 	 */
-	Predictor(const Frame& f, uint index) : m_f(f), m_functorIndex(index)
+	Predictor(const Frame& f, PredictorType type, int index, std::function<int(int, int, int, int)> functor) 
+		: m_functor(functor), m_functorIndex(index), m_nRows(f.rows()), m_nCols(f.cols()), m_format(f.getFormat()), m_type(type)
+	{
+		m_errors = predict(f);
+	}
+
+	Predictor(PredictorType type, int index, std::function<int(int, int, int, int)> functor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
+		: m_functor(functor), m_errors(errors), m_functorIndex(index), m_nRows(nRows), m_nCols(nCols), m_format(format), m_type(type)
 	{
 	}
-	/**
-	 * Get the frame the predictor's working on.
-	 * @return constant reference  to the Frame
-	 */
-	virtual const Frame& frame() const
+
+	Predictor(PredictorType type, int index, std::function<int(int, int, int, int)> functor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
+		: m_functor(functor), m_errors(errors), m_functorIndex(index), m_nRows(nRows), m_nCols(nCols), m_format(format), m_type(type)
 	{
-		return m_f;
 	}
-	virtual std::vector<int> predict() const = 0;
+
+	Predictor(const Predictor& p)
+		: m_functor(p.m_functor), m_errors(p.m_errors), m_functorIndex(p.m_functorIndex), m_nRows(p.m_nRows), m_nCols(p.m_nCols), m_format(p.m_format), m_type(p.m_type)
+	{
+	}
+
+	Predictor(Predictor&& p)
+		: m_functor(p.m_functor), m_errors(p.m_errors), m_functorIndex(p.m_functorIndex), m_nRows(p.m_nRows), m_nCols(p.m_nCols), m_format(p.m_format), m_type(p.m_type)
+	{
+	}
+
 	//virtual void set_predictor(uint predictor) = 0;
+
+	uint rows() const
+	{
+		return m_nRows;
+	}
+
+	uint cols() const
+	{
+		return m_nCols;
+	}
+
+	VideoFormat getFormat() const
+	{
+		return m_format;
+	}
 
 	int index() const
 	{
 		return m_functorIndex;
 	}
-	virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format)  const = 0;
+	Frame* guess()  const;
+
+	const std::vector<int>& errors() const
+	{
+		return m_errors;
+	}
+
+	inline PredictorType type()
+	{
+		return m_type;
+	}
 protected:
-	const Frame& m_f;
+	std::function< int(int, int, int, int) > m_functor;
+	std::vector<int> m_errors;
 	/**
 	 * Index of the function used to predict.
 	 * A negative number means is used defined and not one of the library defaults.
 	 */
 	int m_functorIndex;
-};
+	uint m_nRows;
+	uint m_nCols;
+	VideoFormat m_format;
+	PredictorType m_type;
 
-class NonLinearPredictor : public Predictor
-{
-public:
-	virtual std::vector<int> predict();
+	std::vector<int> predict(const Frame& f) const;
 };
-
 
 #endif

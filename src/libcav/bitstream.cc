@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <error.h>
 #include <errno.h>
+#include <string>
 
 #include "bitstream.h"
 /* 
@@ -9,7 +10,7 @@
  *@author Antonio J. R. Neves (an@ua.pt)
  */
  
-BitStream::BitStream(const char *fileName, char *m)
+BitStream::BitStream(const char *fileName, char *m, CAVHeader* header)
 {
 	fp = fopen(fileName, m);
 	pos = 0;
@@ -21,10 +22,12 @@ BitStream::BitStream(const char *fileName, char *m)
 	if(strcmp(m, "wb") == 0)
 	{
 		mode = 1;
+		writeHeader(header);
 	}
 	else
 	{
 		mode = 0;
+		readHeader(header);
 	}
 }
 
@@ -37,26 +40,19 @@ BitStream::~BitStream()
 	fclose(fp);
 }
 
-void BitStream::writeHeader(const std::string& header)
+void BitStream::writeHeader(const CAVHeader* header)
 {
 	if(mode) {
-		fprintf(fp, "%s\n", header.c_str());
+		//fprintf(fp, "%s\n", header.c_str());
+		fwrite(header, sizeof(struct CAVHeader), 1, fp);
 	}
 }
 
-void BitStream::readHeader(uint& nCols, uint& nRows, PredictorType& predictor, int& index)
+void BitStream::readHeader(CAVHeader* header)
 {
 	if(!mode) {
-		int pred;
-		fscanf(fp, (char*) "%u %u %d %d\n", &nCols, &nRows, &pred, &index);
-
-		switch(pred) {
-			case 1: predictor = LINEAR_PREDICTOR; break;
-			case 2: predictor = NONLINEAR_PREDICTOR; break;
-			default:
-				fprintf(stderr, "Invalid predictor in header\n");
-				abort();
-		}
+		//fgets(str, 255, fp);
+		fread(header, sizeof(struct CAVHeader), 1, fp);
 	}
 }
 

@@ -23,11 +23,10 @@
 
 #include "predictor.h"
 
-
 /**
  * @class Implementation of linear predictors
  * @author Ilan Pegoraro (impegoraro@ua.pt)
- * @author Luís Neves (lui\spneves@ua.pt) 
+ * @author Luís Neves (luispneves@ua.pt) 
  */
 class LinearPredictor : public Predictor
 {
@@ -40,16 +39,31 @@ public:
 	 * @param f - const reference to a frame
 	 */
 	LinearPredictor(const Frame& f, int type);
+
+	LinearPredictor(int index, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors);
+
+	LinearPredictor(int index, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors);
+
 	/**
+	 *
+	 */
+	LinearPredictor(LinearPredictor& p) : Predictor(p)
+	{}
+
+	/**
+	 *
+	 */
+	LinearPredictor(LinearPredictor&& p) : Predictor(p)
+	{}
+
+	/*
 	 * @param f - const reference to a frame
 	 */
-	LinearPredictor(const Frame& f, std::function< int(int, int, int) >& functor);
+	//LinearPredictor(const Frame& f, std::function< int(int, int, int, int) >& functor);
 	
-	virtual std::vector<int> predict() const ;
-
-	virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format) const ;
+	//virtual std::vector<int> predict() const ;
+	//virtual Frame guess(const std::vector<int>& errors, uint nRows, uint nCols, VideoFormat format) const ;
 protected: 
-	std::function< int(int, int, int) > m_functor;
 };
 
 

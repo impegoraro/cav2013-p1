@@ -18,7 +18,7 @@ libcav_a_SOURCES = block.h block.cc \
               video.h video.cc \
               video-formats.h \
               exceptions/cav-exceptions.h \
-              predictor.h \
+              predictor.h predictor.cc \
               linear-predictor.h linear-predictor.cc \
               coder.h \
               golomb.h golomb.cc \

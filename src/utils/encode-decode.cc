@@ -45,45 +45,44 @@ int main(int argc, char** argv)
 	f= Frame::create_from_file((string)argv[1]);
 	//for (int i=0; i < f->cols(); i++)
 	//	cout<< f->y()[i]<< endl;
-
 	for (int i = 0; i <= 6; i++) {
 		stringstream ss;
+		//Predictor lp(*f, i, [](int a, int b, int c, int d) -> int { return a; });
 		LinearPredictor lp(*f, i);
 		ss<< "/home/ilan/Downloads/CAV/tmp/golomb-"<< i<< ".gmb";
 		cout<<"Main: writing "<< ss.str()<< endl;
-		std::vector<int> errors = lp.predict();
+		std::vector<int> errors = lp.errors();
 
-		Golomb g(lp, ss.str(), 16);
+		Golomb g(lp, ss.str(), 4);
 		g.encode();
-		Golomb g2(lp, ss.str(), 16);
-		std::vector<int> errors2 = g2.decode();
 
-		Frame444 f2 = lp.guess(errors2, 720, 1280, YUV_444);
-		f2.display();
+
+		Golomb g2(ss.str());
+		Predictor pred2 = g2.predictor();
+		//assert(errors == pred2.predict());
+		Frame* f2 = pred2.guess();
+		f->display(false, "original");
+		f2->display();
+		float y, u, v;
+		f->psnr(*f2, y, u, v);
+		cout<< "y: "<< y<< " u: "<< u<< " v: "<< v<<endl;
+		delete f2;
 	}
 
 
-	//for (int i = 0; i <= 6; i++) {
-	//	stringstream ss;
-	//	LinearPredictor lp(*f, i);
-	//	Predictor &p = lp;
-	//	errors = move(p.predict());
-	//	ss<< "/home/ilan/Downloads/CAV/tmp/golomb-"<< i<< ".gmb";
-	//	cout<<"Main: writing "<< ss.str()<< endl;
-	//	Golomb g(errors, ss.str(), 4);
+	// for (int i = 0; i <= 6; i++) {
+	// 	stringstream ss;
+	// 	LinearPredictor lp(*f, i);
+	// 	Predictor &p = lp;
+	// 	errors = move(p.predict());
+	// 	ss<< "/home/ilan/Downloads/CAV/tmp/golomb-"<< i<< ".gmb";
+	// 	cout<<"Main: writing "<< ss.str()<< endl;
+	// 	Golomb g(errors, ss.str(), 4);
 
-	//	g.encode();
-	//}
-
-
-	// for(auto i : errors) {
-	// 	if(nl % 20 == 0)
-	// 		cout<< endl;
-	// 	cout<< i << " ";
-	// 	++nl;
+	// 	g.encode();
 	// }
-	
-	delete f;
 
+	delete f;
+	
 	return 0;
 }
