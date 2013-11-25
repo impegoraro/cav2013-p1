@@ -254,7 +254,7 @@ void Video::display(bool playing)
 			end = true;
 			continue;
 		}
-		f->display(false);
+		f->display(false, "Video Playback");
 		delete f;
 		if(playing)
 		{
