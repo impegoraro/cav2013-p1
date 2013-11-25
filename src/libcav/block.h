@@ -124,12 +124,32 @@ public:
 	 */
 	bool operator==(const Block& rhs);
 	/**
+	 * Operator!= Overloaded
+	 * Checks whether the blocks are different.
+	 * @param rhs - Constant reference to a block
+	 * @return bool - true if the blocks are different, false otherwise.
+	 */
+	bool operator!=(const Block& rhs) 
+	{
+		return !((*this) == rhs);
+	}
+	/**
 	 * Operator== Overloaded
-	 * Checks whether the block's buffer is equal to a chunk of memory of the same size.
+	 * Checks whether the block's buffer is equal to a block of memory of the same size.
 	 * @param rhs - array of bytes.
 	 * @return bool - true if the blocks are equal, false otherwise.
 	 */
 	bool operator==(const char* rhs);
+	/**
+	 * Operator!= Overloaded
+	 * Checks whether the block's buffer is different to a block of memory of the same size.
+	 * @param rhs - array of bytes.
+	 * @return bool - true if the blocks are different, false otherwise.
+	 */
+	bool operator!=(const char* rhs)
+	{
+		return !((*this) == rhs);
+	}
 	/**
 	 * Overloaded operator[] allows positioning within the block to get or set the value in that position. Note that the return value is a reference to an int.
  	 * @param index - buffer's index to get the value from.
