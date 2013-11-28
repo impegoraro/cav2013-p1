@@ -21,6 +21,7 @@
 
 #include <utility>
 #include "predictor.h"
+#include "bitstream.h"
 
 /**
  * @class Coder abstract class that serves as a base of each coder specialization like Golomb.
@@ -30,14 +31,14 @@
 class Coder
 {
 public:
-	
-	Coder(const Predictor& pred, const std::string& fpath)
-		: m_pred(pred), m_fpath(fpath)
+
+	Coder(const Predictor& pred, BitStream& bs)
+		: m_pred(pred), m_bs(bs)
 	{
 	}
 
-	Coder(Predictor&& pred, const std::string& fpath)
-		: m_pred(pred), m_fpath(fpath)
+	Coder(Predictor&& pred, BitStream& bs)
+		: m_pred(pred), m_bs(bs)
 	{
 	}
 	
@@ -54,9 +55,7 @@ public:
 	
 protected:
 	Predictor m_pred;
-	std::string m_fpath;
-
-	virtual Predictor decode(const std::string& fpath) = 0;
+	BitStream& m_bs;
 };
 
 #endif

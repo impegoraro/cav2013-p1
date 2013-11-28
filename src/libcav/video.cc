@@ -14,7 +14,7 @@
 using namespace cv;
 
 Video::Video()
-	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB)
+	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB), m_headerSize{0}
 {
 	std::string device("/dev/video0");
 	
@@ -26,7 +26,7 @@ Video::Video()
 }
 
 Video::Video(int number)
-	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB)
+	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB), m_headerSize{0}
 {
 	std::string device("/dev/video");
 	
@@ -39,7 +39,7 @@ Video::Video(int number)
 }
 
 Video::Video(const std::string& fpath)
-	:m_stream(fpath), m_rows(0), m_cols(0), m_fps(0), m_fromCam(false), m_video(), m_type(RGB)
+	:m_stream(fpath, std::ios::in | std::ios::out | std::ios::binary), m_rows(0), m_cols(0), m_fps(0), m_fromCam(false), m_video(), m_type(RGB), m_headerSize{0}
 {
 	int type;
 	char c; // to get the newline
@@ -47,6 +47,7 @@ Video::Video(const std::string& fpath)
 		throw FileNotFoundException();
 	if(fpath.find(".yuv") != std::string::npos) {
 		m_stream>> m_cols>> m_rows>> m_fps>> type>> c;
+		m_headerSize = m_stream.tellg();
 		m_video.release();
 		switch(type) {
 			case 444:
@@ -74,7 +75,7 @@ Video::Video(const std::string& fpath)
 }
 
 Video::Video(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat format)
-	: m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_rows(rows), m_cols(cols), m_fps(fps), m_fromCam(false), m_type(format)
+	: m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_rows(rows), m_cols(cols), m_fps(fps), m_fromCam(false), m_type(format), m_headerSize{0}
 {
 	if(!m_stream.good())
 		throw FileNotFoundException();
@@ -255,6 +256,7 @@ void Video::display(bool playing)
 			continue;
 		}
 		f->display(false, "Video Playback");
+		
 		delete f;
 		if(playing)
 		{
@@ -279,4 +281,17 @@ void Video::display(bool playing)
 				break;
 		}		
 	}
+}
+
+uint Video::getTotalFrames()
+{
+	m_stream.clear(); // cleans eof so that tellg works
+
+    uint curpos{m_stream.tellg()};
+	m_stream.seekg(0, m_stream.end);
+    uint vsize{m_stream.tellg()};
+	
+	m_stream.seekg(curpos, m_stream.beg);
+
+	return (vsize / getFrameSize());
 }

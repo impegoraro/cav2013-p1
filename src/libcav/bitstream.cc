@@ -2,8 +2,8 @@
 #include <cstdlib>
 #include <error.h>
 #include <errno.h>
-#include <string>
-
+#include <cstring>
+#include <memory>
 #include "bitstream.h"
 /* 
  *@class BitStream to read and write bits on a file.
@@ -11,6 +11,7 @@
  */
  
 BitStream::BitStream(const char *fileName, char *m, CAVHeader* header)
+	: m_fpath(fileName)
 {
 	fp = fopen(fileName, m);
 	pos = 0;
@@ -29,15 +30,16 @@ BitStream::BitStream(const char *fileName, char *m, CAVHeader* header)
 		mode = 0;
 		readHeader(header);
 	}
+	std::memcpy(&this->m_header, header, sizeof(this->m_header));
 }
 
 BitStream::~BitStream()
 {
-	if(mode == 1)
-	{
-		putc(buffer, fp);
+	if(fp != nullptr) {
+		if(mode == 1)
+			putc(buffer, fp);
+		fclose(fp);
 	}
-	fclose(fp);
 }
 
 void BitStream::writeHeader(const CAVHeader* header)

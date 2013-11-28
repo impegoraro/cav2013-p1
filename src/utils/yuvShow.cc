@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 		}
 		
 		v->display(playing);
-			
+
 		while(cont) {
 			cout<< "Do you want to play it again? [y/n]: ";
 			cin>> ans;
@@ -101,9 +101,11 @@ int main(int argc, char** argv)
 				cont = false;
 				break;
 			}
+			cout<< "Total Video Frames are: "<< v->getTotalFrames()<< endl;
 			v->display(playing);
 		}
 		delete v;
+
 	} catch (FileNotFoundException& e) {
 		cerr<< "File not found"<< endl;
 	}

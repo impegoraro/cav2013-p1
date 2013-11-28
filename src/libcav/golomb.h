@@ -20,6 +20,8 @@
 #define LIBCAV_GOLOMB_H_
 
 #include "coder.h"
+constexpr uint GOLOMB_MAGIC = 0x4D47;
+
 
 /**
  * @class A class to implement the Golomb encoding
@@ -33,15 +35,18 @@ public:
 	 * Constructs the golomb class
 	 * @param errors - reference to the array of errors.
 	 */
-	Golomb(Predictor& pred, const std::string& fpath, uint m);
-	Golomb(const std::string& fpath);
+	//Golomb(Predictor& pred, const std::string& fpath, uint m);
+	//Golomb(const std::string& fpath);
+	Golomb(Predictor& pred, BitStream& bs, uint m);
 	/**
 	 * Encodes the array of errors to a file stream
 	 */
 	virtual void encode();
 	
+	Golomb* create_from_file(const std::string& fpath); 
 
-
+	static Predictor decode(const std::string& fpath);
+	static Predictor decode(BitStream& bs);
 protected:
 	/**
 	 * Golomb's parameter in a power of two.
@@ -51,7 +56,6 @@ protected:
 	/**
 	 * Recreates the array of errors from a file stream
 	 */
-	virtual Predictor decode(const std::string& fpath);
 };
 
 

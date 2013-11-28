@@ -40,6 +40,9 @@ enum PredictorType
 class Predictor
 {
 public:
+	Predictor()
+		: m_functor(), m_errors(), m_functorIndex(0), m_nRows(0), m_nCols(0), m_format(YUV_444), m_type(LINEAR_PREDICTOR)
+	{ }
 	/**
 	 * @param f - Constant reference to a frame
 	 */
@@ -84,6 +87,24 @@ public:
 	VideoFormat getFormat() const
 	{
 		return m_format;
+	}
+
+	uint frameSize()
+	{
+		uint size{0};
+		switch(m_format) {
+		case YUV_422: 
+			size = m_nCols * m_nRows + ((m_nCols / 2) * m_nRows) * 2; 
+			break;
+		case YUV_420: 
+			size = m_nCols * m_nRows + ((m_nCols / 2)  * (m_nRows / 2)) * 2; 
+			break;
+		case YUV_444:
+		default: size = m_nCols * m_nRows * 3; break;
+
+		}
+
+		return size;
 	}
 
 	int index() const

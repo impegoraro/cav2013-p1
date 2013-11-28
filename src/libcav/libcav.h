@@ -10,6 +10,7 @@
 #include <video-format.h>
 #include <video.h>
 
+#include <cav-header.h>
 #include <predictor.h>
 #include <linear-predictor.h>
 #include <nonlinear-predictor.h>

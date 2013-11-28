@@ -89,6 +89,7 @@ public:
 	 * Writes the frame to the mass storage device.
 	 * pre-condition: the frame to be written must match the videos format.
 	 * @param f - A reference to a frame
+	 * @return Frame - the next frame
 	 */
 	void putFrame(Frame& f);
 
@@ -108,7 +109,28 @@ public:
 	 * @param dest - out video format.
 	 */
 	void convert(const std::string& path, VideoFormat dest);
+
+	/**
+	 * Gets the videos number of frames.
+	 * @return total number of frames
+	 */
+	uint getTotalFrames();
+
 protected:
+	inline uint getFrameSize()
+	{
+		switch(m_type)
+		{
+			case RGB:
+			case YUV_444: return m_rows * m_cols * 3;
+			break;
+			case YUV_422: return m_rows * m_cols + (m_rows * m_cols / 2) * 2; 
+			break;
+			case YUV_420: return m_rows * m_cols + (m_rows / 2 * m_cols / 2) * 2;
+			break;
+		}
+		return 0;
+	}
 	/**
 	 * File stream to read of write the video (YUV444, YUV422 and YUV422 formats).
 	 */
@@ -137,6 +159,8 @@ protected:
 	 * Video's format.
 	 */
 	VideoFormat m_type;
+	/** Header's size. */
+	uint m_headerSize;
 };
 
 #endif
