@@ -64,6 +64,10 @@ public:
 	 	\param header Where to store the coding header.*/
 	void readHeader(CAVHeader* header);
 
+	void flush()
+	{
+		fflush(fp);
+	}
 protected:
 
 	/** Buffer to store the block data (bSize x bSize). */

@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 				Golomb g(p, bs, m);
 
 				g.encode();
-
+				bs.flush();
 				delete f;
 			}
 
