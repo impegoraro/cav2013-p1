@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <cmath>
 #include <algorithm>
 #include <assert.h>
 #include <cstring>
@@ -208,6 +209,36 @@ Block& Block::operator=(Block&& rhs)
 	this->m_buffer = rhs.m_buffer;
 	rhs.m_buffer = NULL;
 	return *this;
+}
+
+uint Block::compareTo(const Block& rhs) const
+{
+	uint val{0};
+	assert(this->m_nRows == rhs.m_nRows && this->m_nCols > rhs.m_nCols);
+	for (uint i = 0; i < rhs.size(); i++)
+		val += abs((*this)[i] - rhs[i]);
+
+	return val;
+}
+
+Block Block::operator+(const Block& rhs) const
+{
+	assert(this->m_nRows == rhs.m_nRows && this->m_nCols > rhs.m_nCols);
+	Block b(m_nRows, m_nCols);
+	for (uint i = 0; i < rhs.size(); i++)
+		b[i] = (*this)[i] + rhs[i];
+
+	return b;
+}
+
+Block Block::operator-(const Block& rhs) const
+{
+	assert(this->m_nRows == rhs.m_nRows && this->m_nCols > rhs.m_nCols);
+	Block b(m_nRows, m_nCols);
+	for (uint i = 0; i < rhs.size(); i++)
+		b[i] = (*this)[i] - rhs[i];
+
+	return b;
 }
 
 void Block::print()

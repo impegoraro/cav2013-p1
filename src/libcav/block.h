@@ -22,6 +22,13 @@
 #include "exceptions/cav-exceptions.h"
 
 
+enum class BlockType
+{
+	Y,
+	U,
+	V
+};
+
 /**
  * The class with all the Block data and methods.
  * The class allows operations in both individual values or using sub blocks.
@@ -165,7 +172,9 @@ public:
 	 */
 	void print();
 
-
+	uint compareTo(const Block& rhs) const;
+	Block operator+(const Block& rhs) const;
+	Block operator-(const Block& rhs) const;
 protected:
 	/**
 	 * Creates an empty block with no associated buffer.
