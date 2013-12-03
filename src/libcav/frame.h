@@ -243,6 +243,12 @@ public:
 	 * @param format - Frame format
 	 */
 	static Frame* create(uint nRows, uint nCols, VideoFormat format);
+
+	/**
+	 *
+	 */
+	Block findBestBlock(const Frame& previous, const Block& b, uint radius, uint& dr, uint& dc, BlockType type);
+	const Block findBestBlock(const Frame& previous, const Block& b, uint radius, uint& dr, uint& dc, BlockType type) const;
 protected:
 	/**
 	 * Number of rows

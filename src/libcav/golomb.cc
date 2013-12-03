@@ -21,6 +21,7 @@
 #include <sstream>
 #include <cmath>
 
+#include "util.h"
 #include "cav-header.h"
 #include "video-format.h"
 #include "predictor.h"
@@ -29,15 +30,11 @@
 #include "golomb.h"
 #include "bitstream.h"
 
-static bool isPowerOf2(uint x)
-{
-	return (x != 0) && ((x & (x-1)) == 0);
-}
 
 Golomb::Golomb(Predictor& pred, BitStream& bs, uint m)
 	: Coder(pred, bs), m_m(m)
 {
-
+	assert(isPowerOf2(m));
 }
 
 void Golomb::encode()

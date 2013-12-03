@@ -23,7 +23,9 @@ libcav_a_SOURCES = block.h block.cc \
               nonlinear-predictor.h nonlinear-predictor.cc \
               coder.h \
               golomb.h golomb.cc \
-              bitstream.h bitstream.cc 
+              golomb-interframe.h golomb-interframe.cc \
+              bitstream.h bitstream.cc \
+              util.h util.cc
 #              file.h file.cc
 
 #libcav_a_LDFLAGS=-static 

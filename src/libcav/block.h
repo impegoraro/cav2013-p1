@@ -37,6 +37,10 @@ class Block
 {
 public:
 	/**
+	 * Creates an empty block with no associated buffer.
+	 */
+	Block();
+	/**
 	 * Initializes the block with the size rows * cols.
 	 * @param rows - Number of rows
 	 * @param cols - Number of columns
@@ -159,6 +163,16 @@ public:
 	 * @return Block - A sub block 
 	 */
 	Block getSubBlock(uint begin, uint rows, uint cols);
+
+	/**
+	 * Return a sub block. Note that the sub block is not a copy, that means that any change to any of its elements will be made to the original block as well.
+	 * Also since its not a copy, the block cannot be deleted. Doing so make the sub block useless and any future use of it will result in an unpredictible result.
+	 * @param begin - initial position of the sub block.
+	 * @param rows - Number of rows of the sub block
+	 * @param cols - Number of columns of the sub block.
+	 * @return Block - A sub block 
+	 */
+	const Block getSubBlock(uint begin, uint rows, uint cols) const;
 	/**
 	 * Copies the values of the a sub block to the internal data.
 	 * @param begin - Initial position from where to copy b.
@@ -176,10 +190,6 @@ public:
 	Block operator+(const Block& rhs) const;
 	Block operator-(const Block& rhs) const;
 protected:
-	/**
-	 * Creates an empty block with no associated buffer.
-	 */
-	Block();
 	/**
 	 * Number of rows.
 	 */

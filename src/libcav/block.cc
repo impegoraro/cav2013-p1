@@ -117,6 +117,18 @@ Block Block::getSubBlock(uint begin, uint rows, uint cols)
 	return b;
 }
 
+const Block Block::getSubBlock(uint begin, uint rows, uint cols) const
+{
+	assert(begin + rows * cols <= m_nRows * m_nCols);
+	
+	Block b;
+	b.m_nRows = rows;
+	b.m_nCols = cols;
+	b.m_buffer = &m_buffer[begin];
+
+	return b;
+}
+
  /*TODO: implement const methods to let the 3rd parameter to be a const Block& */
 void Block::setSubBlock(uint begin, Block& b)
 {

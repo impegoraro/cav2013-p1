@@ -15,9 +15,10 @@
 #include <linear-predictor.h>
 #include <nonlinear-predictor.h>
 #include <coder.h>
-#include <golomb.h>
+#include <util.h>
 #include <bitstream.h>
-
+#include <golomb-interframe.h>
+#include <golomb.h>
 
 
 #endif
