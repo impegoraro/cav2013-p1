@@ -33,6 +33,11 @@
 using namespace std;
 using namespace cv;
 
+void encode(const Frame* actual, BitStream& bs)
+{
+
+}
+
 int main(int argc, char** argv)
 {
 // 	if(argc == 1) {
@@ -94,13 +99,16 @@ int main(int argc, char** argv)
 	int m{4};
 	float quant = 1;
 	bool shouldHaveDest{false};
-	const char* shortops = "hd:p:s:q:m:";
+	int predType = 1;
+	const char* shortops = "hd:p:s:q:m:l:n";
 	const struct option longops[] = {
 		{"help", 0, NULL, 'h'},
 		{"source", 1, NULL, 's'},
 		{"destination", 1, NULL, 'd'},
 		{"quantization", 1, NULL, 'q'},
 		{"golomb-factor", 1, NULL, 'm'},
+		{"nonlinear-predictor", 0, NULL, 'n'},
+		{"linear-predictor", 1, NULL, 'l'},
 		{"play", 1, NULL, 'p'}
 	};
 
@@ -123,6 +131,18 @@ int main(int argc, char** argv)
 				src = optarg;
 				play = true;
 			break;
+			case 'l':
+				pIndex = atoi(optarg);
+				predType = 1;
+				if(pIndex > 6) {
+					cerr<<"Error: linear predictors allowed range from 0 to 6, [0, 6]."<<endl;
+					abort();
+				}
+			break;
+			case 'n':
+				pIndex = 0;
+				predType = 2;
+			break;
 			case 'm':
 				m = atoi(optarg);
 				if(!isPowerOf2(m))
@@ -141,12 +161,19 @@ int main(int argc, char** argv)
 	} while(nextOp !=- 1);
 
 	if(showHelp || src == NULL || shouldHaveDest) {
-		cerr<< "Usage: yuvEncode [OPTIONS] <video>"<<endl;
-		cout<< "The program is able to play videos in the following formats: RGB, YUV444, YUV422 and YUV420."<<endl
+		cerr<< "Usage: encondeDecode [OPTIONS] <video>"<<endl;
+		cout<< "The program is able to encode/decode videos in the following formats: YUV444, YUV422 and YUV420."<<endl
 			<<"[OPTIONS]"<<endl
 			<<"  -h, --help                    Shows this help message."<<endl
-			<<"  -s, --source                  Filename to read the video from. Missing this switch means to read from camera."<<endl<<endl;
-		cout<<"yuvEncode  Copyright (C) 2013  Universidade de Aveiro  - MIECT Audio and Video Coding"<<endl;
+			<<"  -s, --source                  Filename to read the video from."<<endl
+			<<"  -d, --destination             Filename where to store the encoded the video."<<endl
+			<<"  -q, --quantization            Quantization factor (for lossy compression)."<<endl
+			<<"  -g, --golomb                  Golomb factor (m) to use while encoding/decoding."<<endl
+			<<"  -n, --non-linear              Changes the default predictor to be the nonlinear predictor."<<endl
+			<<"  -l, --linear                  Changes the default predictor to be a linear predictor (requires an integer [0, 6])."<<endl
+			<<"  -p, --play                    Plays an encoded video."<<endl
+			<<endl;
+		cout<<"encondeDecode  Copyright (C) 2013  Universidade de Aveiro  - MIECT Audio and Video Coding"<<endl;
 		cout<< "Authors:"<<endl;
 		cout<< "    Ilan Pegoraro N. 41450"<<endl;
 		cout<< "    Luis Neves    N. 41528"<<endl;
@@ -162,6 +189,7 @@ int main(int argc, char** argv)
 		VideoCAVHeader *vh = (VideoCAVHeader*)((GolombCAVHeader*) &header)->undefined;
 		cout<< "Number of Frames: "<< vh->nFrames<<endl;
 		cout<< "Quantization factor: "<< header.quantFactor<<endl;
+		cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 		cout<< "Golomb factor: "<< header.m<<endl;
 		while(!end) {
 			for(uint i = 0; i < vh->nFrames; i++) { 
@@ -189,7 +217,7 @@ int main(int argc, char** argv)
 			header.nCols = v->cols();
 			header.nRows = v->rows();
 			header.format = v->format();
-			header.predictor = LINEAR_PREDICTOR;
+			header.predictor = predType;
 			header.quantFactor = quant;
 			header.index = pIndex;
 			header.m = m;
@@ -201,8 +229,10 @@ int main(int argc, char** argv)
 
 			ss<< dst;
 			BitStream bs(ss.str().c_str(), (char*)"wb", (CAVHeader*) &header);
+			cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 			cout<< "Quantization factor: "<< quant<<endl;
 			cout<< "Golomb factor: "<< m<<endl;
+			Predictor *p = {nullptr};
 			while(!end) {
 				try {
 					f = v->getFrame();
@@ -210,12 +240,15 @@ int main(int argc, char** argv)
 					end = true;
 					continue;
 				}
-				LinearPredictor lp(*f, pIndex, quant);
-				Predictor &p = lp;
-				Golomb g(p, bs, m);
-
+				if(predType == 1)
+					p = new LinearPredictor(*f, pIndex, quant);
+				else
+					p = new NonLinearPredictor(*f, quant);
+				Golomb g(*p, bs, m);
 				g.encode();
 				bs.flush();
+
+				delete p;
 				delete f;
 			}
 
