@@ -49,6 +49,7 @@ void encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, 
 	} else {
 		// (BitStream& bs, const Frame* pf, const Frame* nf, uint m, uint bWidth, uint bHeight)
 		GolombInterframe gi(bs, previous, actual, m, actual->rows() / 4, actual->cols() / 4);
+		//GolombInterframe gi(bs, previous, actual, m, 8, 8);
 		gi.encode();
 	}
 }
@@ -115,7 +116,8 @@ int main(int argc, char** argv)
 	float quant = 1;
 	bool shouldHaveDest{false};
 	int predType = 1;
-	const char* shortops = "hd:p:s:q:m:l:n";
+	bool block{false};
+	const char* shortops = "hd:p:s:q:m:l:nb";
 	const struct option longops[] = {
 		{"help", 0, NULL, 'h'},
 		{"source", 1, NULL, 's'},
@@ -124,6 +126,7 @@ int main(int argc, char** argv)
 		{"golomb-factor", 1, NULL, 'm'},
 		{"nonlinear-predictor", 0, NULL, 'n'},
 		{"linear-predictor", 1, NULL, 'l'},
+		{"block-interframe", 0, NULL, 'b'},
 		{"play", 1, NULL, 'p'}
 	};
 
@@ -145,6 +148,9 @@ int main(int argc, char** argv)
 			case 'p':
 				src = optarg;
 				play = true;
+			break;
+			case 'b':
+				block = true;
 			break;
 			case 'l':
 				pIndex = atoi(optarg);
@@ -208,14 +214,31 @@ int main(int argc, char** argv)
 		cout<< "Quantization factor: "<< header.quantFactor<<endl;
 		cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 		cout<< "Golomb factor: "<< header.m<<endl;
+		bool firstFrame{true};
+		Frame *f{nullptr};
+		Frame *f2;
 		while(!end) {
 			for(uint i = 0; i < vh->nFrames; i++) { 
 				if(!header.block) {
 					Predictor pred = Golomb::decode(bs);
-					Frame *f = pred.guess();
+					f = pred.guess();
 					f->display(false,  "VideoPlayback");
 				 	waitKey(1.0 / vh->fps * 1000);
 					delete f;
+				} else {
+					if(firstFrame) {
+						Predictor pred = Golomb::decode(bs);
+						Frame *f = pred.guess();
+						f->display(false,  "VideoPlayback");
+						f2 = new Frame(*f);
+						firstFrame = false;
+					} else {
+						Frame *tmp = f2;
+						GolombInterframe gi(bs, tmp, nullptr, header.m, f2->rows() / 2, f2->cols() / 2);
+						f2 = gi.decode(header.m);
+						f2->display(false,  "VideoPlayback");
+					}
+				 	waitKey(1.0 / vh->fps * 1000);
 				}
 			}	
 			
@@ -240,7 +263,7 @@ int main(int argc, char** argv)
 			header.quantFactor = quant;
 			header.index = pIndex;
 			header.m = m;
-			header.block = false;
+			header.block = block;
 			vHeader.magic = VIDEO_MAGIC; 
 			vHeader.nFrames = v->getTotalFrames();
 			vHeader.fps = v->fps();
@@ -266,8 +289,10 @@ int main(int argc, char** argv)
 				else
 					p = new NonLinearPredictor(*f, quant);
 
-				encodeInterframe(prev, f, p, m, bs);
-				//encode(f, p, m, bs);
+				if(block)
+					encodeInterframe(prev, f, p, m, bs);
+				else
+					encode(f, p, m, bs);
 
 				delete p;
 				if(prev != nullptr)

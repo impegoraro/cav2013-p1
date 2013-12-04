@@ -17,7 +17,7 @@ struct CAVHeader
 		this->nCols = nCols;
 		this->nRows = nRows;
 		this->format = format;
-		std::memset(&undefined, 0, 24);
+		std::memset(&undefined, 0, 30);
 	}
 	uint magic;
 	uint nCols;

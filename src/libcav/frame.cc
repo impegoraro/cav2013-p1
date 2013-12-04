@@ -450,9 +450,42 @@ Frame* Frame::create_from_file(const std::string& path)
 	return f;
 }
 
-Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, uint& dr, uint& dc, BlockType type)
+// Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, int& dr, int& dc, BlockType type)
+// {
+// 	std::cout<< "should remove"<<std::endl;
+
+// 	assert(false);
+// 	std::cout<< "FindBestBlock"<<std::endl;
+// 	int bestMatch{INT_MAX}, tmpDiff{0};
+// 	Block *inB{nullptr}, *pinB{nullptr};
+// 	Block tmpBlock(1,1), bestBlock(1,1);
+// 	if(type == BlockType::Y) {inB = m_y; pinB = previous.m_y;}
+// 	else if(type == BlockType::U) {inB = m_u; pinB = previous.m_u;}
+// 	else if(type == BlockType::V) {inB = m_v; pinB = previous.m_v;}
+	
+// 	assert(pinB != nullptr);
+// 	uint ir{(b.rows() - radius < 0) ? 0 : (b.rows() - radius)};
+// 	uint ic{(b.cols() - radius < 0) ? 0 : (b.cols() - radius)};
+// 	uint fr{(b.rows() + radius > inB->rows()) ? inB->rows() : (b.rows() + radius)};
+// 	uint fc{(b.cols() + radius > inB->cols()) ? inB->cols() : (b.cols() + radius)};
+
+// 	for(uint r = ir; r < fr; r++){
+// 		for(uint c = ic; c < fc; c++){
+// 			tmpBlock = pinB->getSubBlock(r * previous.cols() + c, b.rows(), b.cols());
+// 			tmpDiff = b.compareTo(tmpBlock);
+// 			if(tmpDiff < bestMatch) {
+// 				bestMatch = tmpDiff;
+// 				bestBlock = tmpBlock;
+// 				dr = r;
+// 				dc = c;
+// 			}
+// 		}
+// 	}	
+// 	return bestBlock;
+// }
+
+const Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, uint actualRow, uint actualCol, int& dr, int& dc, BlockType type) const
 {
-	std::cout<< "FindBestBlock"<<std::endl;
 	int bestMatch{INT_MAX}, tmpDiff{0};
 	Block *inB{nullptr}, *pinB{nullptr};
 	Block tmpBlock(1,1), bestBlock(1,1);
@@ -461,46 +494,14 @@ Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, u
 	else if(type == BlockType::V) {inB = m_v; pinB = previous.m_v;}
 	
 	assert(pinB != nullptr);
-	uint ir{(b.rows() - radius < 0) ? 0 : (b.rows() - radius)};
-	uint ic{(b.cols() - radius < 0) ? 0 : (b.cols() - radius)};
-	uint fr{(b.rows() + radius > inB->rows()) ? inB->rows() : (b.rows() - radius)};
-	uint fc{(b.cols() + radius > inB->cols()) ? inB->cols() : (b.cols() - radius)};
+	uint ir{(b.rows() - radius < 0) ? 0 : (actualRow - radius)};
+	uint ic{(b.cols() - radius < 0) ? 0 : (actualCol - radius)};
+	uint fr{(b.rows() + radius > inB->rows()) ? actualRow + b.rows() : (actualRow  + b.rows() + radius)};
+	uint fc{(b.cols() + radius > inB->cols()) ? actualCol + b.cols() : (actualCol  + b.cols() + radius)};
 
-
-	for(uint r = ir; r < fr; r++){
-		for(uint c = ic; c < fc; c++){
-			tmpBlock = pinB->getSubBlock(r * previous.cols() + c, b.rows(), b.cols());
-			tmpDiff = b.compareTo(tmpBlock);
-			if(tmpDiff < bestMatch) {
-				bestMatch = tmpDiff;
-				bestBlock = tmpBlock;
-				dr = r;
-				dc = c;
-			}
-		}
-	}	
-	return bestBlock;
-}
-
-const Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, uint& dr, uint& dc, BlockType type) const
-{
-	int bestMatch{INT_MAX}, tmpDiff{0};
-	Block *inB{nullptr}, *pinB{nullptr};
-	Block tmpBlock(1,1), bestBlock(1,1);
-	if(type == BlockType::Y) {inB = m_y; pinB = previous.m_y;}
-	else if(type == BlockType::U) {inB = m_u; pinB = previous.m_u;}
-	else if(type == BlockType::V) {inB = m_v; pinB = previous.m_v;}
-	
-	assert(pinB != nullptr);
-	uint ir{(b.rows() < radius) ? 0 : (b.rows() - radius)};
-	uint ic{(b.cols() < radius) ? 0 : (b.cols() - radius)};
-	uint fr{(b.rows() + radius > inB->rows()) ? inB->rows() : (b.rows() + radius)};
-	uint fc{(b.cols() + radius > inB->cols()) ? inB->cols() : (b.cols() + radius)};
-
-
-	for(uint r = ir; r < fr; r++){
-		for(uint c = ic; c < fc; c++){
-			tmpBlock = pinB->getSubBlock(r * previous.cols() + c, b.rows(), b.cols());
+	for(uint r = ir; r + b.rows() < fr + 1; r++){
+		for(uint c = ic; c + b.cols() < fc + 1; c++){
+			tmpBlock = pinB->getSubBlock(r * pinB->cols() + c, b.rows(), b.cols());
 			tmpDiff = b.compareTo(tmpBlock);
 			if(tmpDiff < bestMatch) {
 				bestMatch = tmpDiff;

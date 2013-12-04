@@ -134,6 +134,8 @@ const Block Block::getSubBlock(uint begin, uint rows, uint cols) const
  /*TODO: implement const methods to let the 3rd parameter to be a const Block& */
 void Block::setSubBlock(uint begin, Block& b)
 {
+	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
+	//std::cout<< "Begin "<< begin << " size: "<< b.rows() * b.cols()<<std::endl;
 	assert(begin + b.rows() * b.cols() <= m_nRows * m_nCols);
 	
 	for(uint i = begin, c = 0; c < b.rows() * b.cols(); i++, c++)

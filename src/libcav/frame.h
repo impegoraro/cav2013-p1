@@ -247,8 +247,8 @@ public:
 	/**
 	 *
 	 */
-	Block findBestBlock(const Frame& previous, const Block& b, uint radius, uint& dr, uint& dc, BlockType type);
-	const Block findBestBlock(const Frame& previous, const Block& b, uint radius, uint& dr, uint& dc, BlockType type) const;
+	//Block findBestBlock(const Frame& previous, const Block& b, uint radius, int& dr, int& dc, BlockType type);
+	const Block findBestBlock(const Frame& previous, const Block& b, uint radius, uint actualRow, uint actualCol, int& dr, int& dc, BlockType type) const;
 protected:
 	/**
 	 * Number of rows

@@ -43,7 +43,8 @@ public:
 		m_pFrame = m_nFrame;
 		m_nFrame = f;
 	}
-	//int decode(uint m_m);
+	
+	Frame* decode(uint m_m);
 protected:
 	BitStream& m_bs;
 	const Frame* m_pFrame;
@@ -54,6 +55,9 @@ protected:
 
 	void encode(int val);
 	void encode(const Block& blk);
+
+	int decode2(uint m_m);
+	void decode(Block& blk, uint m_m);
 };
 
 #endif
