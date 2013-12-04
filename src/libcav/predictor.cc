@@ -34,74 +34,86 @@ std::vector<int> Predictor::predict(const Frame& f) const
 	std::vector<int> errors(f.size() + uSize * 2);
 	int x, xv;
 	int a, b, c2, av, bv, cv;
+	Frame tmp(f);
 
 	// Predicting the Y component
-	for(uint r = 0; r < f.rows(); r++) {
-		for(uint c = 0; c < f.cols(); c++) {
-			x = f.y()[r * f.cols() + c];
+	for(uint r = 0; r < tmp.rows(); r++) {
+		for(uint c = 0; c < tmp.cols(); c++) {
+			x = tmp.y()[r * tmp.cols() + c];
 			if(c == 0 && r == 0){
 				// First pixel at F[0][0], all values are considered to be 0
 				errors[i] = x;
 			} else if (r == 0) {
 				// First row b and c are considered to be 0 (no previous value)
-				a = f.y()[c - 1];
+				a = tmp.y()[c - 1];
 				// b and c2 are zero 
 				errors[i] = (x - m_functor(a, 0, 0)) / m_quantFactor;
+				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactor) + m_functor(a, 0, 0);
 			} else if(c == 0) {
 				// First column a and b are considered to be 0
 				// a and c  are zeros 
 
-				b = f.y()[(r - 1) * f.cols() + c];
+				b = tmp.y()[(r - 1) * tmp.cols() + c];
 				errors[i] = (x - m_functor(0, b, 0)) / m_quantFactor;
+				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactor) + m_functor(0, b, 0);
 			} else { 
-				a = f.y()[r * f.cols() + c - 1];
-				b = f.y()[(r - 1) * f.cols() + c];
-				c2 = f.y()[(r - 1) * f.cols() + c - 1];
+				a = tmp.y()[r * tmp.cols() + c - 1];
+				b = tmp.y()[(r - 1) * tmp.cols() + c];
+				c2 = tmp.y()[(r - 1) * tmp.cols() + c - 1];
 				errors[i] = (x - m_functor(a, b, c2)) / m_quantFactor;
+				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactor) + m_functor(a, b, c2);
 			}
-
 			i++;
 		}
 	}
 
 	i = 0;
 	// Predicting the U and V components
-	for(uint r = 0; r < f.u().rows(); r++) {
-		for(uint c = 0; c < f.u().cols(); c++) {
-			x = f.u()[r * f.u().cols() + c];
-			xv = f.v()[r * f.v().cols() + c];
+	for(uint r = 0; r < tmp.u().rows(); r++) {
+		for(uint c = 0; c < tmp.u().cols(); c++) {
+			x = tmp.u()[r * tmp.u().cols() + c];
+			xv = tmp.v()[r * tmp.v().cols() + c];
 			
 
 			if(c == 0 && r == 0) {
 				// First pixel at F[0][0], all values are considered to be 0
-				errors[f.size() + i] = x;
-				errors[f.size() + uSize + i] = xv;
+				errors[tmp.size() + i] = x;
+				errors[tmp.size() + uSize + i] = xv;
 			} else if (r == 0) {
 				// First row b and c are considered to be 0 (no previous value)
-				a = f.u()[c - 1];
-				av = f.v()[c - 1];
+				a = tmp.u()[c - 1];
+				av = tmp.v()[c - 1];
 				
-				errors[f.size() + i] = (x - m_functor(a, 0, 0)) / m_quantFactor;
-				errors[f.size() + uSize + i] = (xv - m_functor(av, 0, 0)) / m_quantFactor;
+				errors[tmp.size() + i] = (x - m_functor(a, 0, 0)) / m_quantFactor;
+				errors[tmp.size() + uSize + i] = (xv - m_functor(av, 0, 0)) / m_quantFactor;
+
+				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactor) + m_functor(a, 0, 0);
+				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactor) + m_functor(av, 0, 0);
 			} else if(c == 0) {
 				// First column a and b are considered to be 0
 				// a and c  are zeros 
 
-				b = f.u()[(r - 1) * f.u().cols()];
-				errors[f.size() + i] = (x - m_functor(0, b, 0)) / m_quantFactor;
+				b = tmp.u()[(r - 1) * tmp.u().cols()];
+				errors[tmp.size() + i] = (x - m_functor(0, b, 0)) / m_quantFactor;
 
-				bv = f.v()[(r - 1) * f.v().cols()];
-				errors[f.size() + uSize + i] = (xv - m_functor(0, bv, 0)) / m_quantFactor;
+				bv = tmp.v()[(r - 1) * tmp.v().cols()];
+				errors[tmp.size() + uSize + i] = (xv - m_functor(0, bv, 0)) / m_quantFactor;
+
+				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactor) + m_functor(0, b, 0);
+				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactor) + m_functor(0, bv, 0);
 			} else { 
-				a = f.u()[r * f.u().cols() + c - 1];
-				b = f.u()[(r - 1) * f.u().cols() + c];
-				c2 = f.u()[(r - 1) * f.u().cols() + c - 1];
-				errors[f.size() + i] = (x - m_functor(a, b, c2)) / m_quantFactor;
+				a = tmp.u()[r * tmp.u().cols() + c - 1];
+				b = tmp.u()[(r - 1) * tmp.u().cols() + c];
+				c2 = tmp.u()[(r - 1) * tmp.u().cols() + c - 1];
+				errors[tmp.size() + i] = (x - m_functor(a, b, c2)) / m_quantFactor;
 
-				av = f.v()[r * f.v().cols() + c - 1];
-				bv = f.v()[(r - 1) * f.v().cols() + c];
-				cv = f.v()[(r - 1) * f.v().cols() + c - 1];
-				errors[f.size() + uSize + i] = (xv - m_functor(av, bv, cv)) / m_quantFactor;
+				av = tmp.v()[r * tmp.v().cols() + c - 1];
+				bv = tmp.v()[(r - 1) * tmp.v().cols() + c];
+				cv = tmp.v()[(r - 1) * tmp.v().cols() + c - 1];
+				errors[tmp.size() + uSize + i] = (xv - m_functor(av, bv, cv)) / m_quantFactor;
+
+				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactor) + m_functor(a, b, c2);
+				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactor) + m_functor(av, bv, cv);
 			}
 
 			i++;
