@@ -78,14 +78,16 @@ int main(int argc, char** argv)
 		return 1;
 	}
 	try {
-		Video *v;
+		VideoInterface *v;
 		if(src == NULL) {
 			cout<< "Using webcam..."<<endl;
 			v = new Video();
 		} else {
 			cout<< "Using file..."<<endl;
 			string path(src);
-			v = new Video(path);
+			if(path.find(".gmb") != std::string::npos)
+				v = new VideoEncoded(path);
+			else v = new Video(path);
 		}
 		
 		v->display(playing);

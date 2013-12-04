@@ -195,6 +195,7 @@ int main(int argc, char** argv)
 			<<"  -n, --non-linear              Changes the default predictor to be the nonlinear predictor."<<endl
 			<<"  -l, --linear                  Changes the default predictor to be a linear predictor (requires an integer [0, 6])."<<endl
 			<<"  -p, --play                    Plays an encoded video."<<endl
+			<<"  -b, --block-interframe        Uses the interframe method to encode the video."<<endl
 			<<endl;
 		cout<<"encondeDecode  Copyright (C) 2013  Universidade de Aveiro  - MIECT Audio and Video Coding"<<endl;
 		cout<< "Authors:"<<endl;

@@ -16,6 +16,8 @@ libcav_a_SOURCES = block.h block.cc \
               frame444.h frame444.cc \
               framergb.h framergb.cc \
               video.h video.cc \
+              video-encoded.h video-encoded.cc \
+              video-interface.h video-interface.cc \
               video-formats.h \
               exceptions/cav-exceptions.h \
               predictor.h predictor.cc \

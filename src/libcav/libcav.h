@@ -8,7 +8,9 @@
 #include <frame.h>
 #include <framergb.h>
 #include <video-format.h>
+#include <video-interface.h>
 #include <video.h>
+#include <video-encoded.h>
 
 #include <cav-header.h>
 #include <predictor.h>
@@ -19,6 +21,7 @@
 #include <bitstream.h>
 #include <golomb-interframe.h>
 #include <golomb.h>
+#include <bitstream.h>
 
 
 #endif
