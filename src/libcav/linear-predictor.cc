@@ -29,35 +29,29 @@
 
 constexpr int N_FUNCTORS = 7;
 /* One more argument for the nonlinear JPEG LS predictors  */
-static std::function<int (int, int, int, int) > m_defFunctors[N_FUNCTORS]{
-	{[](int a, int b, int c, int d) -> int { return a; }},
-	{[](int a, int b, int c, int d) -> int { return b; }},
-	{[](int a, int b, int c, int d) -> int { return c; }},
-	{[](int a, int b, int c, int d) -> int { return a + b - c; }},
-	{[](int a, int b, int c, int d) -> int { return a + (b - c) / 2; }},
-	{[](int a, int b, int c, int d) -> int { return b + (a - c) / 2; }},
-	{[](int a, int b, int c, int d) -> int { return (a + b) / 2; }}
+static std::function<int (int, int, int) > m_defFunctors[N_FUNCTORS]{
+	{[](int a, int b, int c) -> int { return a; }},
+	{[](int a, int b, int c) -> int { return b; }},
+	{[](int a, int b, int c) -> int { return c; }},
+	{[](int a, int b, int c) -> int { return a + b - c; }},
+	{[](int a, int b, int c) -> int { return a + (b - c) / 2; }},
+	{[](int a, int b, int c) -> int { return b + (a - c) / 2; }},
+	{[](int a, int b, int c) -> int { return (a + b) / 2; }}
 };
 
-
-LinearPredictor::LinearPredictor(const Frame& f)
-	: LinearPredictor(f, 0)
-{
-}
-
-LinearPredictor::LinearPredictor(const Frame& f, int type)
-	: Predictor(f, LINEAR_PREDICTOR, type, m_defFunctors[type])
+LinearPredictor::LinearPredictor(const Frame& f, int type, float quantFactor)
+	: Predictor(f, LINEAR_PREDICTOR, quantFactor, type, m_defFunctors[type])
 {
 	assert(type < N_FUNCTORS);
 }
 
-LinearPredictor::LinearPredictor(int index, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
-	: Predictor(LINEAR_PREDICTOR, index, m_defFunctors[index], nRows, nCols, format, errors)
+LinearPredictor::LinearPredictor(int index, float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
+	: Predictor(LINEAR_PREDICTOR, quantFactor, index, m_defFunctors[index], nRows, nCols, format, errors)
 {
 }
 
-LinearPredictor::LinearPredictor(int index, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
-	: Predictor(LINEAR_PREDICTOR, index, m_defFunctors[index], nRows, nCols, format, errors)
+LinearPredictor::LinearPredictor(int index, float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
+	: Predictor(LINEAR_PREDICTOR, quantFactor, index, m_defFunctors[index], nRows, nCols, format, errors)
 {
 }
 

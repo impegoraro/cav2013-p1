@@ -92,12 +92,15 @@ int main(int argc, char** argv)
 	int pIndex{0};
 	bool play{false};
 	int m{4};
+	float quant = 1;
 	bool shouldHaveDest{false};
-	const char* shortops = "hd:p:s:";
+	const char* shortops = "hd:p:s:q:m:";
 	const struct option longops[] = {
 		{"help", 0, NULL, 'h'},
 		{"source", 1, NULL, 's'},
 		{"destination", 1, NULL, 'd'},
+		{"quantization", 1, NULL, 'q'},
+		{"golomb-factor", 1, NULL, 'm'},
 		{"play", 1, NULL, 'p'}
 	};
 
@@ -107,7 +110,6 @@ int main(int argc, char** argv)
 			case 'h':
 				nextOp = -1;
 				showHelp = true;
-			break;
 			break;
 			case 's':
 				shouldHaveDest = true;
@@ -120,6 +122,16 @@ int main(int argc, char** argv)
 			case 'p':
 				src = optarg;
 				play = true;
+			break;
+			case 'm':
+				m = atoi(optarg);
+				if(!isPowerOf2(m))
+					m = 2;
+			break;
+			case 'q':
+				quant = atof(optarg);
+				if(quant <= 0.0)
+					quant = 1.0;
 			break;
 			case '?':
 			default:
@@ -148,9 +160,11 @@ int main(int argc, char** argv)
 		GolombCAVHeader header;
 		BitStream bs(ss.str().c_str(), (char*)"rb", (CAVHeader*) &header);
 		VideoCAVHeader *vh = (VideoCAVHeader*)((GolombCAVHeader*) &header)->undefined;
-
+		cout<< "Number of Frames: "<< vh->nFrames<<endl;
+		cout<< "Quantization factor: "<< header.quantFactor<<endl;
+		cout<< "Golomb factor: "<< header.m<<endl;
 		while(!end) {
-			for(uint i = 0; i < vh->nFrames; i++){ 
+			for(uint i = 0; i < vh->nFrames; i++) { 
 				Predictor pred = Golomb::decode(bs);
 				Frame *f = pred.guess();
 				f->display(false,  "VideoPlayback");
@@ -176,6 +190,7 @@ int main(int argc, char** argv)
 			header.nRows = v->rows();
 			header.format = v->format();
 			header.predictor = LINEAR_PREDICTOR;
+			header.quantFactor = quant;
 			header.index = pIndex;
 			header.m = m;
 			vHeader.magic = VIDEO_MAGIC; 
@@ -186,6 +201,8 @@ int main(int argc, char** argv)
 
 			ss<< dst;
 			BitStream bs(ss.str().c_str(), (char*)"wb", (CAVHeader*) &header);
+			cout<< "Quantization factor: "<< quant<<endl;
+			cout<< "Golomb factor: "<< m<<endl;
 			while(!end) {
 				try {
 					f = v->getFrame();
@@ -193,7 +210,7 @@ int main(int argc, char** argv)
 					end = true;
 					continue;
 				}
-				LinearPredictor lp(*f, pIndex);
+				LinearPredictor lp(*f, pIndex, quant);
 				Predictor &p = lp;
 				Golomb g(p, bs, m);
 

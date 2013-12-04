@@ -41,34 +41,34 @@ class Predictor
 {
 public:
 	Predictor()
-		: m_functor(), m_errors(), m_functorIndex(0), m_nRows(0), m_nCols(0), m_format(YUV_444), m_type(LINEAR_PREDICTOR)
+		: m_functor(), m_errors(), m_functorIndex(0), m_nRows(0), m_nCols(0), m_quantFactor(1.0f), m_format(YUV_444), m_type(LINEAR_PREDICTOR)
 	{ }
 	/**
 	 * @param f - Constant reference to a frame
 	 */
-	Predictor(const Frame& f, PredictorType type, int index, std::function<int(int, int, int, int)> functor) 
-		: m_functor(functor), m_functorIndex(index), m_nRows(f.rows()), m_nCols(f.cols()), m_format(f.getFormat()), m_type(type)
+	Predictor(const Frame& f, PredictorType type, float quantFactor, int index, std::function<int(int, int, int)> functor) 
+		: m_functor(functor), m_functorIndex(index), m_nRows(f.rows()), m_nCols(f.cols()), m_quantFactor(quantFactor), m_format(f.getFormat()), m_type(type)
 	{
 		m_errors = predict(f);
 	}
 
-	Predictor(PredictorType type, int index, std::function<int(int, int, int, int)> functor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
-		: m_functor(functor), m_errors(errors), m_functorIndex(index), m_nRows(nRows), m_nCols(nCols), m_format(format), m_type(type)
+	Predictor(PredictorType type, float quantFactor, int index, std::function<int(int, int, int)> functor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
+		: m_functor(functor), m_errors(errors), m_functorIndex(index), m_nRows(nRows), m_nCols(nCols), m_quantFactor(quantFactor), m_format(format), m_type(type)
 	{
 	}
 
-	Predictor(PredictorType type, int index, std::function<int(int, int, int, int)> functor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
-		: m_functor(functor), m_errors(errors), m_functorIndex(index), m_nRows(nRows), m_nCols(nCols), m_format(format), m_type(type)
+	Predictor(PredictorType type, float quantFactor, int index, std::function<int(int, int, int)> functor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
+		: m_functor(functor), m_errors(errors), m_functorIndex(index), m_nRows(nRows), m_nCols(nCols), m_quantFactor(quantFactor), m_format(format), m_type(type)
 	{
 	}
 
 	Predictor(const Predictor& p)
-		: m_functor(p.m_functor), m_errors(p.m_errors), m_functorIndex(p.m_functorIndex), m_nRows(p.m_nRows), m_nCols(p.m_nCols), m_format(p.m_format), m_type(p.m_type)
+		: m_functor(p.m_functor), m_errors(p.m_errors), m_functorIndex(p.m_functorIndex), m_nRows(p.m_nRows), m_nCols(p.m_nCols), m_quantFactor(p.m_quantFactor), m_format(p.m_format), m_type(p.m_type)
 	{
 	}
 
 	Predictor(Predictor&& p)
-		: m_functor(p.m_functor), m_errors(p.m_errors), m_functorIndex(p.m_functorIndex), m_nRows(p.m_nRows), m_nCols(p.m_nCols), m_format(p.m_format), m_type(p.m_type)
+		: m_functor(p.m_functor), m_errors(p.m_errors), m_functorIndex(p.m_functorIndex), m_nRows(p.m_nRows), m_nCols(p.m_nCols), m_quantFactor(p.m_quantFactor), m_format(p.m_format), m_type(p.m_type)
 	{
 	}
 
@@ -122,8 +122,18 @@ public:
 	{
 		return m_type;
 	}
+
+	float quantizationFactor() const
+	{
+		return m_quantFactor;
+	}
+
+	float& quantizationFactor()
+	{
+		return m_quantFactor;
+	}
 protected:
-	std::function< int(int, int, int, int) > m_functor;
+	std::function< int(int, int, int) > m_functor;
 	std::vector<int> m_errors;
 	/**
 	 * Index of the function used to predict.
@@ -132,6 +142,7 @@ protected:
 	int m_functorIndex;
 	uint m_nRows;
 	uint m_nCols;
+	float m_quantFactor;
 	VideoFormat m_format;
 	PredictorType m_type;
 

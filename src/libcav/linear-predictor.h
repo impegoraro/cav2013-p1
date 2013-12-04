@@ -34,15 +34,11 @@ public:
 	/**
 	 * @param f - const reference to a frame
 	 */
-	LinearPredictor(const Frame& f);
-	/**
-	 * @param f - const reference to a frame
-	 */
-	LinearPredictor(const Frame& f, int type);
+	LinearPredictor(const Frame& f, int type = 0, float quantFactor = 1.0f);
 
-	LinearPredictor(int index, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors);
+	LinearPredictor(int index, float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors);
 
-	LinearPredictor(int index, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors);
+	LinearPredictor(int index, float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors);
 
 	/**
 	 *

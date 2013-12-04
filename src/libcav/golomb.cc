@@ -99,12 +99,12 @@ Predictor Golomb::decode(const std::string& fpath)
 
 	switch(header->predictor) {
 		case LINEAR_PREDICTOR: {
-			LinearPredictor lp(header->index, header->nRows, header->nCols, vformat, errors);
+			LinearPredictor lp(header->index, header->quantFactor, header->nRows, header->nCols, vformat, errors);
 			return lp;
 		break;
 		} case NONLINEAR_PREDICTOR: {
 			// Non linear
-			NonLinearPredictor nlp(header->nRows, header->nCols, vformat, errors);
+			NonLinearPredictor nlp(header->quantFactor, header->nRows, header->nCols, vformat, errors);
 			return nlp;
 		break;
 		}default:
@@ -155,12 +155,12 @@ Predictor Golomb::decode(BitStream& bs)
 
 	switch(header->predictor) {
 		case LINEAR_PREDICTOR: {
-			LinearPredictor lp(header->index, header->nRows, header->nCols, vformat, errors);
+			LinearPredictor lp(header->index, header->quantFactor, header->nRows, header->nCols, vformat, errors);
 			return lp;
 		break;
 		} case NONLINEAR_PREDICTOR: {
 			// Non linear
-			NonLinearPredictor nlp(header->nRows, header->nCols, vformat, errors);
+			NonLinearPredictor nlp(header->quantFactor, header->nRows, header->nCols, vformat, errors);
 			return nlp;
 		break;
 		}default:

@@ -30,8 +30,8 @@
 constexpr int N_FUNCTORS = 1;
 
 /* One more argument for the nonlinear JPEG LS predictors  */
-static std::function<int (int, int, int, int) > m_defFunctors[N_FUNCTORS]{
-	{[] (int a, int b, int c, int d) {
+static std::function<int (int, int, int) > m_defFunctors[N_FUNCTORS]{
+	{[] (int a, int b, int c) {
 		int res;
 		if(c >= std::max(a, b))
 			res = std::min(a, b);
@@ -44,17 +44,17 @@ static std::function<int (int, int, int, int) > m_defFunctors[N_FUNCTORS]{
 	}}
 };
 
-NonLinearPredictor::NonLinearPredictor(Frame& f)
-	: Predictor(f, NONLINEAR_PREDICTOR, 0, m_defFunctors[0])
+NonLinearPredictor::NonLinearPredictor(Frame& f, float quantFactor)
+	: Predictor(f, NONLINEAR_PREDICTOR, quantFactor, 0, m_defFunctors[0])
 {
 }
 
-NonLinearPredictor::NonLinearPredictor(uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
-	: Predictor(NONLINEAR_PREDICTOR, 0, m_defFunctors[0], nRows, nCols, format, errors)
+NonLinearPredictor::NonLinearPredictor(float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
+	: Predictor(NONLINEAR_PREDICTOR, quantFactor, 0, m_defFunctors[0], nRows, nCols, format, errors)
 {
 }
 
-NonLinearPredictor::NonLinearPredictor(uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
-	: Predictor(NONLINEAR_PREDICTOR, 0, m_defFunctors[0], nRows, nCols, format, errors)
+NonLinearPredictor::NonLinearPredictor(float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
+	: Predictor(NONLINEAR_PREDICTOR, quantFactor, 0, m_defFunctors[0], nRows, nCols, format, errors)
 {
 }
