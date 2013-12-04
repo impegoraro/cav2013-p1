@@ -33,9 +33,24 @@
 using namespace std;
 using namespace cv;
 
-void encode(const Frame* actual, BitStream& bs)
+void encode(const Frame* actual, Predictor *p, uint m, BitStream& bs)
 {
+	Golomb g(*p, bs, m);
+	g.encode();
+	bs.flush();
+}
 
+void encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, uint m, BitStream& bs)
+{
+	if(previous == nullptr) {
+		Golomb g(*p, bs, m);
+		g.encode();
+		bs.flush();
+	} else {
+		// (BitStream& bs, const Frame* pf, const Frame* nf, uint m, uint bWidth, uint bHeight)
+		GolombInterframe gi(bs, previous, actual, m, actual->rows() / 4, actual->cols() / 4);
+		gi.encode();
+	}
 }
 
 int main(int argc, char** argv)
@@ -145,8 +160,10 @@ int main(int argc, char** argv)
 			break;
 			case 'm':
 				m = atoi(optarg);
-				if(!isPowerOf2(m))
-					m = 2;
+				if(!isPowerOf2(m)) {
+					cerr<< "Error: Invalid parameter golomb m parameter, the parameter must be power of 2."<<endl;
+					abort();
+				}
 			break;
 			case 'q':
 				quant = atof(optarg);
@@ -193,11 +210,13 @@ int main(int argc, char** argv)
 		cout<< "Golomb factor: "<< header.m<<endl;
 		while(!end) {
 			for(uint i = 0; i < vh->nFrames; i++) { 
-				Predictor pred = Golomb::decode(bs);
-				Frame *f = pred.guess();
-				f->display(false,  "VideoPlayback");
-				delete f;
-			 	waitKey(1.0 / vh->fps * 1000);
+				if(!header.block) {
+					Predictor pred = Golomb::decode(bs);
+					Frame *f = pred.guess();
+					f->display(false,  "VideoPlayback");
+				 	waitKey(1.0 / vh->fps * 1000);
+					delete f;
+				}
 			}	
 			
 		}
@@ -221,6 +240,7 @@ int main(int argc, char** argv)
 			header.quantFactor = quant;
 			header.index = pIndex;
 			header.m = m;
+			header.block = false;
 			vHeader.magic = VIDEO_MAGIC; 
 			vHeader.nFrames = v->getTotalFrames();
 			vHeader.fps = v->fps();
@@ -233,6 +253,7 @@ int main(int argc, char** argv)
 			cout<< "Quantization factor: "<< quant<<endl;
 			cout<< "Golomb factor: "<< m<<endl;
 			Predictor *p = {nullptr};
+			Frame *prev = nullptr;
 			while(!end) {
 				try {
 					f = v->getFrame();
@@ -244,12 +265,14 @@ int main(int argc, char** argv)
 					p = new LinearPredictor(*f, pIndex, quant);
 				else
 					p = new NonLinearPredictor(*f, quant);
-				Golomb g(*p, bs, m);
-				g.encode();
-				bs.flush();
+
+				encodeInterframe(prev, f, p, m, bs);
+				//encode(f, p, m, bs);
 
 				delete p;
-				delete f;
+				if(prev != nullptr)
+					delete prev;
+				prev = f;
 			}
 
 			delete v;

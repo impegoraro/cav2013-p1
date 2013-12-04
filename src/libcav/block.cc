@@ -48,7 +48,7 @@ Block::Block(const Block& b)
 	////Falling back to copying byte by byte
 	//for(uint i = 0; i < m_nRows * m_nCols; i++)
 	//	m_buffer[i] = b.m_buffer[i];
-	assert(*this == b);
+	//assert(*this == b);
 }
 
 Block::Block(Block&& b)
@@ -102,13 +102,14 @@ Block* Block::dup()
 	Block* b = new Block(m_nRows, m_nCols);
 	*b = *this; // Copying buffers
 	
-	assert (*b == *this);
+	//assert (*b == *this);
 	return b;
 }
 
 Block Block::getSubBlock(uint begin, uint rows, uint cols)
 {
-	assert(begin + rows * cols <= m_nRows * m_nCols);
+	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
+	assert((begin + rows * cols) <= m_nRows * m_nCols);
 	Block b;
 	b.m_nRows = rows;
 	b.m_nCols = cols;
@@ -119,7 +120,8 @@ Block Block::getSubBlock(uint begin, uint rows, uint cols)
 
 const Block Block::getSubBlock(uint begin, uint rows, uint cols) const
 {
-	assert(begin + rows * cols <= m_nRows * m_nCols);
+	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
+	assert((begin + rows * cols) <= m_nRows * m_nCols);
 	
 	Block b;
 	b.m_nRows = rows;
@@ -226,7 +228,7 @@ Block& Block::operator=(Block&& rhs)
 uint Block::compareTo(const Block& rhs) const
 {
 	uint val{0};
-	assert(this->m_nRows == rhs.m_nRows && this->m_nCols > rhs.m_nCols);
+	assert(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols);
 	for (uint i = 0; i < rhs.size(); i++)
 		val += abs((*this)[i] - rhs[i]);
 
@@ -235,7 +237,7 @@ uint Block::compareTo(const Block& rhs) const
 
 Block Block::operator+(const Block& rhs) const
 {
-	assert(this->m_nRows == rhs.m_nRows && this->m_nCols > rhs.m_nCols);
+	assert(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols);
 	Block b(m_nRows, m_nCols);
 	for (uint i = 0; i < rhs.size(); i++)
 		b[i] = (*this)[i] + rhs[i];
@@ -245,7 +247,7 @@ Block Block::operator+(const Block& rhs) const
 
 Block Block::operator-(const Block& rhs) const
 {
-	assert(this->m_nRows == rhs.m_nRows && this->m_nCols > rhs.m_nCols);
+	assert(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols);
 	Block b(m_nRows, m_nCols);
 	for (uint i = 0; i < rhs.size(); i++)
 		b[i] = (*this)[i] - rhs[i];

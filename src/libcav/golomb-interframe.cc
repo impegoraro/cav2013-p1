@@ -24,49 +24,54 @@
 
 void GolombInterframe::encode()
 {
-	uint bSize{m_bWidth * m_bHeight};
+	//std::cout<< "GolombInterframe encode"<<std::endl;
+	uint radius{2};
 	uint dr{0}, dc{0};
 	Block b2, b1, be;
 
 	// Y
-	for(uint r = 0; r < m_nFrame->rows(); r += bSize) {
-		for(uint c = 0; c < m_nFrame->cols(); c += bSize) {
-			b2 = m_nFrame->y().getSubBlock(r, c, bSize);
+	for(uint r = 0; r < m_nFrame->rows() - m_bWidth; r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->cols() - m_bWidth; c += m_bHeight) {
+			b2 = m_nFrame->y().getSubBlock(r * m_nFrame->cols() + c, m_bWidth, m_bHeight);
 			//(const Frame& previous, const Block& b, uint radius, uint& dr, uint& dc, BlockType type)
-			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, bSize, dr, dc, BlockType::Y);
+			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, radius, dr, dc, BlockType::Y);
 			be = b2 - b1;
-			this->encode((int)dr);
-			this->encode((int)dc);
-			this->encode(be);
-		}
-	}
-
-	for(uint r = 0; r < m_nFrame->rows(); r += bSize) {
-		for(uint c = 0; c < m_nFrame->cols(); c += bSize) {
-			b2 = m_nFrame->u().getSubBlock(r, c, bSize);
-			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, bSize, dr, dc, BlockType::U);
-			be = b2 - b1;
-			this->encode((int)dr);
-			this->encode((int)dc);
-			this->encode(be);
-		}
-	}
-
-	for(uint r = 0; r < m_nFrame->rows(); r += bSize) {
-		for(uint c = 0; c < m_nFrame->cols(); c += bSize) {
-			b2 = m_nFrame->v().getSubBlock(r, c, bSize);
-			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, bSize, dr, dc, BlockType::V);
-			be = b2 - b1;
-			this->encode((int)dr);
+			this->encode(dr);
 			this->encode(dc);
 			this->encode(be);
 		}
 	}
+	//std::cout<< "GolombInterframe Y Completed"<<std::endl;
+
+	for(uint r = 0; r < m_nFrame->u().rows() - m_bWidth; r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->u().cols() - m_bHeight; c += m_bHeight) {
+			b2 = m_nFrame->u().getSubBlock(r * m_nFrame->u().cols() + c, m_bWidth, m_bHeight);
+			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, radius, dr, dc, BlockType::U);
+			be = b2 - b1;
+			this->encode(dr);
+			this->encode(dc);
+			this->encode(be);
+		}
+	}
+	//std::cout<< "GolombInterframe U Completed"<<std::endl;
+
+	for(uint r = 0; r < m_nFrame->u().rows() - m_bWidth; r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->u().cols() - m_bHeight; c += m_bHeight) {
+			b2 = m_nFrame->v().getSubBlock(r * m_nFrame->u().cols() + c, m_bWidth, m_bHeight);
+			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, radius, dr, dc, BlockType::V);
+			be = b2 - b1;
+			this->encode(dr);
+			this->encode(dc);
+			this->encode(be);
+		}
+	}
+	//std::cout<< "GolombInterframe V Completed"<<std::endl;
+
 }
 
 void GolombInterframe::encode(int val)
 {
-	uint q, r, m(pow(m_m, 2));
+	uint q, r, m(pow(2, m_m));
 	uint tmp; // temporary holding for error using the even-odd strategy 
 
 	// handles positives as even numbers and negatives as odd numbers
@@ -79,6 +84,24 @@ void GolombInterframe::encode(int val)
 		m_bs.writeBit(1);
 	m_bs.writeBit(0);
 }
+
+// int GolombInterframe::decode(uint m_m)
+// {
+// 	int r, q = 0;
+// 	uint m{pow(m_m, 2)};
+// 	r = m_bs.readNBits(m_m);
+// 	if(r == EOF) break;
+// 	do {
+// 		bit = m_bs.readBit();
+// 		if(bit == EOF || !bit) break;
+// 		++q;
+
+// 	} while(bit);
+// 	tmp = q * m + r;
+// 	int e = (tmp % 2 == 0) ? tmp / 2 : -1 * ((tmp+1) / 2); 
+// 	i++;
+// }
+
 
 void GolombInterframe::encode(const Block& blk)
 {
