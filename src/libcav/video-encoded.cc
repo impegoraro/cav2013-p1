@@ -27,9 +27,9 @@
 #include "cav-header.h"
 
 VideoEncoded::VideoEncoded(const std::string& path)
-	: VideoInterface(0, 0, 0, YUV_444), m_bs(path.c_str(), (char *)"rb", (CAVHeader*)&m_header), 
-	m_vh((VideoCAVHeader*) ((GolombCAVHeader*) &m_header)->undefined)
+	: VideoInterface(0, 0, 0, YUV_444), m_bs(path.c_str(), (char *)"rb", (CAVHeader*)&m_header), m_vh{nullptr}
 {
+	m_vh = (VideoCAVHeader*) ((GolombCAVHeader*) &m_header)->undefined;
 	m_rows = m_header.nRows;
 	m_cols = m_header.nCols;
 	m_fps = m_vh->fps;

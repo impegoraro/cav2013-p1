@@ -239,7 +239,8 @@ int main(int argc, char** argv)
 						f2 = gi.decode(header.m);
 						f2->display(false,  "VideoPlayback");
 					}
-				 	waitKey(1.0 / vh->fps * 1000);
+				 	//waitKey(1.0 / vh->fps * 1000);
+				 	waitKey(0);
 				}
 			}	
 			

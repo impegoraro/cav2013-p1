@@ -494,11 +494,16 @@ const Block Frame::findBestBlock(const Frame& previous, const Block& b, uint rad
 	else if(type == BlockType::V) {inB = m_v; pinB = previous.m_v;}
 	
 	assert(pinB != nullptr);
-	uint ir{(b.rows() - radius < 0) ? 0 : (actualRow - radius)};
-	uint ic{(b.cols() - radius < 0) ? 0 : (actualCol - radius)};
-	uint fr{(b.rows() + radius > inB->rows()) ? actualRow + b.rows() : (actualRow  + b.rows() + radius)};
-	uint fc{(b.cols() + radius > inB->cols()) ? actualCol + b.cols() : (actualCol  + b.cols() + radius)};
-
+	//uint ir{(b.rows() - radius < 0) ? 0 : (actualRow - radius)};
+	//uint ic{(b.cols() - radius < 0) ? 0 : (actualCol - radius)};
+	//uint fr{(b.rows() + radius > inB->rows()) ? actualRow + b.rows() : (actualRow  + b.rows() + radius)};
+	//uint fc{(b.cols() + radius > inB->cols()) ? actualCol + b.cols() : (actualCol  + b.cols() + radius)};
+ 
+ 	uint ir{(actualRow - radius < 0) ? 0 : (actualRow - radius)}; 
+ 	uint ic{(actualCol - radius < 0) ? 0 : (actualCol - radius)}; 
+ 	uint fr{(actualRow + b.rows() + radius > inB->rows()) ? inB->rows() : (actualRow + b.rows() + radius)}; 
+ 	uint fc{(actualCol + b.cols() + radius > inB->cols()) ? inB->cols() : (actualCol + b.cols() + radius)};
+	
 	for(uint r = ir; r + b.rows() < fr + 1; r++){
 		for(uint c = ic; c + b.cols() < fc + 1; c++){
 			tmpBlock = pinB->getSubBlock(r * pinB->cols() + c, b.rows(), b.cols());

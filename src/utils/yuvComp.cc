@@ -25,46 +25,6 @@
 using namespace std;
 using namespace cv;
 
-float calcESq(Frame& f, Frame& f2, uint component) {
-        //TODO: check dimensions
-        
-        int lim(1);
-        int sum(0);
-        float eSq(0);
-        Block *fBuffer(NULL), *f2Buffer(NULL);
-
-        switch (component){
-        case 0:
-                fBuffer = &f.y();
-                f2Buffer = &f2.y();
-                lim = fBuffer->rows() * fBuffer->cols();
-                break;
-        case 1:
-                fBuffer = &f.u();
-                f2Buffer = &f2.u();
-                lim = fBuffer->rows() * fBuffer->cols();
-                break;
-        case 2:
-                fBuffer = &f.v();
-                f2Buffer = &f2.v();
-                lim = fBuffer->rows() * fBuffer->cols();
-                break;
-        }
-        assert(fBuffer != NULL && f2Buffer != NULL); // safety check, usually not needed.
-        eSq = 1.0/lim;
-        
-        for(int i = 0; i < lim; i++) {
-            sum += ((*fBuffer)[i] - (*f2Buffer)[i]) * ((*fBuffer)[i] - (*f2Buffer)[i]);
-        }
-
-        eSq *= sum;
-        return eSq;
-}
-
-float inline calcPSNR(Frame& f, Frame& f2, int component){
-    return 10.0 * log10f(255.0 * 255.0 / calcESq(f,f2,component));
-}
-
 int main(int argc, char** argv)
 {
 	if(argc != 3 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
@@ -80,40 +40,47 @@ int main(int argc, char** argv)
 	try {
 		string path(argv[1]);
 		string path2(argv[2]);
-		Video v(path);
-		Video v2(path2);
+		VideoInterface *v;
+		VideoInterface *v2;
+        uint nFrames;
 
 		Frame *f, *f2;
 		int end = false;
-		uint frames = 0;
-        float sumY = 0.0f;
-        float sumU = 0.0f;
-        float sumV = 0.0f;
+        if(path.find(".gmb") != std::string::npos)
+            v = new VideoEncoded(path);
+        else 
+            v = new Video(path);
+        if(path2.find(".gmb") != std::string::npos)
+            v2 = new VideoEncoded(path2);
+        else 
+            v2 = new Video(path2);
 
-		while(!end) {
+        nFrames = min(v->getTotalFrames(), v2->getTotalFrames());
+        float sumY{0.0}, sumU{0.0}, sumV{0.0};
+        float Y, U, V;
+        uint i{0};
+		while(!end && i < nFrames) {
 			try {
-				f = v.getFrame();
-				f2 = v2.getFrame();
-			} catch (VideoEndedException& e) {
-				end = true;
-				continue;
-			}
+				f = v->getFrame();
+				f2 = v2->getFrame();
+                f->psnr(*f2, Y, U, V);
+                sumY += Y;
+                sumU += U;
+                sumV += V;
+            } catch (VideoEndedException& e) {
+                end = true;
+                continue;
+            }
+            i++;
+            delete f;
+        }
+        //cout<< "y: " <<sumY<< ", u: "<< sumU<< ", v: "<< sumV<< endl;
+        cout<< sumY<< " "<< sumU<< " "<< sumV<< " ";
 
-			sumY += calcPSNR(*f, *f2, 0);
-            sumU += calcPSNR(*f, *f2, 1);
-            sumV += calcPSNR(*f, *f2, 2);
-                        
-            frames++;
-
-			delete f;
-		}
-		
-		printf("Y: %f, U:%f, V:%f\n", sumY/(float)frames, sumU/(float)frames, sumV/(float)frames);
-
-
+        delete v;
+        delete v2;
 	} catch (FileNotFoundException& e) {
 		cerr<< "File not found"<< endl;
 	}
-	
 	return 0;
 }
