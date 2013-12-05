@@ -48,7 +48,7 @@ void encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, 
 		bs.flush();
 	} else {
 		// (BitStream& bs, const Frame* pf, const Frame* nf, uint m, uint bWidth, uint bHeight)
-		GolombInterframe gi(bs, previous, actual, m, actual->rows() / 4, actual->cols() / 4);
+		GolombInterframe gi(bs, previous, actual, m, actual->rows() / 2, actual->cols() / 2);
 		//GolombInterframe gi(bs, previous, actual, m, 8, 8);
 		gi.encode();
 	}
@@ -56,55 +56,6 @@ void encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, 
 
 int main(int argc, char** argv)
 {
-// 	if(argc == 1) {
-// 		cerr<< "Missing filename"<<endl;
-// 		exit(1);
-// 	}
-// 	Frame *f= Frame::create_from_file((string)argv[1]);
-// 	stringstream ss;
-// 	//Predictor lp(*f, i, [](int a, int b, int c, int d) -> int { return a; });
-// 	NonLinearPredictor lp(*f);
-// 	ss<< "/home/ilan/Downloads/CAV/tmp/golomb-0.gmb";
-// 	cout<<"Main: writing "<< ss.str()<< endl;
-// 	GolombCAVHeader header;
-// 	{
-// 		header.magic = GOLOMB_MAGIC;
-// 		header.nCols = f->cols();
-// 		header.nRows = f->rows();
-// 		header.format = f->getFormat();
-// 		header.m = 4;
-// 		header.predictor = NONLINEAR_PREDICTOR;
-// 		header.index = 0;
-// 		BitStream bs(ss.str().c_str(), (char*)"wb", (CAVHeader*)&header);
-// 		Golomb g(lp, bs, 4);
-// 		g.encode();
-// 	}
-
-// 	cout<< "magic: "<< header.magic<< endl;
-// 	cout<< "nCols: "<< header.nCols<< endl;
-// 	cout<< "nRows: "<< header.nRows<< endl;
-// 	cout<< "format: "<< header.format<< endl;
-// 	cout<< "m: "<< header.m<< endl;
-// 	cout<< "predictor: "<< header.predictor<< endl;
-// 	cout<< "index: "<< header.index<< endl;
-// 	{
-// 		BitStream bs(ss.str().c_str(), (char*)"rb", (CAVHeader*)&header);
-// 		cout<< "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"<<endl;
-// 		cout<< "magic: "<< header.magic<< endl;
-// 		cout<< "nCols: "<< header.nCols<< endl;
-// 		cout<< "nRows: "<< header.nRows<< endl;
-// 		cout<< "format: "<< header.format<< endl;
-// 		cout<< "m: "<< header.m<< endl;
-// 		cout<< "predictor: "<< header.predictor<< endl;
-// 		cout<< "index: "<< header.index<< endl;
-
-// 		Predictor pred{Golomb::decode(bs)};
-// 		Frame* f2 = pred.guess();
-// 		f2->display();
-// 		delete f2;
-
-// 	}
-// }
 	string ans;
 	bool showHelp{false};
 	char *src{NULL};
@@ -218,9 +169,11 @@ int main(int argc, char** argv)
 		bool firstFrame{true};
 		Frame *f{nullptr};
 		Frame *f2;
+		Frame *tmp;
 		while(!end) {
 			for(uint i = 0; i < vh->nFrames; i++) { 
 				if(!header.block) {
+					cout<< "Using intraframe coding"<<endl;
 					Predictor pred = Golomb::decode(bs);
 					f = pred.guess();
 					f->display(false,  "VideoPlayback");
@@ -228,14 +181,18 @@ int main(int argc, char** argv)
 					delete f;
 				} else {
 					if(firstFrame) {
+						cout<< "Using interframe coding"<<endl;
 						Predictor pred = Golomb::decode(bs);
 						Frame *f = pred.guess();
 						f->display(false,  "VideoPlayback");
 						f2 = new Frame(*f);
 						firstFrame = false;
 					} else {
-						Frame *tmp = f2;
-						GolombInterframe gi(bs, tmp, nullptr, header.m, f2->rows() / 2, f2->cols() / 2);
+						if(tmp != nullptr)
+							delete tmp;
+						tmp = f2;
+
+						GolombInterframe gi(bs, tmp, nullptr, header.m, tmp->rows() / 2, tmp->cols() / 2);
 						f2 = gi.decode(header.m);
 						f2->display(false,  "VideoPlayback");
 					}

@@ -30,51 +30,57 @@ void GolombInterframe::encode()
 	Block b2, b1, be;
 
 	// Y
-	for(uint r = 0; r < m_nFrame->rows() - m_bWidth; r += m_bWidth) {
-		for(uint c = 0; c < m_nFrame->cols() - m_bWidth; c += m_bHeight) {
+	for(uint r = 0; r < m_nFrame->rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->cols(); c += m_bHeight) {
 			b2 = m_nFrame->y().getSubBlock(r * m_nFrame->cols() + c, m_bWidth, m_bHeight);
-			//(const Frame& previous, const Block& b, uint radius, uint& dr, uint& dc, BlockType type)
+			//b1 = m_pFrame->y().getSubBlock(r * m_nFrame->cols() + c, m_bWidth, m_bHeight);
 			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, radius, r, c, dr, dc, BlockType::Y);
-			std::cout<< "Size b2: "<<b2.size()<<std::endl;
-			std::cout<< "Size b1: "<<b1.size()<<std::endl;
 			be = b2 - b1;
 			int tdr = dr - r;
 			int tdc = dc - c;
+			//int tdr = 0;
+			//int tdc = 0;
 			this->encode(tdr);
 			this->encode(tdc);
 			this->encode(be);
 		
 		}
 	}
-	std::cout<< "GolombInterframe Y Completed"<<std::endl;
+	//std::cout<< "GolombInterframe Y Completed"<<std::endl;
 
-	for(uint r = 0; r < m_nFrame->u().rows() - m_bWidth; r += m_bWidth) {
-		for(uint c = 0; c < m_nFrame->u().cols() - m_bHeight; c += m_bHeight) {
+	for(uint r = 0; r < m_nFrame->u().rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->u().cols(); c += m_bHeight) {
 			b2 = m_nFrame->u().getSubBlock(r * m_nFrame->u().cols() + c, m_bWidth, m_bHeight);
+			//b1 = m_pFrame->u().getSubBlock(r * m_nFrame->u().cols() + c, m_bWidth, m_bHeight);
 			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, radius, r, c, dr, dc, BlockType::U);
 			be = b2 - b1;
 			int tdr = dr - r;
 			int tdc = dc - c;
+			//int tdr = 0;
+			//int tdc = 0;
 			this->encode(tdc);
 			this->encode(tdr);
 			this->encode(be);
 		}
 	}
-	std::cout<< "GolombInterframe U Completed"<<std::endl;
+	//std::cout<< "GolombInterframe U Completed"<<std::endl;
 
-	for(uint r = 0; r < m_nFrame->u().rows() - m_bWidth; r += m_bWidth) {
-		for(uint c = 0; c < m_nFrame->u().cols() - m_bHeight; c += m_bHeight) {
+	for(uint r = 0; r < m_nFrame->u().rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->u().cols(); c += m_bHeight) {
 			b2 = m_nFrame->v().getSubBlock(r * m_nFrame->u().cols() + c, m_bWidth, m_bHeight);
+			//b1 = m_pFrame->v().getSubBlock(r * m_nFrame->u().cols() + c, m_bWidth, m_bHeight);
 			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, radius, r, c, dr, dc, BlockType::V);
 			be = b2 - b1;
 			int tdr = dr - r;
 			int tdc = dc - c;
+			//int tdr = 0;
+			//int tdc = 0;
 			this->encode(tdr);
 			this->encode(tdc);
 			this->encode(be);
 		}
 	}
-	std::cout<< "GolombInterframe V Completed"<<std::endl;
+	//std::cout<< "GolombInterframe V Completed"<<std::endl;
 
 }
 
@@ -111,8 +117,8 @@ Frame* GolombInterframe::decode(uint m_m)
 	int tdc, tdr;
 
 	// Y
-	for(uint r = 0; r < m_pFrame->rows() - m_bWidth; r += m_bWidth) {
-		for(uint c = 0; c < m_pFrame->cols() - m_bWidth; c += m_bHeight) {
+	for(uint r = 0; r < m_pFrame->rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_pFrame->cols(); c += m_bHeight) {
 			tdr = this->decode2(m_m);
 			tdc = this->decode2(m_m);
 			this->decode(be, m_m);
@@ -127,23 +133,23 @@ Frame* GolombInterframe::decode(uint m_m)
 		}
 	}
 
-	for(uint r = 0; r < m_pFrame->u().rows() - m_bWidth; r += m_bWidth) {
-		for(uint c = 0; c < m_pFrame->u().cols() - m_bHeight; c += m_bHeight) {
+	for(uint r = 0; r < m_pFrame->u().rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_pFrame->u().cols(); c += m_bHeight) {
 			tdr = this->decode2(m_m);
 			tdc = this->decode2(m_m);
 			this->decode(be, m_m);
 			dr = tdr + r;
 			dc = tdc + c;
 			
-			b2 = m_pFrame->u().getSubBlock(dr * m_pFrame->u().cols() + dc, m_bWidth, m_bHeight);
+			b2 = m_pFrame->u().getSubBlock(dr * m_pFrame->u().cols() +dc, m_bWidth, m_bHeight);
 			//b1 = m_pFrame->findBestBlock(*m_pFrame, b2, radius, dr, dc, BlockType::U);
 			b1 = b2 + be;
 			actual->u().setSubBlock(r * actual->u().cols() + c, b1);
 		}
 	}
 
-	for(uint r = 0; r < m_pFrame->u().rows() - m_bWidth; r += m_bWidth) {
-		for(uint c = 0; c < m_pFrame->u().cols() - m_bHeight; c += m_bHeight) {
+	for(uint r = 0; r < m_pFrame->u().rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_pFrame->u().cols(); c += m_bHeight) {
 			tdr = this->decode2(m_m);
 			tdc = this->decode2(m_m);
 			this->decode(be, m_m);

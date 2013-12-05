@@ -200,7 +200,7 @@ Block& Block::operator=(const Block& rhs)
 	//for(uint i = 0; i < (m_nRows * m_nCols); i++)
 	//	m_buffer[i] = rhs.m_buffer[i];
 
-	assert (*this == rhs);
+	//assert (*this == rhs);
 	return *this;
 }
 
@@ -210,7 +210,7 @@ Block& Block::operator=(const char *rhs)
 	//	m_buffer[i] = rhs[i];
 
 	std::memcpy(this->m_buffer, rhs, sizeof(int) * m_nRows * m_nCols);
-	assert (*this == rhs);
+	//assert (*this == rhs);
 	return *this;
 }
 
