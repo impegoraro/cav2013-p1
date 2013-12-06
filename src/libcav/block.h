@@ -186,6 +186,9 @@ public:
 	 */
 	void print();
 
+	Block getSubBlock(uint oRow, uint oCol, uint rows, uint cols);
+	const Block getSubBlock(uint oRow, uint oCol, uint rows, uint cols) const;
+
 	uint compareTo(const Block& rhs) const;
 	Block operator+(const Block& rhs) const;
 	Block operator-(const Block& rhs) const;

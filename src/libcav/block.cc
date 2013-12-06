@@ -118,6 +118,31 @@ Block Block::getSubBlock(uint begin, uint rows, uint cols)
 	return b;
 }
 
+Block Block::getSubBlock(uint oRow, uint oCol, uint rows, uint cols)
+{
+	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
+	assert(((oRow * m_nCols + oCol) + rows * cols) <= m_nRows * m_nCols);
+	Block b;
+	b.m_nRows = rows;
+	b.m_nCols = cols;
+	b.m_buffer = &m_buffer[(oRow * m_nCols + oCol)];
+
+	return b;
+}
+
+const Block Block::getSubBlock(uint oRow, uint oCol, uint rows, uint cols) const
+{
+	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
+	assert(((oRow * m_nCols + oCol) + rows * cols) <= m_nRows * m_nCols);
+	Block b;
+	b.m_nRows = rows;
+	b.m_nCols = cols;
+	b.m_buffer = &m_buffer[(oRow * m_nCols + oCol)];
+
+	return b;
+}
+
+
 const Block Block::getSubBlock(uint begin, uint rows, uint cols) const
 {
 	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
