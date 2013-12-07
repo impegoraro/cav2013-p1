@@ -43,7 +43,7 @@ double encode(const Frame* actual, Predictor *p, uint m, BitStream& bs)
 	return enctime;
 }
 
-double encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, uint m, BitStream& bs, int radius)
+double encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, uint m, BitStream& bs, int radius, uint factor)
 {
 	double enctime{0.0};
 	if(previous == nullptr) {
@@ -52,7 +52,7 @@ double encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p
 		enctime = g.getEncodeTime();
 		bs.flush();
 	} else {
-		GolombInterframe gi(bs, previous, actual, m, actual->rows() / 2, actual->cols() / 2, radius);
+		GolombInterframe gi(bs, previous, actual, m, actual->rows() / factor, actual->cols() / factor, radius);
 		gi.encode();
 		enctime = gi.getEncodeTime();
 		bs.flush();
@@ -77,8 +77,9 @@ int main(int argc, char** argv)
 	int radius = 0;
 	bool shouldHaveDest{false};
 	int predType = 1;
+	uint factor = 2;
 	bool block{false};
-	const char* shortops = "hd:p:s:y:u:v:m:l:nbr:";
+	const char* shortops = "hd:p:s:y:u:v:m:l:nbr:f:";
 	const struct option longops[] = {
 		{"help", 0, NULL, 'h'},
 		{"source", 1, NULL, 's'},
@@ -86,7 +87,8 @@ int main(int argc, char** argv)
 		{"quantization-y", 1, NULL, 'y'},
 		{"quantization-u", 1, NULL, 'u'},
 		{"quantization-v", 1, NULL, 'v'},
-		{"radius", 1, NULL, 'v'},
+		{"factor", 1, NULL, 'f'},
+		{"radius", 1, NULL, 'r'},
 		{"golomb-factor", 1, NULL, 'm'},
 		{"nonlinear-predictor", 0, NULL, 'n'},
 		{"linear-predictor", 1, NULL, 'l'},
@@ -131,6 +133,9 @@ int main(int argc, char** argv)
 				pIndex = 0;
 				predType = 2;
 			break;
+			case 'f':
+				factor = (uint) atoi(optarg);
+			break;
 			case 'm':
 				m = atoi(optarg);
 				if(!isPowerOf2(m)) {
@@ -170,6 +175,7 @@ int main(int argc, char** argv)
 			<<"  -y, --quantization-y          Quantization factor Y (for lossy compression)."<<endl
 			<<"  -u, --quantization-u          Quantization factor U (for lossy compression)."<<endl
 			<<"  -v, --quantization-v          Quantization factor V (for lossy compression)."<<endl
+			<<"  -f, --factor                  Factor use to obtain the block size for interframe coding (FrameSize / Factor)."<<endl
 			<<"  -g, --golomb                  Golomb factor (m) to use while encoding/decoding."<<endl
 			<<"  -n, --non-linear              Changes the default predictor to be the nonlinear predictor."<<endl
 			<<"  -l, --linear                  Changes the default predictor to be a linear predictor (requires an integer [0, 6])."<<endl
@@ -194,16 +200,19 @@ int main(int argc, char** argv)
 		//cout<< "Quantization factor: "<< header.quantFactor<<endl;
 		cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 		cout<< "Golomb factor: "<< header.m<<endl;
+		//factor = ((GolombCAVHeader*) &header)->factor;
 		bool firstFrame{true};
 		Frame *f{nullptr};
-		Frame *f2;
-		Frame *tmp;
+		Frame *f2{nullptr};
+		Frame *tmp{nullptr};
 		while(!end) {
 			for(uint i = 0; i < vh->nFrames; i++) { 
 				if(!header.block) {
 					Predictor pred = Golomb::decode(bs);
 					if(firstFrame) {
 						cout<< "Using intraframe coding"<<endl;
+						cout<< "Block factor: "<< factor<< endl;
+
 						cout<< "Quantization factor Y: "<< pred.quantizationFactorY()<< " U: "<< pred.quantizationFactorU()<< " V: "<< pred.quantizationFactorV()<<endl;
 						firstFrame = false;
 					}
@@ -224,7 +233,7 @@ int main(int argc, char** argv)
 							delete tmp;
 						tmp = f2;
 
-						GolombInterframe gi(bs, tmp, nullptr, header.m, tmp->rows() / 2, tmp->cols() / 2);
+						GolombInterframe gi(bs, tmp, nullptr, header.m, tmp->rows() / factor, tmp->cols() / factor);
 						f2 = gi.decode(header.m);
 						f2->display(false,  "VideoPlayback");
 					}
@@ -251,7 +260,7 @@ int main(int argc, char** argv)
 			header.nRows = v->rows();
 			header.format = v->format();
 			header.predictor = predType;
-			//header.quantFactor = quant;
+			header.factor = factor;
 			header.index = pIndex;
 			header.m = m;
 			header.block = block;
@@ -263,11 +272,15 @@ int main(int argc, char** argv)
 
 			ss<< dst;
 			BitStream bs(ss.str().c_str(), (char*)"wb", (CAVHeader*) &header);
+			if(block) {
+				cout<< "Inter-frame encoding"<<endl;
+				cout<< "Search radius: "<< radius<<endl;
+				cout<< "Block factor: "<< factor<< endl;
+			} else
+				cout<< "Intra-frame encoding"<<endl;
 			cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 			cout<< "Quantization factor Y: "<< quantY<< " U: "<< quantU<< " V: "<< quantV<<endl;
 			cout<< "Golomb factor: "<< m<<endl;
-			if(block)
-				cout<< "Search radius: "<< radius<<endl;
 			double enctime{0.0};
 			Predictor *p = {nullptr};
 			Frame *prev = nullptr;
@@ -285,7 +298,7 @@ int main(int argc, char** argv)
 					p = new NonLinearPredictor(*f, quantY, quantU, quantV);
 
 				if(block)
-					enctime += encodeInterframe(prev, f, p, m, bs, radius);
+					enctime += encodeInterframe(prev, f, p, m, bs, radius, factor);
 				else
 					enctime += encode(f, p, m, bs);
 

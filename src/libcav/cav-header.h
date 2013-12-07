@@ -32,7 +32,7 @@ struct GolombCAVHeader
 	{
 		std::memset(this, 0, sizeof(struct GolombCAVHeader));
 	}
-	GolombCAVHeader(uint magic, uint nCols, uint nRows, int format, uint m, int predictor, int index, bool block = false)
+	GolombCAVHeader(uint magic, uint nCols, uint nRows, int format, uint m, int predictor, int index, uint factor, bool block = false)
 	{
 		this->m = m;
 		this->predictor = predictor;
@@ -42,6 +42,7 @@ struct GolombCAVHeader
 		this->nRows = nRows;
 		this->format = format;
 		this->block = block;
+		this->factor = factor;
 		std::memset(&undefined, 0, 8);
 	}
 	uint magic;
@@ -51,6 +52,7 @@ struct GolombCAVHeader
 	uint m;
 	int predictor;
 	int index;
+	uint factor;
 	bool block;
 	char undefined[8];
 };
