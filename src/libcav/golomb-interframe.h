@@ -32,14 +32,15 @@
 class GolombInterframe
 {
 public:
-	GolombInterframe(BitStream& bs, const Frame* pf, const Frame* nf, unsigned long long m, uint bWidth, uint bHeight, uint radius = 0)
-		: m_bs(bs), m_pFrame(pf), m_nFrame(nf), m_m(m), m_bWidth(bWidth), m_bHeight(bHeight), m_radius{radius}, m_elapsed{0}
+	GolombInterframe(BitStream& bs, Frame* pf, Frame* nf, unsigned long long m, uint bWidth, uint bHeight, uint radius = 0, int quantY = 1, int quantU = 1, int quantV = 1)
+		: m_bs(bs), m_pFrame(pf), m_nFrame(nf), m_m(m), m_bWidth(bWidth), m_bHeight(bHeight), m_radius{radius},
+		m_quantY(quantY), m_quantU(quantU), m_quantV(quantV), m_elapsed{0}
 	{
 		assert(isPowerOf2(m));
 	}
 	void encode();
 
-	void set_frame(const Frame* f)
+	void set_frame(Frame* f)
 	{
 		m_pFrame = m_nFrame;
 		m_nFrame = f;
@@ -55,12 +56,15 @@ public:
 
 protected:
 	BitStream& m_bs;
-	const Frame* m_pFrame;
-	const Frame* m_nFrame;
+	Frame* m_pFrame;
+	Frame* m_nFrame;
 	unsigned long long m_m;
 	uint m_bWidth;
 	uint m_bHeight;
 	uint m_radius;
+	int m_quantY;
+	int m_quantU;
+	int m_quantV;
 	double m_elapsed;
 
 	void encode(int val);

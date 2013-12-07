@@ -29,6 +29,7 @@ void GolombInterframe::encode()
 	Block b2, b1, be;
 	
 	// Encoding the Y component
+	this->encode(m_quantY);
 	for(uint r = 0; r < m_nFrame->rows(); r += m_bWidth) {
 		for(uint c = 0; c < m_nFrame->cols(); c += m_bHeight) {
 			b2 = m_nFrame->y().getSubBlock(r, c, m_bWidth, m_bHeight);
@@ -39,15 +40,19 @@ void GolombInterframe::encode()
 			int tdc = dc - c;
 			//int tdr = 0;
 			//int tdc = 0;
+			be / m_quantY;
 			this->encode(tdr);
 			this->encode(tdc);
 			this->encode(be);
-		
+
+			be * m_quantY;
+			m_nFrame->y().setSubBlock(r, c, b1 + be);
 		}
 	}
 
 
 	// Encoding the U component
+	this->encode(m_quantU);
 	for(uint r = 0; r < m_nFrame->u().rows(); r += m_bWidth) {
 		for(uint c = 0; c < m_nFrame->u().cols(); c += m_bHeight) {
 			b2 = m_nFrame->u().getSubBlock(r, c, m_bWidth, m_bHeight);
@@ -58,15 +63,19 @@ void GolombInterframe::encode()
 			int tdc = dc - c;
 			//int tdr = 0;
 			//int tdc = 0;
+			be / m_quantU;
 			this->encode(tdr);
 			this->encode(tdc);
 			this->encode(be);
-		
+
+			be * m_quantU;
+			m_nFrame->u().setSubBlock(r, c, be + b1);
 		}
 	}
 
 
 	// Encoding the V component
+	this->encode(m_quantV);
 	for(uint r = 0; r < m_nFrame->v().rows(); r += m_bWidth) {
 		for(uint c = 0; c < m_nFrame->v().cols(); c += m_bHeight) {
 			b2 = m_nFrame->v().getSubBlock(r, c, m_bWidth, m_bHeight);
@@ -77,10 +86,13 @@ void GolombInterframe::encode()
 			int tdc = dc - c;
 			//int tdr = 0;
 			//int tdc = 0;
+			be / m_quantV;
 			this->encode(tdr);
 			this->encode(tdc);
 			this->encode(be);
-		
+
+			be * m_quantV;
+			m_nFrame->v().setSubBlock(r, c, be + b1);
 		}
 	}
 
@@ -117,13 +129,16 @@ Frame* GolombInterframe::decode(unsigned long long m_m)
 	int dr{0}, dc{0};
 	Block b2, b1, be(m_bWidth, m_bHeight);
 	Frame *actual = Frame::create(m_pFrame->rows(), m_pFrame->cols(), m_pFrame->getFormat());
+	int quantY, quantU, quantV;
 
 	// Y
+	quantY = decode2(m_m);
 	for(uint r = 0; r < m_pFrame->rows(); r += m_bWidth) {
 		for(uint c = 0; c < m_pFrame->cols(); c += m_bHeight) {
 			dr = this->decode2(m_m);
 			dc = this->decode2(m_m);
 			this->decode(be, m_m);
+			be * quantY;
 			b2 = m_pFrame->y().getSubBlock(dr + r, dc + c, m_bWidth, m_bHeight);
 			b1 = b2 + be;
 			actual->y().setSubBlock(r, c, b1);
@@ -131,11 +146,13 @@ Frame* GolombInterframe::decode(unsigned long long m_m)
 	}
 
 	// U
+	quantU = decode2(m_m);
 	for(uint r = 0; r < m_pFrame->u().rows(); r += m_bWidth) {
 		for(uint c = 0; c < m_pFrame->u().cols(); c += m_bHeight) {
 			dr = this->decode2(m_m);
 			dc = this->decode2(m_m);
 			this->decode(be, m_m);
+			be * quantU;
 			b2 = m_pFrame->u().getSubBlock(dr + r, dc + c, m_bWidth, m_bHeight);
 			b1 = b2 + be;
 			actual->u().setSubBlock(r, c, b1);
@@ -143,11 +160,13 @@ Frame* GolombInterframe::decode(unsigned long long m_m)
 	}
 
 	// V
+	quantV = decode2(m_m);
 	for(uint r = 0; r < m_pFrame->v().rows(); r += m_bWidth) {
 		for(uint c = 0; c < m_pFrame->v().cols(); c += m_bHeight) {
 			dr = this->decode2(m_m);
 			dc = this->decode2(m_m);
 			this->decode(be, m_m);
+			be * quantV;
 			b2 = m_pFrame->v().getSubBlock(dr + r, dc + c, m_bWidth, m_bHeight);
 			b1 = b2 + be;
 			actual->v().setSubBlock(r, c, b1);

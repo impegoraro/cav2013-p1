@@ -229,6 +229,31 @@ uint Block::compareTo(const Block& rhs) const
 	return val;
 }
 
+Block& Block::operator*(int quant)
+{
+	for (uint i = 0; i < size(); i++)
+		(*this)[i] *= quant;
+
+	return *this;
+}
+
+Block& Block::operator/(int quant)
+{
+	for (uint i = 0; i < size(); i++)
+		(*this)[i] /= quant;
+
+	return *this;
+}
+
+Block& Block::operator+(const Block& rhs)
+{
+	assert(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols);
+	for (uint i = 0; i < rhs.size(); i++)
+		(*this)[i] += rhs[i];
+
+	return *this;
+}
+
 Block Block::operator+(const Block& rhs) const
 {
 	assert(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols);
@@ -247,6 +272,15 @@ Block Block::operator-(const Block& rhs) const
 		b[i] = (*this)[i] - rhs[i];
 
 	return b;
+}
+
+Block& Block::operator-(const Block& rhs)
+{
+	assert(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols);
+	for (uint i = 0; i < rhs.size(); i++)
+		(*this)[i] -= rhs[i];
+
+	return *this;
 }
 
 void Block::print()

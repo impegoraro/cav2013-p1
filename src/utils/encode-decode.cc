@@ -33,7 +33,7 @@
 using namespace std;
 using namespace cv;
 
-double encode(const Frame* actual, Predictor *p, uint m, BitStream& bs)
+double encode(Frame* actual, Predictor *p, uint m, BitStream& bs)
 {
 	Golomb g(*p, bs, m);
 	g.encode();
@@ -43,7 +43,7 @@ double encode(const Frame* actual, Predictor *p, uint m, BitStream& bs)
 	return enctime;
 }
 
-double encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, uint m, BitStream& bs, int radius, uint factor)
+double encodeInterframe(Frame* previous, Frame* actual, Predictor *p, uint m, BitStream& bs, int radius, uint factor, int qy, int qu, int qv)
 {
 	double enctime{0.0};
 	if(previous == nullptr) {
@@ -52,7 +52,7 @@ double encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p
 		enctime = g.getEncodeTime();
 		bs.flush();
 	} else {
-		GolombInterframe gi(bs, previous, actual, m, actual->rows() / factor, actual->cols() / factor, radius);
+		GolombInterframe gi(bs, previous, actual, m, actual->rows() / factor, actual->cols() / factor, radius, qy, qu, qv);
 		gi.encode();
 		enctime = gi.getEncodeTime();
 		bs.flush();
@@ -200,7 +200,7 @@ int main(int argc, char** argv)
 		//cout<< "Quantization factor: "<< header.quantFactor<<endl;
 		cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 		cout<< "Golomb factor: "<< header.m<<endl;
-		//factor = ((GolombCAVHeader*) &header)->factor;
+		factor = ((GolombCAVHeader*) &header)->factor;
 		bool firstFrame{true};
 		Frame *f{nullptr};
 		Frame *f2{nullptr};
@@ -212,7 +212,6 @@ int main(int argc, char** argv)
 					if(firstFrame) {
 						cout<< "Using intraframe coding"<<endl;
 						cout<< "Block factor: "<< factor<< endl;
-
 						cout<< "Quantization factor Y: "<< pred.quantizationFactorY()<< " U: "<< pred.quantizationFactorU()<< " V: "<< pred.quantizationFactorV()<<endl;
 						firstFrame = false;
 					}
@@ -298,7 +297,7 @@ int main(int argc, char** argv)
 					p = new NonLinearPredictor(*f, quantY, quantU, quantV);
 
 				if(block)
-					enctime += encodeInterframe(prev, f, p, m, bs, radius, factor);
+					enctime += encodeInterframe(prev, f, p, m, bs, radius, factor, quantY, quantU, quantV);
 				else
 					enctime += encode(f, p, m, bs);
 

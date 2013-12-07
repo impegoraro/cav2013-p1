@@ -190,6 +190,10 @@ public:
 	uint compareTo(const Block& rhs) const;
 	Block operator+(const Block& rhs) const;
 	Block operator-(const Block& rhs) const;
+	Block& operator+(const Block& rhs);
+	Block& operator-(const Block& rhs);
+	Block& operator*(int quant);
+	Block& operator/(int quant);
 protected:
 	/**
 	 * Number of rows.
