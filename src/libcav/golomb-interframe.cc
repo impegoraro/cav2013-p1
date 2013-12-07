@@ -27,65 +27,64 @@ void GolombInterframe::encode()
 	Timer enctime;
 	int dr{0}, dc{0};
 	Block b2, b1, be;
-	uint factor(1);
-	factor = m_nFrame->rows()/m_bWidth;
 	
-
-	// Y
-	for(uint i = 0; i < factor * factor; i++) {
-		uint r = 0;
-		uint c = 0;
-		if(i > 0){
-			r = (i * m_bWidth/factor) - 1;
-			c = m_bHeight;
+	// Encoding the Y component
+	for(uint r = 0; r < m_nFrame->rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->cols(); c += m_bHeight) {
+			b2 = m_nFrame->y().getSubBlock(r, c, m_bWidth, m_bHeight);
+			//b1 = m_pFrame->y().getSubBlock(r, c, m_bWidth, m_bHeight);
+			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, m_radius, r, c, dr, dc, BlockType::Y);
+			be = b2 - b1;
+			int tdr = dr - r;
+			int tdc = dc - c;
+			//int tdr = 0;
+			//int tdc = 0;
+			this->encode(tdr);
+			this->encode(tdc);
+			this->encode(be);
+		
 		}
-		b2 = m_nFrame->y().getSubBlock(r * m_nFrame->cols() + c, m_bWidth, m_bHeight);
-		b1 = m_pFrame->findBestBlock(*m_pFrame, b2, m_radius, r, c, dr, dc, BlockType::Y);
-		be = b2;// - b1;
-		int tdr = dr - r;
-		int tdc = dc - c;
-		this->encode(tdr);
-		this->encode(tdc);
-		this->encode(be);
 	}
 
-	factor = m_nFrame->u().rows()/m_bWidth;
-	for(uint i = 0; i < factor * factor; i++) {
-		uint r = 0;
-		uint c = 0;
-		if(i > 0){
-			r = (i * m_bWidth/factor) - 1;
-			c = m_bHeight;
-		}
 
-		b2 = m_nFrame->u().getSubBlock(r * m_nFrame->u().cols() + c, m_bWidth, m_bHeight);
-		b1 = m_pFrame->findBestBlock(*m_pFrame, b2, m_radius, r, c, dr, dc, BlockType::U);
-		be = b2;// - b1;
-		int tdr = dr - r;
-		int tdc = dc - c;
-		this->encode(tdc);
-		this->encode(tdr);
-		this->encode(be);
+	// Encoding the U component
+	for(uint r = 0; r < m_nFrame->u().rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->u().cols(); c += m_bHeight) {
+			b2 = m_nFrame->u().getSubBlock(r, c, m_bWidth, m_bHeight);
+			//b1 = m_pFrame->u().getSubBlock(r, c, m_bWidth, m_bHeight);
+			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, m_radius, r, c, dr, dc, BlockType::U);
+			be = b2 - b1;
+			int tdr = dr - r;
+			int tdc = dc - c;
+			//int tdr = 0;
+			//int tdc = 0;
+			this->encode(tdr);
+			this->encode(tdc);
+			this->encode(be);
+		
+		}
 	}
 
-	factor = m_nFrame->v().rows()/m_bWidth;
-	for(uint i = 0; i < factor * factor; i++) {
-		uint r = 0;
-		uint c = 0;
-		if(i > 0){
-			r = (i * m_bWidth/factor) - 1;
-			c = m_bHeight;
-		}
 
-		b2 = m_nFrame->v().getSubBlock(r * m_nFrame->v().cols() + c, m_bWidth, m_bHeight);
-		b1 = m_pFrame->findBestBlock(*m_pFrame, b2, m_radius, r, c, dr, dc, BlockType::V);
-		be = b2;// - b1;
-		int tdr = dr - r;
-		int tdc = dc - c;
-		this->encode(tdr);
-		this->encode(tdc);
-		this->encode(be);
+	// Encoding the V component
+	for(uint r = 0; r < m_nFrame->v().rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_nFrame->v().cols(); c += m_bHeight) {
+			b2 = m_nFrame->v().getSubBlock(r, c, m_bWidth, m_bHeight);
+			//b1 = m_pFrame->v().getSubBlock(r, c, m_bWidth, m_bHeight);
+			b1 = m_pFrame->findBestBlock(*m_pFrame, b2, m_radius, r, c, dr, dc, BlockType::V);
+			be = b2 - b1;
+			int tdr = dr - r;
+			int tdc = dc - c;
+			//int tdr = 0;
+			//int tdc = 0;
+			this->encode(tdr);
+			this->encode(tdc);
+			this->encode(be);
+		
+		}
 	}
+
+
 	m_elapsed = enctime.elapsed();
 }
 
@@ -118,63 +117,41 @@ Frame* GolombInterframe::decode(unsigned long long m_m)
 	int dr{0}, dc{0};
 	Block b2, b1, be(m_bWidth, m_bHeight);
 	Frame *actual = Frame::create(m_pFrame->rows(), m_pFrame->cols(), m_pFrame->getFormat());
-	int tdc, tdr;
-	Block tmpB(m_bWidth, m_bHeight);
-	uint factor(1);
-	factor = m_pFrame->rows()/m_bWidth;
 
 	// Y
-	for(uint i = 0; i < factor * factor; i++) {
-		uint r = 0;
-		uint c = 0;
-		if(i > 0){
-			r = (i * m_bWidth/factor) - 1;
-			c = m_bHeight;
+	for(uint r = 0; r < m_pFrame->rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_pFrame->cols(); c += m_bHeight) {
+			dr = this->decode2(m_m);
+			dc = this->decode2(m_m);
+			this->decode(be, m_m);
+			b2 = m_pFrame->y().getSubBlock(dr + r, dc + c, m_bWidth, m_bHeight);
+			b1 = b2 + be;
+			actual->y().setSubBlock(r, c, b1);
 		}
-		tdr = this->decode2(m_m);
-		tdc = this->decode2(m_m);
-		this->decode(be, m_m);
-		dr = tdr + r;
-		dc = tdc + c;
-		b2 = m_pFrame->y().getSubBlock(dr * m_pFrame->cols() + dc, m_bWidth, m_bHeight);
-		b1 = be;// b2 + be;
-		actual->y().setSubBlock(r * actual->cols() + c, b1);
 	}
 
-	factor = m_pFrame->u().rows()/m_bWidth;
-	for(uint i = 0; i < factor * factor; i++) {
-		uint r = 0;
-		uint c = 0;
-		if(i > 0){
-			r = (i * m_bWidth/factor) - 1;
-			c = m_bHeight;
+	// U
+	for(uint r = 0; r < m_pFrame->u().rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_pFrame->u().cols(); c += m_bHeight) {
+			dr = this->decode2(m_m);
+			dc = this->decode2(m_m);
+			this->decode(be, m_m);
+			b2 = m_pFrame->u().getSubBlock(dr + r, dc + c, m_bWidth, m_bHeight);
+			b1 = b2 + be;
+			actual->u().setSubBlock(r, c, b1);
 		}
-		tdr = this->decode2(m_m);
-		tdc = this->decode2(m_m);
-		this->decode(be, m_m);
-		dr = tdr + r;
-		dc = tdc + c;
-		b2 = m_pFrame->u().getSubBlock(dr * m_pFrame->u().cols() +dc, m_bWidth, m_bHeight);
-		b1 = be;// b2 + be;
-		actual->u().setSubBlock(r * actual->u().cols() + c, b1);
 	}
 
-	factor = m_pFrame->v().rows()/m_bWidth;
-	for(uint i = 0; i < factor * factor; i++) {
-		uint r = 0;
-		uint c = 0;
-		if(i > 0){
-			r = (i * m_bWidth/factor) - 1;
-			c = m_bHeight;
+	// V
+	for(uint r = 0; r < m_pFrame->v().rows(); r += m_bWidth) {
+		for(uint c = 0; c < m_pFrame->v().cols(); c += m_bHeight) {
+			dr = this->decode2(m_m);
+			dc = this->decode2(m_m);
+			this->decode(be, m_m);
+			b2 = m_pFrame->v().getSubBlock(dr + r, dc + c, m_bWidth, m_bHeight);
+			b1 = b2 + be;
+			actual->v().setSubBlock(r, c, b1);
 		}
-		tdr = this->decode2(m_m);
-		tdc = this->decode2(m_m);
-		this->decode(be, m_m);
-		dr = tdr + r;
-		dc = tdc + c;
-		b2 = m_pFrame->v().getSubBlock(dr * m_pFrame->v().cols() + dc, m_bWidth, m_bHeight);
-		b1 = be;// b2 + be;
-		actual->v().setSubBlock(r * actual->v().cols() + c, b1);
 	}
 
 	return actual;

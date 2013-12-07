@@ -484,7 +484,7 @@ Frame* Frame::create_from_file(const std::string& path)
 // 	return bestBlock;
 // }
 
-const Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, uint actualRow, uint actualCol, int& dr, int& dc, BlockType type) const
+Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, uint actualRow, uint actualCol, int& dr, int& dc, BlockType type) const
 {
 	int bestMatch{INT_MAX}, tmpDiff{0};
 	Block *inB{nullptr}, *pinB{nullptr};
@@ -502,7 +502,7 @@ const Block Frame::findBestBlock(const Frame& previous, const Block& b, uint rad
 	
 	for(uint r = ir; r + b.rows() < fr + 1; r++){
 		for(uint c = ic; c + b.cols() < fc + 1; c++){
-			tmpBlock = pinB->getSubBlock(r * pinB->cols() + c, b.rows(), b.cols());
+			tmpBlock = pinB->getSubBlock(r, c, b.rows(), b.cols());
 			tmpDiff = b.compareTo(tmpBlock);
 			if(tmpDiff < bestMatch) {
 				bestMatch = tmpDiff;
