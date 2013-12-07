@@ -24,6 +24,7 @@
 
 void GolombInterframe::encode()
 {
+	Timer enctime;
 	int dr{0}, dc{0};
 	Block b2, b1, be;
 	uint factor(1);
@@ -85,6 +86,7 @@ void GolombInterframe::encode()
 		this->encode(tdc);
 		this->encode(be);
 	}
+	m_elapsed = enctime.elapsed();
 }
 
 void GolombInterframe::encode(int val)

@@ -43,18 +43,22 @@ double encode(const Frame* actual, Predictor *p, uint m, BitStream& bs)
 	return enctime;
 }
 
-void encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, uint m, BitStream& bs)
+double encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, uint m, BitStream& bs, int radius)
 {
+	double enctime{0.0};
 	if(previous == nullptr) {
 		Golomb g(*p, bs, m);
 		g.encode();
+		enctime = g.getEncodeTime();
 		bs.flush();
 	} else {
-		// (BitStream& bs, const Frame* pf, const Frame* nf, uint m, uint bWidth, uint bHeight)
-		GolombInterframe gi(bs, previous, actual, m, actual->rows() / 2, actual->cols() / 2);
-		//GolombInterframe gi(bs, previous, actual, m, 8, 8);
+		GolombInterframe gi(bs, previous, actual, m, actual->rows() / 2, actual->cols() / 2, radius);
 		gi.encode();
+		enctime = gi.getEncodeTime();
+		bs.flush();
 	}
+
+	return enctime;
 }
 
 int main(int argc, char** argv)
@@ -70,10 +74,11 @@ int main(int argc, char** argv)
 	int quantY = 1;
 	int quantU = 1;
 	int quantV = 1;
+	int radius = 0;
 	bool shouldHaveDest{false};
 	int predType = 1;
 	bool block{false};
-	const char* shortops = "hd:p:s:y:u:v:m:l:nb";
+	const char* shortops = "hd:p:s:y:u:v:m:l:nbr:";
 	const struct option longops[] = {
 		{"help", 0, NULL, 'h'},
 		{"source", 1, NULL, 's'},
@@ -81,6 +86,7 @@ int main(int argc, char** argv)
 		{"quantization-y", 1, NULL, 'y'},
 		{"quantization-u", 1, NULL, 'u'},
 		{"quantization-v", 1, NULL, 'v'},
+		{"radius", 1, NULL, 'v'},
 		{"golomb-factor", 1, NULL, 'm'},
 		{"nonlinear-predictor", 0, NULL, 'n'},
 		{"linear-predictor", 1, NULL, 'l'},
@@ -109,6 +115,9 @@ int main(int argc, char** argv)
 			break;
 			case 'b':
 				block = true;
+			break;
+			case 'r':
+				radius = atoi(optarg);
 			break;
 			case 'l':
 				pIndex = atoi(optarg);
@@ -257,6 +266,8 @@ int main(int argc, char** argv)
 			cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 			cout<< "Quantization factor Y: "<< quantY<< " U: "<< quantU<< " V: "<< quantV<<endl;
 			cout<< "Golomb factor: "<< m<<endl;
+			if(block)
+				cout<< "Search radius: "<< radius<<endl;
 			double enctime{0.0};
 			Predictor *p = {nullptr};
 			Frame *prev = nullptr;
@@ -274,7 +285,7 @@ int main(int argc, char** argv)
 					p = new NonLinearPredictor(*f, quantY, quantU, quantV);
 
 				if(block)
-					encodeInterframe(prev, f, p, m, bs);
+					enctime += encodeInterframe(prev, f, p, m, bs, radius);
 				else
 					enctime += encode(f, p, m, bs);
 
