@@ -22,6 +22,7 @@
 #include <cmath>
 #include <assert.h>
 
+#include "coder.h"
 #include "util.h"
 #include "block.h"
 #include "bitstream.h"
@@ -31,8 +32,8 @@
 class GolombInterframe
 {
 public:
-	GolombInterframe(BitStream& bs, const Frame* pf, const Frame* nf, uint m, uint bWidth, uint bHeight)
-		: m_bs(bs), m_pFrame(pf), m_nFrame(nf), m_m(m), m_bWidth(bWidth), m_bHeight(bHeight)
+	GolombInterframe(BitStream& bs, const Frame* pf, const Frame* nf, unsigned long long m, uint bWidth, uint bHeight, uint radius = 0)
+		: m_bs(bs), m_pFrame(pf), m_nFrame(nf), m_m(m), m_bWidth(bWidth), m_bHeight(bHeight), m_radius{radius}
 	{
 		assert(isPowerOf2(m));
 	}
@@ -44,20 +45,21 @@ public:
 		m_nFrame = f;
 	}
 	
-	Frame* decode(uint m_m);
+	Frame* decode(unsigned long long m_m);
 protected:
 	BitStream& m_bs;
 	const Frame* m_pFrame;
 	const Frame* m_nFrame;
-	uint m_m;
+	unsigned long long m_m;
 	uint m_bWidth;
 	uint m_bHeight;
+	uint m_radius;
 
 	void encode(int val);
 	void encode(const Block& blk);
 
-	int decode2(uint m_m);
-	void decode(Block& blk, uint m_m);
+	int decode2(unsigned long long m_m);
+	void decode(Block& blk, unsigned long long m_m);
 };
 
 #endif

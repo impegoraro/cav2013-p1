@@ -75,7 +75,7 @@ int main(int argc, char** argv)
             delete f;
         }
         //cout<< "y: " <<sumY<< ", u: "<< sumU<< ", v: "<< sumV<< endl;
-        cout<< sumY<< " "<< sumU<< " "<< sumV<< " ";
+        cout<< sumY / nFrames<< " "<< sumU / nFrames<< " "<< sumV / nFrames<< " ";
 
         delete v;
         delete v2;

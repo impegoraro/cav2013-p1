@@ -33,12 +33,12 @@ class Coder
 public:
 
 	Coder(const Predictor& pred, BitStream& bs)
-		: m_pred(pred), m_bs(bs)
+		: m_pred(pred), m_bs(bs), m_elapsed(0)
 	{
 	}
 
 	Coder(Predictor&& pred, BitStream& bs)
-		: m_pred(pred), m_bs(bs)
+		: m_pred(pred), m_bs(bs), m_elapsed(0)
 	{
 	}
 	
@@ -53,9 +53,15 @@ public:
 	
 	virtual void encode() = 0;
 	
+	double getEncodeTime() const
+	{
+		return m_elapsed;
+	}
 protected:
 	Predictor m_pred;
 	BitStream& m_bs;
+
+	double m_elapsed;
 };
 
 #endif

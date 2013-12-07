@@ -135,7 +135,7 @@ Frame* Video::getFrame()
 			throw VideoEndedException();
 		}
 		// Unneeded
-		f = new Frame444(rows, cols);
+		//f = new Frame444(rows, cols);
 
 		for(uint i = 0; i < rows * cols * 3; i += 3) {
 			b = tmpFrame.ptr()[i];

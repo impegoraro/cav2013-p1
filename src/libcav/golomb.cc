@@ -39,7 +39,9 @@ Golomb::Golomb(Predictor& pred, BitStream& bs, uint m)
 
 void Golomb::encode()
 {
-	uint q, r, m(pow(2, m_m));
+	Timer enctime;
+	uint q, r;
+	unsigned long long m(pow(2, m_m));
 	uint tmp; // temporary holding for error using the even-odd strategy 
 	auto errors = m_pred.errors();
 
@@ -54,6 +56,7 @@ void Golomb::encode()
 			m_bs.writeBit(1);
 		m_bs.writeBit(0);
 	}
+	m_elapsed = enctime.elapsed();
 }
 
 Predictor Golomb::decode(const std::string& fpath)
@@ -65,7 +68,7 @@ Predictor Golomb::decode(const std::string& fpath)
 	BitStream bs(fpath.c_str(), (char*)"rb", &tmpHeader);
 	GolombCAVHeader *header{(GolombCAVHeader*) &tmpHeader};
 	assert(header->magic == GOLOMB_MAGIC && isPowerOf2(header->m));
-	uint m(pow(2, header->m));
+	unsigned long m(pow(2, header->m));
 	
 	switch(header->format) {
 		case 422: 
@@ -121,7 +124,7 @@ Predictor Golomb::decode(BitStream& bs)
 	int bit;
 	GolombCAVHeader *header{(GolombCAVHeader*) bs.getHeader()};
 	assert(header->magic == GOLOMB_MAGIC && isPowerOf2(header->m));
-	uint m(pow(2, header->m));
+	unsigned long long m(pow(2, header->m));
 	
 	switch(header->format) {
 		case 422: 

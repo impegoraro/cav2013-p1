@@ -33,11 +33,14 @@
 using namespace std;
 using namespace cv;
 
-void encode(const Frame* actual, Predictor *p, uint m, BitStream& bs)
+double encode(const Frame* actual, Predictor *p, uint m, BitStream& bs)
 {
 	Golomb g(*p, bs, m);
 	g.encode();
+	double enctime{g.getEncodeTime()};
 	bs.flush();
+
+	return enctime;
 }
 
 void encodeInterframe(const Frame* previous, const Frame* actual, Predictor *p, uint m, BitStream& bs)
@@ -196,8 +199,8 @@ int main(int argc, char** argv)
 						f2 = gi.decode(header.m);
 						f2->display(false,  "VideoPlayback");
 					}
-				 	//waitKey(1.0 / vh->fps * 1000);
-				 	waitKey(0);
+				 	waitKey(1.0 / vh->fps * 1000);
+				 	//waitKey(0);
 				}
 			}	
 			
@@ -234,8 +237,10 @@ int main(int argc, char** argv)
 			cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 			cout<< "Quantization factor: "<< quant<<endl;
 			cout<< "Golomb factor: "<< m<<endl;
+			double enctime{0.0};
 			Predictor *p = {nullptr};
 			Frame *prev = nullptr;
+
 			while(!end) {
 				try {
 					f = v->getFrame();
@@ -251,13 +256,14 @@ int main(int argc, char** argv)
 				if(block)
 					encodeInterframe(prev, f, p, m, bs);
 				else
-					encode(f, p, m, bs);
+					enctime += encode(f, p, m, bs);
 
 				delete p;
 				if(prev != nullptr)
 					delete prev;
 				prev = f;
 			}
+			cout<< "Encode Time: "<< enctime<< " By Frame: "<< enctime / vHeader.nFrames <<endl;
 
 			delete v;
 		} catch (FileNotFoundException& e) {
