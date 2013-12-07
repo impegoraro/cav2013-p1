@@ -53,9 +53,8 @@ protected:
 	 */
 	uint m_m;
 
-	/**
-	 * Recreates the array of errors from a file stream
-	 */
+	inline void encode(unsigned long long m, int e);
+	inline static int decode(BitStream& bs, uint m_m, unsigned long long m);
 };
 
 

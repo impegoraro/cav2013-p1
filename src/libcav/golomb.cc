@@ -40,36 +40,47 @@ Golomb::Golomb(Predictor& pred, BitStream& bs, uint m)
 void Golomb::encode()
 {
 	Timer enctime;
-	uint q, r;
-	unsigned long long m(pow(2, m_m));
-	uint tmp; // temporary holding for error using the even-odd strategy 
 	auto errors = m_pred.errors();
+	unsigned long long m(pow(2, m_m));
+	
+	encode(m, m_pred.quantizationFactorY());
+	encode(m, m_pred.quantizationFactorU());
+	encode(m, m_pred.quantizationFactorV());
 
-	for(auto e : errors) {
-		// handles positives as even numbers and negatives as odd numbers
-		tmp = (e >= 0) ? 2 * e : 2 * abs(e) - 1; 
-		
-		q = tmp / m;
-		r = tmp % m;
-		m_bs.writeNBits(r, m_m);
-		for(uint i = 0; i < q; i++)
-			m_bs.writeBit(1);
-		m_bs.writeBit(0);
-	}
+	for(auto e : errors)
+		encode(m, e);
+	
 	m_elapsed = enctime.elapsed();
+}
+
+inline void Golomb::encode(unsigned long long m, int e)
+{
+	uint q, r;
+	uint tmp; // temporary holding for error using the even-odd strategy 
+	// handles positives as even numbers and negatives as odd numbers
+	tmp = (e >= 0) ? 2 * e : 2 * abs(e) - 1; 
+	
+	q = tmp / m;
+	r = tmp % m;
+	m_bs.writeNBits(r, m_m);
+	for(uint i = 0; i < q; i++)
+		m_bs.writeBit(1);
+	m_bs.writeBit(0);
 }
 
 Predictor Golomb::decode(const std::string& fpath)
 {
 	VideoFormat vformat;
-	uint q, r, size, tmp, i(0);
-	int bit;
+	uint size, i(0);
 	CAVHeader tmpHeader;
 	BitStream bs(fpath.c_str(), (char*)"rb", &tmpHeader);
 	GolombCAVHeader *header{(GolombCAVHeader*) &tmpHeader};
 	assert(header->magic == GOLOMB_MAGIC && isPowerOf2(header->m));
 	unsigned long m(pow(2, header->m));
-	
+	int quantY(decode(bs, header->m, m));
+	int quantU(decode(bs, header->m, m));
+	int quantV(decode(bs, header->m, m));
+
 	switch(header->format) {
 		case 422: 
 			vformat = YUV_422; 
@@ -86,28 +97,18 @@ Predictor Golomb::decode(const std::string& fpath)
 	
 	std::vector<int> errors(size);
 	while(i < size) {
-		q = 0;
-		r = bs.readNBits(header->m);
-		if(r == EOF) break;
-		do {
-			bit = bs.readBit();
-			if(bit == EOF || !bit) break;
-			++q;
-
-		} while(bit);
-		tmp = q * m + r;
-		errors[i] = (tmp % 2 == 0) ? tmp / 2 : -1 * ((tmp+1) / 2); 
+		errors[i] = decode(bs, header->m, m); 
 		i++;
 	}
 
 	switch(header->predictor) {
 		case LINEAR_PREDICTOR: {
-			LinearPredictor lp(header->index, header->quantFactor, header->nRows, header->nCols, vformat, errors);
+			LinearPredictor lp(header->index, quantY, quantU, quantV, header->nRows, header->nCols, vformat, errors);
 			return lp;
 		break;
 		} case NONLINEAR_PREDICTOR: {
 			// Non linear
-			NonLinearPredictor nlp(header->quantFactor, header->nRows, header->nCols, vformat, errors);
+			NonLinearPredictor nlp(quantY, quantU, quantV, header->nRows, header->nCols, vformat, errors);
 			return nlp;
 		break;
 		}default:
@@ -120,11 +121,13 @@ Predictor Golomb::decode(const std::string& fpath)
 Predictor Golomb::decode(BitStream& bs)
 {
 	VideoFormat vformat;
-	uint q, r, size, tmp, i(0);
-	int bit;
+	uint size, i(0);
 	GolombCAVHeader *header{(GolombCAVHeader*) bs.getHeader()};
 	assert(header->magic == GOLOMB_MAGIC && isPowerOf2(header->m));
 	unsigned long long m(pow(2, header->m));
+	int quantY(decode(bs, header->m, m));
+	int quantU(decode(bs, header->m, m));
+	int quantV(decode(bs, header->m, m));
 	
 	switch(header->format) {
 		case 422: 
@@ -142,28 +145,18 @@ Predictor Golomb::decode(BitStream& bs)
 	
 	std::vector<int> errors(size);
 	while(i < size) {
-		q = 0;
-		r = bs.readNBits(header->m);
-		if(r == EOF) break;
-		do {
-			bit = bs.readBit();
-			if(bit == EOF || !bit) break;
-			++q;
-
-		} while(bit);
-		tmp = q * m + r;
-		errors[i] = (tmp % 2 == 0) ? tmp / 2 : -1 * ((tmp+1) / 2); 
+		errors[i] = decode(bs, header->m, m); 
 		i++;
 	}
 
 	switch(header->predictor) {
 		case LINEAR_PREDICTOR: {
-			LinearPredictor lp(header->index, header->quantFactor, header->nRows, header->nCols, vformat, errors);
+			LinearPredictor lp(header->index, quantY, quantU, quantV, header->nRows, header->nCols, vformat, errors);
 			return lp;
 		break;
 		} case NONLINEAR_PREDICTOR: {
 			// Non linear
-			NonLinearPredictor nlp(header->quantFactor, header->nRows, header->nCols, vformat, errors);
+			NonLinearPredictor nlp(quantY, quantU, quantV, header->nRows, header->nCols, vformat, errors);
 			return nlp;
 		break;
 		}default:
@@ -171,4 +164,22 @@ Predictor Golomb::decode(BitStream& bs)
 			fprintf(stderr, "Invalid predictor in header\n");
 			abort();
 	}
+}
+
+inline int Golomb::decode(BitStream& bs, uint m_m, unsigned long long m)
+{
+	assert(isPowerOf2(m_m) && isPowerOf2(m));
+	uint r, q = 0, tmp;
+	int bit;
+
+	r = bs.readNBits(m_m);
+	if(r == EOF) throw int(-1);
+	do {
+		bit = bs.readBit();
+		if(bit == EOF || !bit) break;
+		++q;
+
+	} while(bit);
+	tmp = q * m + r;
+	return (tmp % 2 == 0) ? tmp / 2 : -1 * ((tmp+1) / 2); 
 }

@@ -39,23 +39,18 @@ static std::function<int (int, int, int) > m_defFunctors[N_FUNCTORS]{
 	{[](int a, int b, int c) -> int { return (a + b) / 2; }}
 };
 
-LinearPredictor::LinearPredictor(const Frame& f, int type, float quantFactor)
-	: Predictor(f, LINEAR_PREDICTOR, quantFactor, type, m_defFunctors[type])
+LinearPredictor::LinearPredictor(const Frame& f, int type, int quantFactorY, int quantFactorU, int quantFactorV)
+	: Predictor(f, LINEAR_PREDICTOR, quantFactorY, quantFactorU, quantFactorV, type, m_defFunctors[type])
 {
 	assert(type < N_FUNCTORS);
 }
 
-LinearPredictor::LinearPredictor(int index, float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
-	: Predictor(LINEAR_PREDICTOR, quantFactor, index, m_defFunctors[index], nRows, nCols, format, errors)
+LinearPredictor::LinearPredictor(int index, int quantFactorY, int quantFactorU, int quantFactorV, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
+	: Predictor(LINEAR_PREDICTOR, quantFactorY, quantFactorU, quantFactorV, index, m_defFunctors[index], nRows, nCols, format, errors)
 {
 }
 
-LinearPredictor::LinearPredictor(int index, float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
-	: Predictor(LINEAR_PREDICTOR, quantFactor, index, m_defFunctors[index], nRows, nCols, format, errors)
+LinearPredictor::LinearPredictor(int index, int quantFactorY, int quantFactorU, int quantFactorV, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
+	: Predictor(LINEAR_PREDICTOR, quantFactorY, quantFactorU, quantFactorV, index, m_defFunctors[index], nRows, nCols, format, errors)
 {
 }
-
-// LinearPredictor::LinearPredictor(const Frame& f, std::function< int(int, int, int, int) >& functor)
-// 	: Predictor(f, -1, functor)
-// {
-// }

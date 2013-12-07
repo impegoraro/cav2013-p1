@@ -25,7 +25,7 @@ do
 	
 			encTime=`cat /tmp/encodedecode.log | grep Encode | cut -d' ' -f3 | tr -d "\n"`
 			encTimeFrame=`cat /tmp/encodedecode.log | grep Encode | cut -d' ' -f6 | tr -d "\n"`
-			echo "$i" "linear" "$lin" `ls -sh ../output/$fname-linear-$lin-m-$i-q-$2.gmb | cut -d' ' -f1` " 2" " $encTime" " $encTimeFrame" >> "$log"  
+			echo "$i" "linear" "$lin" `ls -sh ../output/$fname-linear-$lin-m-$i-q-$2.gmb | cut -d' ' -f1` "$2" " $encTime" " $encTimeFrame" >> "$log"  
 		done 
 	done
 	

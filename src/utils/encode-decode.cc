@@ -67,16 +67,20 @@ int main(int argc, char** argv)
 	int pIndex{0};
 	bool play{false};
 	int m{4};
-	float quant = 1;
+	int quantY = 1;
+	int quantU = 1;
+	int quantV = 1;
 	bool shouldHaveDest{false};
 	int predType = 1;
 	bool block{false};
-	const char* shortops = "hd:p:s:q:m:l:nb";
+	const char* shortops = "hd:p:s:y:u:v:m:l:nb";
 	const struct option longops[] = {
 		{"help", 0, NULL, 'h'},
 		{"source", 1, NULL, 's'},
 		{"destination", 1, NULL, 'd'},
-		{"quantization", 1, NULL, 'q'},
+		{"quantization-y", 1, NULL, 'y'},
+		{"quantization-u", 1, NULL, 'u'},
+		{"quantization-v", 1, NULL, 'v'},
 		{"golomb-factor", 1, NULL, 'm'},
 		{"nonlinear-predictor", 0, NULL, 'n'},
 		{"linear-predictor", 1, NULL, 'l'},
@@ -125,10 +129,20 @@ int main(int argc, char** argv)
 					abort();
 				}
 			break;
-			case 'q':
-				quant = atof(optarg);
-				if(quant <= 0.0)
-					quant = 1.0;
+			case 'y':
+				quantY = atoi(optarg);
+				if(quantY <= 0)
+					quantY = 1;
+			break;
+			case 'u':
+				quantU = atoi(optarg);
+				if(quantU <= 0.0)
+					quantU = 1.0;
+			break;
+			case 'v':
+				quantV = atoi(optarg);
+				if(quantV <= 0)
+					quantV = 1;
 			break;
 			case '?':
 			default:
@@ -144,7 +158,9 @@ int main(int argc, char** argv)
 			<<"  -h, --help                    Shows this help message."<<endl
 			<<"  -s, --source                  Filename to read the video from."<<endl
 			<<"  -d, --destination             Filename where to store the encoded the video."<<endl
-			<<"  -q, --quantization            Quantization factor (for lossy compression)."<<endl
+			<<"  -y, --quantization-y          Quantization factor Y (for lossy compression)."<<endl
+			<<"  -u, --quantization-u          Quantization factor U (for lossy compression)."<<endl
+			<<"  -v, --quantization-v          Quantization factor V (for lossy compression)."<<endl
 			<<"  -g, --golomb                  Golomb factor (m) to use while encoding/decoding."<<endl
 			<<"  -n, --non-linear              Changes the default predictor to be the nonlinear predictor."<<endl
 			<<"  -l, --linear                  Changes the default predictor to be a linear predictor (requires an integer [0, 6])."<<endl
@@ -166,7 +182,7 @@ int main(int argc, char** argv)
 		BitStream bs(ss.str().c_str(), (char*)"rb", (CAVHeader*) &header);
 		VideoCAVHeader *vh = (VideoCAVHeader*)((GolombCAVHeader*) &header)->undefined;
 		cout<< "Number of Frames: "<< vh->nFrames<<endl;
-		cout<< "Quantization factor: "<< header.quantFactor<<endl;
+		//cout<< "Quantization factor: "<< header.quantFactor<<endl;
 		cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
 		cout<< "Golomb factor: "<< header.m<<endl;
 		bool firstFrame{true};
@@ -176,8 +192,12 @@ int main(int argc, char** argv)
 		while(!end) {
 			for(uint i = 0; i < vh->nFrames; i++) { 
 				if(!header.block) {
-					cout<< "Using intraframe coding"<<endl;
 					Predictor pred = Golomb::decode(bs);
+					if(firstFrame) {
+						cout<< "Using intraframe coding"<<endl;
+						cout<< "Quantization factor Y: "<< pred.quantizationFactorY()<< " U: "<< pred.quantizationFactorU()<< " V: "<< pred.quantizationFactorV()<<endl;
+						firstFrame = false;
+					}
 					f = pred.guess();
 					f->display(false,  "VideoPlayback");
 				 	waitKey(1.0 / vh->fps * 1000);
@@ -222,7 +242,7 @@ int main(int argc, char** argv)
 			header.nRows = v->rows();
 			header.format = v->format();
 			header.predictor = predType;
-			header.quantFactor = quant;
+			//header.quantFactor = quant;
 			header.index = pIndex;
 			header.m = m;
 			header.block = block;
@@ -235,7 +255,7 @@ int main(int argc, char** argv)
 			ss<< dst;
 			BitStream bs(ss.str().c_str(), (char*)"wb", (CAVHeader*) &header);
 			cout<< "Predictor: "<< ((header.predictor == 1) ? "Linear" : "Non-Linear")<< " - "<< header.index<<endl;
-			cout<< "Quantization factor: "<< quant<<endl;
+			cout<< "Quantization factor Y: "<< quantY<< " U: "<< quantU<< " V: "<< quantV<<endl;
 			cout<< "Golomb factor: "<< m<<endl;
 			double enctime{0.0};
 			Predictor *p = {nullptr};
@@ -249,9 +269,9 @@ int main(int argc, char** argv)
 					continue;
 				}
 				if(predType == 1)
-					p = new LinearPredictor(*f, pIndex, quant);
+					p = new LinearPredictor(*f, pIndex, quantY, quantU, quantV);
 				else
-					p = new NonLinearPredictor(*f, quant);
+					p = new NonLinearPredictor(*f, quantY, quantU, quantV);
 
 				if(block)
 					encodeInterframe(prev, f, p, m, bs);

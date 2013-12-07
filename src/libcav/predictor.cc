@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+#include <iostream>
 #include <vector>
 #include <string>
 #include <assert.h>
@@ -47,21 +47,21 @@ std::vector<int> Predictor::predict(const Frame& f) const
 				// First row b and c are considered to be 0 (no previous value)
 				a = tmp.y()[c - 1];
 				// b and c2 are zero 
-				errors[i] = (x - m_functor(a, 0, 0)) / m_quantFactor;
-				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactor) + m_functor(a, 0, 0);
+				errors[i] = (x - m_functor(a, 0, 0)) / m_quantFactorY;
+				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactorY) + m_functor(a, 0, 0);
 			} else if(c == 0) {
 				// First column a and b are considered to be 0
 				// a and c  are zeros 
 
 				b = tmp.y()[(r - 1) * tmp.cols() + c];
-				errors[i] = (x - m_functor(0, b, 0)) / m_quantFactor;
-				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactor) + m_functor(0, b, 0);
+				errors[i] = (x - m_functor(0, b, 0)) / m_quantFactorY;
+				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactorY) + m_functor(0, b, 0);
 			} else { 
 				a = tmp.y()[r * tmp.cols() + c - 1];
 				b = tmp.y()[(r - 1) * tmp.cols() + c];
 				c2 = tmp.y()[(r - 1) * tmp.cols() + c - 1];
-				errors[i] = (x - m_functor(a, b, c2)) / m_quantFactor;
-				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactor) + m_functor(a, b, c2);
+				errors[i] = (x - m_functor(a, b, c2)) / m_quantFactorY;
+				tmp.y()[r * tmp.y().cols() + c] = (errors[i]  * m_quantFactorY) + m_functor(a, b, c2);
 			}
 			i++;
 		}
@@ -84,36 +84,36 @@ std::vector<int> Predictor::predict(const Frame& f) const
 				a = tmp.u()[c - 1];
 				av = tmp.v()[c - 1];
 				
-				errors[tmp.size() + i] = (x - m_functor(a, 0, 0)) / m_quantFactor;
-				errors[tmp.size() + uSize + i] = (xv - m_functor(av, 0, 0)) / m_quantFactor;
+				errors[tmp.size() + i] = (x - m_functor(a, 0, 0)) / m_quantFactorU;
+				errors[tmp.size() + uSize + i] = (xv - m_functor(av, 0, 0)) / m_quantFactorV;
 
-				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactor) + m_functor(a, 0, 0);
-				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactor) + m_functor(av, 0, 0);
+				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactorU) + m_functor(a, 0, 0);
+				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactorV) + m_functor(av, 0, 0);
 			} else if(c == 0) {
 				// First column a and b are considered to be 0
 				// a and c  are zeros 
 
 				b = tmp.u()[(r - 1) * tmp.u().cols()];
-				errors[tmp.size() + i] = (x - m_functor(0, b, 0)) / m_quantFactor;
+				errors[tmp.size() + i] = (x - m_functor(0, b, 0)) / m_quantFactorU;
 
 				bv = tmp.v()[(r - 1) * tmp.v().cols()];
-				errors[tmp.size() + uSize + i] = (xv - m_functor(0, bv, 0)) / m_quantFactor;
+				errors[tmp.size() + uSize + i] = (xv - m_functor(0, bv, 0)) / m_quantFactorV;
 
-				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactor) + m_functor(0, b, 0);
-				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactor) + m_functor(0, bv, 0);
+				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactorU) + m_functor(0, b, 0);
+				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactorV) + m_functor(0, bv, 0);
 			} else { 
 				a = tmp.u()[r * tmp.u().cols() + c - 1];
 				b = tmp.u()[(r - 1) * tmp.u().cols() + c];
 				c2 = tmp.u()[(r - 1) * tmp.u().cols() + c - 1];
-				errors[tmp.size() + i] = (x - m_functor(a, b, c2)) / m_quantFactor;
+				errors[tmp.size() + i] = (x - m_functor(a, b, c2)) / m_quantFactorU;
 
 				av = tmp.v()[r * tmp.v().cols() + c - 1];
 				bv = tmp.v()[(r - 1) * tmp.v().cols() + c];
 				cv = tmp.v()[(r - 1) * tmp.v().cols() + c - 1];
-				errors[tmp.size() + uSize + i] = (xv - m_functor(av, bv, cv)) / m_quantFactor;
+				errors[tmp.size() + uSize + i] = (xv - m_functor(av, bv, cv)) / m_quantFactorV;
 
-				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactor) + m_functor(a, b, c2);
-				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactor) + m_functor(av, bv, cv);
+				tmp.u()[r * tmp.u().cols() + c] = (errors[tmp.size() + i]  * m_quantFactorU) + m_functor(a, b, c2);
+				tmp.v()[r * tmp.u().cols() + c] = (errors[tmp.size() + uSize + i]  * m_quantFactorV) + m_functor(av, bv, cv);
 			}
 
 			i++;
@@ -148,18 +148,18 @@ Frame* Predictor::guess() const
 				a = f->y()[c - 1];
 				//std::cout<< "a = "<< a<< " e = "<<e <<std::endl;
 				// b and c2 are zero 
-				f->y()[r + c] = (e  * m_quantFactor) + m_functor(a, 0, 0);
+				f->y()[r + c] = (e  * m_quantFactorY) + m_functor(a, 0, 0);
 			} else if(c == 0) {
 				// First column a and b are considered to be 0
 				// a and c  are zeros 
 
 				b = f->y()[(r - 1) * f->cols()];
-				f->y()[r * f->cols() + c] = (e  * m_quantFactor) + m_functor(0, b, 0);
+				f->y()[r * f->cols() + c] = (e  * m_quantFactorY) + m_functor(0, b, 0);
 			} else { 
 				a = f->y()[r * f->cols() + c - 1];
 				b = f->y()[(r - 1) * f->cols() + c];
 				c2 = f->y()[(r - 1) * f->cols() + c - 1];
-				f->y()[r * f->cols() + c] = (e  * m_quantFactor) + m_functor(a, b, c2);
+				f->y()[r * f->cols() + c] = (e  * m_quantFactorY) + m_functor(a, b, c2);
 			}
 			i++;
 		}
@@ -181,28 +181,28 @@ Frame* Predictor::guess() const
 				a = f->u()[c - 1];
 				av = f->v()[c - 1];
 				
-				f->u()[i] = (e  * m_quantFactor) + m_functor(a, 0, 0);
-				f->v()[i] = (ev  * m_quantFactor) + m_functor(av, 0, 0);
+				f->u()[i] = (e  * m_quantFactorU) + m_functor(a, 0, 0);
+				f->v()[i] = (ev  * m_quantFactorV) + m_functor(av, 0, 0);
 			} else if(c == 0) {
 				// First column a and b are considered to be 0
 				// a and c  are zeros 
 
 				b = f->u()[(r - 1) * f->u().cols()];
-				f->u()[i] = (e  * m_quantFactor) + m_functor(0, b, 0);
+				f->u()[i] = (e  * m_quantFactorU) + m_functor(0, b, 0);
 
 				bv = f->v()[(r - 1) * f->v().cols()];
-				f->v()[i] = (ev  * m_quantFactor) + m_functor(0, bv, 0);
+				f->v()[i] = (ev  * m_quantFactorV) + m_functor(0, bv, 0);
 
 			} else { 
 				a = f->u()[r * f->u().cols() + c - 1];
 				b = f->u()[(r - 1) * f->u().cols() + c];
 				c2 = f->u()[(r - 1) * f->u().cols() + c - 1];
-				f->u()[i] = (e  * m_quantFactor) + m_functor(a, b, c2);
+				f->u()[i] = (e  * m_quantFactorU) + m_functor(a, b, c2);
 
 				av = f->v()[r * f->v().cols() + c - 1];
 				bv = f->v()[(r - 1) * f->v().cols() + c];
 				cv = f->v()[(r - 1) * f->v().cols() + c - 1];
-				f->v()[i] = (ev  * m_quantFactor) + m_functor(av, bv, cv);
+				f->v()[i] = (ev  * m_quantFactorV) + m_functor(av, bv, cv);
 			}
 			i++;
 		}

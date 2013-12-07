@@ -30,11 +30,11 @@ public:
 	/**
 	 * @param f - const reference to a frame
 	 */
-	NonLinearPredictor(Frame& f, float quantFactor = 1.0f);
+	NonLinearPredictor(Frame& f, int quantFactorY = 1, int quantFactor = 1, int quantFactorV = 1);
 	
-	NonLinearPredictor(float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors);
+	NonLinearPredictor(int quantFactorY, int quantFactorU, int quantFactorV, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors);
 
-	NonLinearPredictor(float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors);
+	NonLinearPredictor(int quantFactorY, int quantFactorU, int quantFactorV, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors);
 	/**
 	 *
 	 */

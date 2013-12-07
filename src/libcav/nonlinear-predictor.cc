@@ -44,17 +44,17 @@ static std::function<int (int, int, int) > m_defFunctors[N_FUNCTORS]{
 	}}
 };
 
-NonLinearPredictor::NonLinearPredictor(Frame& f, float quantFactor)
-	: Predictor(f, NONLINEAR_PREDICTOR, quantFactor, 0, m_defFunctors[0])
+NonLinearPredictor::NonLinearPredictor(Frame& f, int quantFactorY, int quantFactorU, int quantFactorV)
+	: Predictor(f, NONLINEAR_PREDICTOR, quantFactorY, quantFactorU, quantFactorV, 0, m_defFunctors[0])
 {
 }
 
-NonLinearPredictor::NonLinearPredictor(float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
-	: Predictor(NONLINEAR_PREDICTOR, quantFactor, 0, m_defFunctors[0], nRows, nCols, format, errors)
+NonLinearPredictor::NonLinearPredictor(int quantFactorY, int quantFactorU, int quantFactorV, uint nRows, uint nCols, VideoFormat format, const std::vector<int>& errors)
+	: Predictor(NONLINEAR_PREDICTOR, quantFactorY, quantFactorU, quantFactorV, 0, m_defFunctors[0], nRows, nCols, format, errors)
 {
 }
 
-NonLinearPredictor::NonLinearPredictor(float quantFactor, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
-	: Predictor(NONLINEAR_PREDICTOR, quantFactor, 0, m_defFunctors[0], nRows, nCols, format, errors)
+NonLinearPredictor::NonLinearPredictor(int quantFactorY, int quantFactorU, int quantFactorV, uint nRows, uint nCols, VideoFormat format, const std::vector<int>&& errors)
+	: Predictor(NONLINEAR_PREDICTOR, quantFactorY, quantFactorU, quantFactorV, 0, m_defFunctors[0], nRows, nCols, format, errors)
 {
 }
