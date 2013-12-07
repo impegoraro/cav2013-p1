@@ -155,7 +155,7 @@ public:
 	int operator[](uint index) const;
 
 	/**
-	 * Return a sub block. Note that the sub block is not a copy, that means that any change to any of its elements will be made to the original block as well.
+	 * Return a sub block in a linear fashion. Note that the sub block is not a copy, that means that any change to any of its elements will be made to the original block as well.
 	 * Also since its not a copy, the block cannot be deleted. Doing so make the sub block useless and any future use of it will result in an unpredictible result.
 	 * @param begin - initial position of the sub block.
 	 * @param rows - Number of rows of the sub block
@@ -165,8 +165,7 @@ public:
 	Block getSubBlock(uint begin, uint rows, uint cols);
 
 	/**
-	 * Return a sub block. Note that the sub block is not a copy, that means that any change to any of its elements will be made to the original block as well.
-	 * Also since its not a copy, the block cannot be deleted. Doing so make the sub block useless and any future use of it will result in an unpredictible result.
+	 * Return a sub block. Note that the sub block is a copy,.
 	 * @param begin - initial position of the sub block.
 	 * @param rows - Number of rows of the sub block
 	 * @param cols - Number of columns of the sub block.
@@ -174,20 +173,19 @@ public:
 	 */
 	const Block getSubBlock(uint begin, uint rows, uint cols) const;
 	/**
-	 * Copies the values of the a sub block to the internal data.
+	 * Copies the values of the a sub block to the internal data in a linear fashion.
 	 * @param begin - Initial position from where to copy b.
 	 * @param b - Sub block to get the values from.
 	 */
 	void setSubBlock(uint begin, Block& b);
+	void setSubBlock(uint beginRow, uint beginCol, const Block& b) const;
+	Block getSubBlock(uint beginRow, uint beginCol, uint rows, uint cols) const;
 
-	
 	/**
 	 * Prints the content of the block.
 	 */
 	void print();
 
-	Block getSubBlock(uint oRow, uint oCol, uint rows, uint cols);
-	const Block getSubBlock(uint oRow, uint oCol, uint rows, uint cols) const;
 
 	uint compareTo(const Block& rhs) const;
 	Block operator+(const Block& rhs) const;

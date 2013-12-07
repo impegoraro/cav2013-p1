@@ -44,11 +44,6 @@ Block::Block(const Block& b)
 {
 	this->m_buffer = new int[m_nRows * m_nCols];
 	std::memcpy(this->m_buffer, b.m_buffer, sizeof(int) * m_nRows * m_nCols);
-
-	////Falling back to copying byte by byte
-	//for(uint i = 0; i < m_nRows * m_nCols; i++)
-	//	m_buffer[i] = b.m_buffer[i];
-	//assert(*this == b);
 }
 
 Block::Block(Block&& b)
@@ -106,9 +101,32 @@ Block* Block::dup()
 	return b;
 }
 
+Block Block::getSubBlock(uint beginRow, uint beginCol, uint rows, uint cols) const
+{
+	assert (beginRow + rows <= m_nRows && beginCol + cols <= m_nCols);
+	Block b(rows, cols); 
+	uint rb = 0;
+
+	for (uint r = beginRow; r < beginRow + rows; r++, rb++) {
+  		for (uint c = beginCol, cb = 0; c < beginCol + cols; c++, cb++)
+	  		b.m_buffer[rb * cols + cb] = m_buffer[r * m_nCols + c];
+  	}
+	return b;
+}
+
+void Block::setSubBlock(uint beginRow, uint beginCol, const Block& b) const
+{
+	assert (beginRow + b.rows() <= m_nRows && beginCol + b.cols() <= m_nCols);
+	uint rb = 0;
+
+	for (uint r = beginRow; r < beginRow + b.rows(); r++, rb++) {
+  		for (uint c = beginCol, cb = 0; c < beginCol + b.cols(); c++, cb++)
+	  		m_buffer[r * m_nCols + c] = b.m_buffer[rb * b.cols() + cb];
+  	}
+}
+
 Block Block::getSubBlock(uint begin, uint rows, uint cols)
 {
-	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
 	assert((begin + rows * cols) <= m_nRows * m_nCols);
 	Block b;
 	b.m_nRows = rows;
@@ -118,34 +136,8 @@ Block Block::getSubBlock(uint begin, uint rows, uint cols)
 	return b;
 }
 
-Block Block::getSubBlock(uint oRow, uint oCol, uint rows, uint cols)
-{
-	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
-	assert(((oRow * m_nCols + oCol) + rows * cols) <= m_nRows * m_nCols);
-	Block b;
-	b.m_nRows = rows;
-	b.m_nCols = cols;
-	b.m_buffer = &m_buffer[(oRow * m_nCols + oCol)];
-
-	return b;
-}
-
-const Block Block::getSubBlock(uint oRow, uint oCol, uint rows, uint cols) const
-{
-	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
-	assert(((oRow * m_nCols + oCol) + rows * cols) <= m_nRows * m_nCols);
-	Block b;
-	b.m_nRows = rows;
-	b.m_nCols = cols;
-	b.m_buffer = &m_buffer[(oRow * m_nCols + oCol)];
-
-	return b;
-}
-
-
 const Block Block::getSubBlock(uint begin, uint rows, uint cols) const
 {
-	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
 	assert((begin + rows * cols) <= m_nRows * m_nCols);
 	
 	Block b;
@@ -159,8 +151,6 @@ const Block Block::getSubBlock(uint begin, uint rows, uint cols) const
  /*TODO: implement const methods to let the 3rd parameter to be a const Block& */
 void Block::setSubBlock(uint begin, Block& b)
 {
-	//std::cout<< "Begin "<< begin << " size: "<< m_nRows * m_nCols<<std::endl;
-	//std::cout<< "Begin "<< begin << " size: "<< b.rows() * b.cols()<<std::endl;
 	assert(begin + b.rows() * b.cols() <= m_nRows * m_nCols);
 	
 	for(uint i = begin, c = 0; c < b.rows() * b.cols(); i++, c++)
@@ -171,29 +161,15 @@ bool Block::operator==(const Block& rhs)
 {
 	bool res(false);
 
-	if(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols) {
-		//res = true; // assume the blocks are equals
-		//for(uint i = 0; i < (m_nRows * m_nCols); i++) {
-		//	if(m_buffer[i] != rhs.m_buffer[i]) {
-		//		res = false; // first element different, return false
-		//		break;
-		//	}
-		//}
+	if(this->m_nRows == rhs.m_nRows && this->m_nCols == rhs.m_nCols)
 		return (std::memcmp(m_buffer, rhs.m_buffer, sizeof(int) * m_nRows * m_nCols) == 0);
-	}
+
 	return res;
 }
 
 bool Block::operator==(const char* rhs)
 {
 	return std::memcmp(m_buffer, rhs, sizeof(int) * m_nRows * m_nCols);
-	//bool res = true;
-	//for(uint i = 0; i < (m_nRows * m_nCols); i++)
-	//	if(m_buffer[i] != rhs[i]) {
-	//		res = false;  // first element different, return false
-	//		break;
-	//	}
-	//return res;
 }
 
 int& Block::operator[](uint index)
@@ -221,21 +197,12 @@ Block& Block::operator=(const Block& rhs)
 		m_shouldClean = true;
 	}
 	std::memcpy(m_buffer, rhs.m_buffer, sizeof(int) * m_nRows * m_nCols);
-	//Fallback method if errors occurs
-	//for(uint i = 0; i < (m_nRows * m_nCols); i++)
-	//	m_buffer[i] = rhs.m_buffer[i];
-
-	//assert (*this == rhs);
 	return *this;
 }
 
 Block& Block::operator=(const char *rhs)
 {
-	//for(uint i = 0; i < m_nRows * m_nCols; i++)
-	//	m_buffer[i] = rhs[i];
-
 	std::memcpy(this->m_buffer, rhs, sizeof(int) * m_nRows * m_nCols);
-	//assert (*this == rhs);
 	return *this;
 }
 
