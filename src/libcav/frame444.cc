@@ -40,6 +40,10 @@ Frame444::Frame444(Frame&& f) : Frame(f)
 	assert(f.getFormat() == YUV_444);
 }
 
+Frame444::Frame444(Frame444&& f) : Frame(f)
+{
+}
+
 Frame Frame444::convert(VideoFormat dest)
 {
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);

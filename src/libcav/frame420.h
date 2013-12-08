@@ -35,7 +35,20 @@ public:
 	 * @param nCols - Number of columns.
 	 */
 	Frame420(unsigned int nRows, unsigned int nCols);
-
+	/**
+	 * Move constructor
+	 * @param f - Frame
+	 */
+	Frame420(Frame420&& f) : Frame(f)
+	{
+	}
+	/**
+	 * Move constructor
+	 * @param f - Frame
+	 */
+	Frame420(const Frame420& f) : Frame(f)
+	{
+	}
 	/**
 	 * Overrided method from the frame base class. This methods converts a frame in YUV444 format to the new format.
 	 * @param dest - VideoFormat for the new Frame.

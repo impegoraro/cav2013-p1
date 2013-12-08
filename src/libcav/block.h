@@ -22,6 +22,13 @@
 #include "exceptions/cav-exceptions.h"
 
 
+enum class BlockType
+{
+	Y,
+	U,
+	V
+};
+
 /**
  * The class with all the Block data and methods.
  * The class allows operations in both individual values or using sub blocks.
@@ -29,6 +36,10 @@
 class Block
 {
 public:
+	/**
+	 * Creates an empty block with no associated buffer.
+	 */
+	Block();
 	/**
 	 * Initializes the block with the size rows * cols.
 	 * @param rows - Number of rows
@@ -79,17 +90,17 @@ public:
 	 * Gets the number of rows of the defined block.
 	 * @return uint - Number of rows
 	 */
-	uint rows(void);
+	uint rows(void) const;
 	/**
 	 * Gets the number of columns of the defined block.
 	 * @return uint - Number of columns
 	 */
-	uint cols(void);
+	uint cols(void) const;
 	/**
 	 * Gets the size of the block
 	 * @return uint - size of the block
 	 */
-	uint size(void);
+	uint size(void) const;
 
 	/**
 	 * Returns the internal buffer of the block.
@@ -144,7 +155,7 @@ public:
 	int operator[](uint index) const;
 
 	/**
-	 * Return a sub block. Note that the sub block is not a copy, that means that any change to any of its elements will be made to the original block as well.
+	 * Return a sub block in a linear fashion. Note that the sub block is not a copy, that means that any change to any of its elements will be made to the original block as well.
 	 * Also since its not a copy, the block cannot be deleted. Doing so make the sub block useless and any future use of it will result in an unpredictible result.
 	 * @param begin - initial position of the sub block.
 	 * @param rows - Number of rows of the sub block
@@ -152,25 +163,38 @@ public:
 	 * @return Block - A sub block 
 	 */
 	Block getSubBlock(uint begin, uint rows, uint cols);
+
 	/**
-	 * Copies the values of the a sub block to the internal data.
+	 * Return a sub block. Note that the sub block is a copy,.
+	 * @param begin - initial position of the sub block.
+	 * @param rows - Number of rows of the sub block
+	 * @param cols - Number of columns of the sub block.
+	 * @return Block - A sub block 
+	 */
+	const Block getSubBlock(uint begin, uint rows, uint cols) const;
+	/**
+	 * Copies the values of the a sub block to the internal data in a linear fashion.
 	 * @param begin - Initial position from where to copy b.
 	 * @param b - Sub block to get the values from.
 	 */
 	void setSubBlock(uint begin, Block& b);
+	void setSubBlock(uint beginRow, uint beginCol, const Block& b) const;
+	Block getSubBlock(uint beginRow, uint beginCol, uint rows, uint cols) const;
 
-	
 	/**
 	 * Prints the content of the block.
 	 */
 	void print();
 
 
+	uint compareTo(const Block& rhs) const;
+	Block operator+(const Block& rhs) const;
+	Block operator-(const Block& rhs) const;
+	Block& operator+(const Block& rhs);
+	Block& operator-(const Block& rhs);
+	Block& operator*(int quant);
+	Block& operator/(int quant);
 protected:
-	/**
-	 * Creates an empty block with no associated buffer.
-	 */
-	Block();
 	/**
 	 * Number of rows.
 	 */

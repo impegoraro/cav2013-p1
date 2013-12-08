@@ -65,7 +65,7 @@ public:
 	/**
 	 * Gets the current VideoFormat.
 	 */
-	VideoFormat getFormat();
+	VideoFormat getFormat() const;
 
 	/**
 	 * Changes the frames components.
@@ -111,7 +111,7 @@ public:
 	/**
 	 * Displays the current frame in a window.
 	 */
-	void display();
+	void display(bool wait = true, std::string name = "");
 
 	/**
 	 * Converts the frame to black and white.
@@ -130,23 +130,29 @@ public:
 	 * Gets the number of rows of the defined frame.
 	 * @return uint - Number of rows
 	 */
-	uint rows();
+	uint rows() const;
 	/**
 	 * Gets the number of columns of the defined frame.
 	 * @return uint - Number of columns
 	 */
-	uint cols();
+	uint cols() const;
+
+	/**
+	 * Returns the size of the frame.
+	 * @return uint - size of the frame
+	 */
+	uint size() const;
 
 	/**
 	 * Makes a copies the frame into the internal buffers.
 	 * @param rhs - The source frame.
 	 */
-	Frame& operator=(const Frame& rhs);
+	virtual Frame& operator=(const Frame& rhs);
 	/**
 	 * Moves the buffers of rhs into the internal buffers.
 	 * @param rhs - The source frame.
 	 */
-	Frame& operator=(Frame&& rhs);
+	virtual Frame& operator=(Frame&& rhs);
 
 	/**
 	 * Gets the block defined by the component Y.
@@ -155,6 +161,13 @@ public:
 	 * @return Block& - A reference to the block Y.
 	 */
 	Block& y();
+
+	/**
+	 * Gets the block defined by the component Y.
+	 * @return const Block& - A constant reference to the block Y.
+	 */
+	const Block& y() const;
+	
 	/**
 	 * Gets the block defined by the component U.
 	 * Since it returns a reference to the block all changes made to the 
@@ -162,6 +175,13 @@ public:
 	 * @return Block& - A reference to the block U.
 	 */
 	Block& u();
+	
+	/**
+	 * Gets the block defined by the component U.
+	 * @return const Block& - A constant reference to the block U.
+	 */
+	const Block& u() const;
+
 	/**
 	 * Gets the block defined by the component V.
 	 * Since it returns a reference to the block all changes made to the 
@@ -171,6 +191,21 @@ public:
 	Block& v();
 
 	/**
+	 * Gets the block defined by the component V.
+	 * @return const Block& - A constant reference to the block V
+	 */
+	const Block& v() const;
+
+	/**
+	 * Compares two the current frame with the one passed as a parameter.
+	 * @param rhs Frame to compare
+	 * @param y - Result for the Y component 
+	 * @param u - Result for the U component
+	 * @param v - Result for the V component
+	 */
+	void psnr(const Frame& rhs, float& y, float& u, float& v) const;
+
+	/**
 	 * Creates a buffer of the YUV buffers in packed mode, the size of the resulting 
 	 * buffer is returned by the first parameter. Note that the buffer is dynamically allocated
 	 * therefore must be freed by the caller.
@@ -178,7 +213,7 @@ public:
 	 * @return unsigned char* - buffer in packed mode.
 	 */
 	virtual unsigned char* packedMode(uint& size) const;
-	
+
 	/**
 	 * Writes a frame to the mass storage device.
 	 * @param path - The file path where the frame is to be saved on.
@@ -200,6 +235,20 @@ public:
 	 * @return Frame* - dyanmically allcated frame.
 	 */
 	static Frame* create_from_file(const std::string& path);
+
+	/**
+	 * Creates a new frame in the specified format.
+	 * @param nRows - Number of Rows
+	 * @param nCols - Number of Columns
+	 * @param format - Frame format
+	 */
+	static Frame* create(uint nRows, uint nCols, VideoFormat format);
+
+	/**
+	 *
+	 */
+	//Block findBestBlock(const Frame& previous, const Block& b, uint radius, int& dr, int& dc, BlockType type);
+	Block findBestBlock(const Frame& previous, const Block& b, uint radius, uint actualRow, uint actualCol, int& dr, int& dc, BlockType type) const;
 protected:
 	/**
 	 * Number of rows

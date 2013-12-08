@@ -14,19 +14,18 @@
 using namespace cv;
 
 Video::Video()
-	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB)
+	: VideoInterface(0, 0, 0, RGB), m_fromCam(true), m_video(0), m_headerSize{0}
 {
 	std::string device("/dev/video0");
 	
 	m_stream.open(device);
 	m_fps = 30; //(int)m_video.get(CV_CAP_PROP_FPS);
-	m_cols= (int)m_video.get(CV_CAP_PROP_FRAME_WIDTH);
+	m_cols = (int)m_video.get(CV_CAP_PROP_FRAME_WIDTH);
 	m_rows = (int)m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
-	m_type = RGB;
 }
 
 Video::Video(int number)
-	: m_rows(0), m_cols(0), m_fps(0), m_fromCam(true), m_video(0), m_type(RGB)
+	: VideoInterface(0, 0, 0, RGB), m_fromCam(true), m_video(0), m_headerSize{0}
 {
 	std::string device("/dev/video");
 	
@@ -35,11 +34,10 @@ Video::Video(int number)
 	m_fps = 30; //(int)m_video.get(CV_CAP_PROP_FPS);
 	m_cols= (int)m_video.get(CV_CAP_PROP_FRAME_WIDTH);
 	m_rows = (int)m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
-	m_type = RGB;
 }
 
 Video::Video(const std::string& fpath)
-	:m_stream(fpath), m_rows(0), m_cols(0), m_fps(0), m_fromCam(false), m_video(), m_type(RGB)
+	: VideoInterface(0, 0, 0, YUV_444), m_stream(fpath, std::ios::in | std::ios::out | std::ios::binary), m_fromCam(false), m_video(), m_headerSize{0}
 {
 	int type;
 	char c; // to get the newline
@@ -47,6 +45,7 @@ Video::Video(const std::string& fpath)
 		throw FileNotFoundException();
 	if(fpath.find(".yuv") != std::string::npos) {
 		m_stream>> m_cols>> m_rows>> m_fps>> type>> c;
+		m_headerSize = m_stream.tellg();
 		m_video.release();
 		switch(type) {
 			case 444:
@@ -74,7 +73,7 @@ Video::Video(const std::string& fpath)
 }
 
 Video::Video(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat format)
-	: m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_rows(rows), m_cols(cols), m_fps(fps), m_fromCam(false), m_type(format)
+	: VideoInterface(rows, cols, fps, format), m_stream(fpath, std::ios::in | std::ios::out | std::ios::trunc), m_fromCam(false), m_headerSize{0}
 {
 	if(!m_stream.good())
 		throw FileNotFoundException();
@@ -136,7 +135,7 @@ Frame* Video::getFrame()
 			throw VideoEndedException();
 		}
 		// Unneeded
-		f = new Frame444(rows, cols);
+		//f = new Frame444(rows, cols);
 
 		for(uint i = 0; i < rows * cols * 3; i += 3) {
 			b = tmpFrame.ptr()[i];
@@ -189,26 +188,6 @@ void Video::putFrame(Frame& f)
 	delete buffer;
 }
 
-uint Video::rows()
-{
-	return m_rows;
-}
-
-uint Video::cols()
-{
-	return m_cols;
-}
-
-uint Video::fps()
-{
-	return m_fps;
-}
-
-VideoFormat Video::format()
-{
-	return m_type;
-}
-
 void Video::reset()
 {
 	string tmp;
@@ -242,41 +221,15 @@ void Video::convert(const std::string& path, VideoFormat dest)
 	}
 }
 
-void Video::display(bool playing)
+uint Video::getTotalFrames()
 {
-	Frame *f = NULL;
-	int end = false, inputKey;
+	m_stream.clear(); // cleans eof so that tellg works
 
-	while(!end) {
-		try {
-			f = getFrame();
-		} catch (VideoEndedException& e) {
-			end = true;
-			continue;
-		}
-		f->display();
-		delete f;
-		if(playing)
-		{
-			/* wait according to the frame rate */
-			inputKey = waitKey(1.0 / m_fps * 1000);
-		}
-		else
-		{
-			/* wait until user press a key */
-			inputKey = waitKey(0);
-		}
+    uint curpos{m_stream.tellg()};
+	m_stream.seekg(0, m_stream.end);
+    uint vsize{m_stream.tellg()};
 	
-		/* parse the pressed keys, if any */
-		switch((char)inputKey)
-		{
-			case 'q':
-				end = 1;
-				break;
-			
-			case 'p':
-				playing = playing ? 0 : 1;
-				break;
-		}		
-	}
+	m_stream.seekg(curpos, m_stream.beg);
+
+	return (vsize / getFrameSize());
 }

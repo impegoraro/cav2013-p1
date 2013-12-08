@@ -78,18 +78,20 @@ int main(int argc, char** argv)
 		return 1;
 	}
 	try {
-		Video *v;
+		VideoInterface *v;
 		if(src == NULL) {
 			cout<< "Using webcam..."<<endl;
 			v = new Video();
 		} else {
 			cout<< "Using file..."<<endl;
 			string path(src);
-			v = new Video(path);
+			if(path.find(".gmb") != std::string::npos)
+				v = new VideoEncoded(path);
+			else v = new Video(path);
 		}
 		
 		v->display(playing);
-			
+
 		while(cont) {
 			cout<< "Do you want to play it again? [y/n]: ";
 			cin>> ans;
@@ -101,9 +103,11 @@ int main(int argc, char** argv)
 				cont = false;
 				break;
 			}
+			cout<< "Total Video Frames are: "<< v->getTotalFrames()<< endl;
 			v->display(playing);
 		}
 		delete v;
+
 	} catch (FileNotFoundException& e) {
 		cerr<< "File not found"<< endl;
 	}

@@ -20,8 +20,11 @@
 #include <algorithm>
 #include <string>
 #include <cstring>
+#include <cstdlib>
+#include <sstream>
 #include <fstream>
 #include <assert.h>
+#include <climits>
 #include <opencv2/opencv.hpp>
 
 #include "video-format.h"
@@ -29,9 +32,10 @@
 #include "frame444.h"
 #include "frame422.h"
 #include "frame420.h"
+#include "framergb.h"
 
 Frame::Frame()
-	: m_rows(0), m_cols(0), m_uvRows(0), m_uvCols(0), m_y(NULL), m_u(NULL), m_v(NULL), m_format(YUV_444)
+	: m_rows(0), m_cols(0), m_uvRows(0), m_uvCols(0), m_y(nullptr), m_u(nullptr), m_v(nullptr), m_format(YUV_444)
 {
 }
 
@@ -71,18 +75,18 @@ Frame::Frame(Frame &&f)
 {
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 
-	f.m_y = NULL;
-	f.m_u = NULL;
-	f.m_v = NULL;
+	f.m_y = nullptr;
+	f.m_u = nullptr;
+	f.m_v = nullptr;
 }
 
 Frame::~Frame()
 {
-	if(m_y != NULL)
+	if(m_y != nullptr)
 		delete m_y;
-	if(m_u != NULL)
+	if(m_u != nullptr)
 		delete m_u;
-	if(m_v != NULL)
+	if(m_v != nullptr)
 		delete m_v;	
 }
 
@@ -90,11 +94,11 @@ Frame& Frame::operator=(const Frame& rhs)
 {
 	assert(m_rows == rhs.m_rows && m_cols == rhs.m_cols && m_uvRows == rhs.m_uvRows && m_uvCols == rhs.m_uvCols && m_format == rhs.m_format);
 
-	if(m_y != NULL)
+	if(m_y != nullptr)
 		delete m_y;
-	if(m_u != NULL)
+	if(m_u != nullptr)
 		delete m_u;
-	if(m_v != NULL)
+	if(m_v != nullptr)
 		delete m_v;
 
 	(*m_y) = *rhs.m_y;
@@ -112,19 +116,19 @@ Frame& Frame::operator=(Frame&& rhs)
 	m_uvCols = rhs.m_uvCols;
 	m_format = rhs.m_format;
 
-	if(m_y != NULL)
+	if(m_y != nullptr)
 		delete m_y;
-	if(m_u != NULL)
+	if(m_u != nullptr)
 		delete m_u;
-	if(m_v != NULL)
+	if(m_v != nullptr)
 		delete m_v;
 
 	(m_y) = rhs.m_y;
-	rhs.m_y = NULL;
+	rhs.m_y = nullptr;
 	(m_u) = rhs.m_u;
-	rhs.m_u = NULL;
+	rhs.m_u = nullptr;
 	(m_v) = rhs.m_v;
-	rhs.m_v = NULL;
+	rhs.m_v = nullptr;
 
 	return *this;
 }
@@ -173,12 +177,12 @@ void Frame::getPixel(uint pos, int& y, int& u, int& v)
 	v = (*m_v)[pos];
 }
 
-VideoFormat Frame::getFormat()
+VideoFormat Frame::getFormat() const
 {
 	return m_format;
 }
 
-void Frame::display()
+void Frame::display(bool wait, std::string name)
 {
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 	int r, g, b;
@@ -218,8 +222,16 @@ void Frame::display()
 		buffer[i + 1] = g;
 		buffer[i + 2] = r;
 	}
+	std::string winName;
+	if(name.size() == 0) {
+		std::stringstream ss;
 
-	imshow("rgb", img);
+		ss<< "rgb-"<<rand() % 10000;
+		winName = std::move(ss.str());
+	} else 
+		winName = name;
+	imshow(winName.c_str(), img);
+	if(wait) cv::waitKey(0); // giving control back to opencv 
 }
 
 void Frame::setBlackWhite()
@@ -261,17 +273,27 @@ void Frame::changeLuminance(float factor)
 	}
 }
 
-uint Frame::rows()
+uint Frame::rows() const
 {
 	return m_rows;
 }
 
-uint Frame::cols()
+uint Frame::cols() const
 {
 	return m_cols;
 }
 
+uint Frame::size() const
+{
+	return m_rows * m_cols;
+}
+
 Block& Frame::y()
+{
+	return *m_y;
+}
+
+const Block& Frame::y() const
 {
 	return *m_y;
 }
@@ -281,14 +303,24 @@ Block& Frame::u()
 	return *m_u;
 }
 
+const Block& Frame::u() const
+{
+	return *m_u;
+}
+
 Block& Frame::v()
+{
+	return *m_v;
+}
+
+const Block& Frame::v() const
 {
 	return *m_v;
 }
 
 Frame Frame::convert(VideoFormat format)
 {
-
+	assert(false);
 	assert(m_rows > 0 && m_cols > 0 && m_uvRows > 0 && m_uvCols > 0);
 
 	Frame f;
@@ -314,7 +346,6 @@ unsigned char* Frame::packedMode(uint& size) const
 	size = m_rows * m_cols + m_uvRows * m_uvCols * 2;
 	unsigned char *buffer = new unsigned char[size];
 	
-	std::memset((char*)buffer, 127, sizeof(buffer));
 	for(uint i = 0 ; i < m_rows * m_cols * 3 ; i += 3)
 	{
 		/* Accessing to planar infor */
@@ -345,6 +376,30 @@ void Frame::write(const std::string& path)
 	stream.close();
 }
 
+void Frame::psnr(const Frame& rhs, float& y, float& u, float& v) const
+{
+	assert(m_y != nullptr && m_u != nullptr && m_v != nullptr);
+    float sumY(0), sumU(0), sumV(0);
+    float eSqY(0), eSqU(0), eSqV(0);
+
+    eSqY = 1.0 / m_y->size();
+    eSqU = 1.0 / m_u->size();
+    eSqV = 1.0 / m_v->size();
+
+    for(uint i = 0; i < m_y->size(); i++) {
+        sumY += ((*m_y)[i] - rhs.y()[i]) * ((*m_y)[i] - rhs.y()[i]);
+    }
+
+    for(uint i = 0; i < m_u->size(); i++) {
+        sumU += ((*m_u)[i] - rhs.u()[i]) * ((*m_u)[i] - rhs.u()[i]);
+        sumV += ((*m_v)[i] - rhs.v()[i]) * ((*m_v)[i] - rhs.v()[i]);
+    }
+
+	y = 10.0 * log10f(255.0 * 255.0 / (eSqY * sumY));
+	u = 10.0 * log10f(255.0 * 255.0 / (eSqU * sumU));
+	v = 10.0 * log10f(255.0 * 255.0 / (eSqV * sumV));
+}
+
 /************************************
  *          Static Methods          * 
  ***********************************/
@@ -353,9 +408,8 @@ Frame* Frame::create_from_file(const std::string& path)
 {
 	std::ifstream stream(path);
 	uint cols, rows, type;
-	uint uvCols(0), uvRows(0), size(0);
 	char c;
-	Frame *f(NULL);
+	Frame *f(nullptr);
 
 	if(!stream.good())
 		throw FileNotFoundException();
@@ -365,44 +419,110 @@ Frame* Frame::create_from_file(const std::string& path)
 
 	switch(type) {
 	case 444: {
-		uvRows = rows;
-		uvCols = cols;
-		size = rows * cols * 3;
 		f = new Frame444(rows, cols);
 		break;
 	} case 422: {
-		uvRows = rows;
-		uvCols = cols / 2;
-		size = rows * cols + uvRows * uvCols * 2;
 		f = new Frame422(rows, cols);
-		cols /= 2;
 		break;
 	} case 420: {
-		rows = rows / 2;
-		cols = cols / 2;
-		size = rows * cols + uvRows * uvCols * 2;
-
 		f = new Frame420(rows, cols);
 		break;
 	} default:
 		throw InvalidVideoTypeException();
 	}
 	
-	stream.read((char*)buffer, size);
-	int y,u,v;
-	for(uint i = 0 ; i < rows * cols * 3 ; i += 3)
+	stream.read((char*)buffer, f->size() * 3);
+	int y, u, v;
+	for(uint i = 0 ; i < f->size() * 3; i += 3)
 	{ 
 		/* Accessing to planar infor */
 		y = buffer[i / 3]; 
 		f->y()[i / 3] = y;
 		
 		if(type == YUV_444 || ((i/3) < f->u().size())) {
-			u = buffer[(i / 3) + (rows * cols)]; 
-			v = buffer[(i / 3) + (rows * cols + uvRows * uvCols)];
+			u = buffer[(i / 3) + f->y().size()]; 
+			v = buffer[(i / 3) + f->y().size() + f->u().size()];
 			f->u()[i / 3] = u;
 			f->v()[i / 3] = v;
 		}
 	}
 	stream.close();
 	return f;
+}
+
+// Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, int& dr, int& dc, BlockType type)
+// {
+// 	std::cout<< "should remove"<<std::endl;
+
+// 	assert(false);
+// 	std::cout<< "FindBestBlock"<<std::endl;
+// 	int bestMatch{INT_MAX}, tmpDiff{0};
+// 	Block *inB{nullptr}, *pinB{nullptr};
+// 	Block tmpBlock(1,1), bestBlock(1,1);
+// 	if(type == BlockType::Y) {inB = m_y; pinB = previous.m_y;}
+// 	else if(type == BlockType::U) {inB = m_u; pinB = previous.m_u;}
+// 	else if(type == BlockType::V) {inB = m_v; pinB = previous.m_v;}
+	
+// 	assert(pinB != nullptr);
+// 	uint ir{(b.rows() - radius < 0) ? 0 : (b.rows() - radius)};
+// 	uint ic{(b.cols() - radius < 0) ? 0 : (b.cols() - radius)};
+// 	uint fr{(b.rows() + radius > inB->rows()) ? inB->rows() : (b.rows() + radius)};
+// 	uint fc{(b.cols() + radius > inB->cols()) ? inB->cols() : (b.cols() + radius)};
+
+// 	for(uint r = ir; r < fr; r++){
+// 		for(uint c = ic; c < fc; c++){
+// 			tmpBlock = pinB->getSubBlock(r * previous.cols() + c, b.rows(), b.cols());
+// 			tmpDiff = b.compareTo(tmpBlock);
+// 			if(tmpDiff < bestMatch) {
+// 				bestMatch = tmpDiff;
+// 				bestBlock = tmpBlock;
+// 				dr = r;
+// 				dc = c;
+// 			}
+// 		}
+// 	}	
+// 	return bestBlock;
+// }
+
+Block Frame::findBestBlock(const Frame& previous, const Block& b, uint radius, uint actualRow, uint actualCol, int& dr, int& dc, BlockType type) const
+{
+	int bestMatch{INT_MAX}, tmpDiff{0};
+	Block *inB{nullptr}, *pinB{nullptr};
+	Block tmpBlock(1,1), bestBlock(1,1);
+	if(type == BlockType::Y) {inB = m_y; pinB = previous.m_y;}
+	else if(type == BlockType::U) {inB = m_u; pinB = previous.m_u;}
+	else if(type == BlockType::V) {inB = m_v; pinB = previous.m_v;}
+	
+	assert(pinB != nullptr);
+ 
+ 	uint ir{((int)actualRow - (int)radius < 0) ? 0 : (actualRow - radius)}; 
+ 	uint ic{((int)actualCol - (int)radius < 0) ? 0 : (actualCol - radius)}; 
+ 	uint fr{((int)actualRow + (int)b.rows() + (int)radius > (int)inB->rows()) ? inB->rows() : (actualRow + b.rows() + radius)}; 
+ 	uint fc{((int)actualCol + (int)b.cols() + (int)radius > (int)inB->cols()) ? inB->cols() : (actualCol + b.cols() + radius)};
+	
+	for(uint r = ir; r + b.rows() < fr + 1; r++){
+		for(uint c = ic; c + b.cols() < fc + 1; c++){
+			tmpBlock = pinB->getSubBlock(r, c, b.rows(), b.cols());
+			tmpDiff = b.compareTo(tmpBlock);
+			if(tmpDiff < bestMatch) {
+				bestMatch = tmpDiff;
+				bestBlock = tmpBlock;
+				dr = r;
+				dc = c;
+			}
+		}
+	}	
+	return bestBlock;
+}
+
+Frame* Frame::create(uint nRows, uint nCols, VideoFormat format)
+{
+	switch (format)
+	{
+		case YUV_444: return new Frame444(nRows, nCols);
+		case YUV_422: return new Frame422(nRows, nCols);
+		case YUV_420: return new Frame420(nRows, nCols);
+		case RGB: return new FrameRGB(nRows, nCols);
+	}
+	assert(false);
 }

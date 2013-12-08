@@ -1,10 +1,10 @@
 
 
 # Definition of the configuration flag
-AM_CXXFLAGS=-std=c++0x -Wall -I../
+AM_CXXFLAGS=-std=c++0x -Wall -I../libcav
 AM_CFLAGS=$(DEPS_CFLAGS) 
 
-bin_PROGRAMS=yuvShow yuvComp yuvCopy yuvConvert videoEffects yuvResize
+bin_PROGRAMS=yuvShow yuvComp yuvCopy yuvConvert videoEffects yuvResize frameExtractor encodeDecode
 
 # yuvShow program 
 yuvShow_LDADD=../libcav/libcav.a $(DEPS_LIBS)
@@ -31,3 +31,9 @@ videoEffects_SOURCES=videoEffects.cc
 yuvResize_LDADD=../libcav/libcav.a $(DEPS_LIBS)
 yuvResize_SOURCES=yuvResize.cc
 
+# frameExtractor program
+frameExtractor_LDADD=../libcav/libcav.a $(DEPS_LIBS)
+frameExtractor_SOURCES=frameExtractor.cc
+
+encodeDecode_LDADD=../libcav/libcav.a $(DEPS_LIBS)
+encodeDecode_SOURCES=encode-decode.cc

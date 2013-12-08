@@ -8,7 +8,7 @@
 #define PACKAGE_NAME "CAVP1"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "CAVP1 0.7"
+#define PACKAGE_STRING "CAVP1 0.8"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "cavp1"
@@ -17,4 +17,4 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.7"
+#define PACKAGE_VERSION "0.8"

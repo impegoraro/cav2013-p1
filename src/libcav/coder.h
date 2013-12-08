@@ -1,5 +1,5 @@
 /*
- * frame422.h
+ * coder.h
  * Copyright (C) 2013  Ilan Pegoraro and Luís Neves
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -16,40 +16,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FRAME422_H_
-#define FRAME422_H_
+#ifndef LIBCAV_CODER_H_
+#define LIBCAV_CODER_H_
 
-#include "frame.h"
-#include "video-format.h"
-
+#include <utility>
+#include "predictor.h"
+#include "bitstream.h"
 
 /**
- * Intialiazes frame for 422. The components U and V have half the columns of Y.
+ * @class Coder abstract class that serves as a base of each coder specialization like Golomb.
+ * @author Ilan Pegoraro <impegoraro@ua.pt>
+ * @author Luís Neves <luispneves@ua.pt>
  */
-class Frame422 : public Frame
+class Coder
 {
 public:
-	/**
-	 * Constructs a frame with half the columns for the U and V components (YUV422 format).
-	 * @param nRows - Number of rows.
-	 * @param nCols - Number of columns.
-	 */
-	Frame422(unsigned int nRows, unsigned int nCols);
 
-	/**
-	 * Move constructor
-	 * @param f - Frame
-	 */
-	Frame422(Frame422&& f) : Frame(f)
+	Coder(const Predictor& pred, BitStream& bs)
+		: m_pred(pred), m_bs(bs), m_elapsed(0)
 	{
 	}
 
-	/**
-	 * Overrided method from the frame base class. This methods converts a frame in YUV422 format to the new format.
-	 * @param dest - VideoFormat for the new Frame.
-	 */
-	virtual Frame convert(VideoFormat dest);
+	Coder(Predictor&& pred, BitStream& bs)
+		: m_pred(pred), m_bs(bs), m_elapsed(0)
+	{
+	}
+	
+	virtual Predictor& predictor()
+	{
+		return m_pred;
+	}
+	virtual const Predictor& predictor() const
+	{
+		return m_pred;
+	}
+	
+	virtual void encode() = 0;
+	
+	double getEncodeTime() const
+	{
+		return m_elapsed;
+	}
 protected:
+	Predictor m_pred;
+	BitStream& m_bs;
+
+	double m_elapsed;
 };
 
 #endif

@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 					end = true;
 					continue;
 				}
-				f->display();
+				f->display(false);
 				delete f;
 				if(playing)
 				{

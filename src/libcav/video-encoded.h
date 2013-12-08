@@ -1,5 +1,5 @@
 /*
- * video.h
+ * video-encoded.h
  * Copyright (C) 2013  Ilan Pegoraro and Luís Neves
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -16,34 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CAV_VIDEO_H
-#define CAV_VIDEO_H
+#ifndef CAV_VIDEO_ENCODED_H
+#define CAV_VIDEO_ENCODED_H
 
 #include <string>
 #include <fstream>
 #include <opencv2/opencv.hpp>
 #include "frame.h"
 #include "video-interface.h"
+#include "bitstream.h"
+#include "cav-header.h"
 
 /**
  * Class that has all the information about the Video and manages accessing/displaying the Frames.
  */
 
-class Video : public VideoInterface
+class VideoEncoded : public VideoInterface
 {
 public:
-	/**
-	 * Constructs a video reading from the first webcam.
-	 */
-	Video();
-	/** Construct a Video object from a device.
-	 * @param device - device number
-	 */
-	Video(int device);
-	/** Construct a Video object from a file.	
-	 * @param path - file path of the  
-	 */
-	Video(const std::string& path);
+	VideoEncoded(const std::string& path);
 	/**
 	 * Construct a Video object for writing.	
 	 * @param fpath  - File path of the file
@@ -52,12 +43,15 @@ public:
 	 * @param fps - Frames per second.
 	 * @param format - VideoFormat.
 	 */
-	Video(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat format);
+	VideoEncoded(const std::string& fpath, uint rows, uint cols, uint fps, VideoFormat format);
 	/**
 	 * Video Destructor.
 	 * Cleans the internal state of the class, closes the stream.
 	 */
-	virtual ~Video();
+	virtual ~VideoEncoded()
+	{
+
+	}
 
 	/**
 	 * Returns the videos next frame. Note that the frame is dynamically allocated, so the resposability of deleting it is delegated to the caller.
@@ -65,25 +59,11 @@ public:
 	 * @return Frame* - Dynamically allocated frame.
 	 */
 	virtual Frame* getFrame();
-	/**
-	 * Writes the frame to the mass storage device.
-	 * pre-condition: the frame to be written must match the videos format.
-	 * @param f - A reference to a frame
-	 * @return Frame - the next frame
-	 */
-	virtual void putFrame(Frame& f);
 
 	/**
 	 * Sets the posistion of the file to the begining.
 	 */
 	virtual void reset();
-
-	/**
-	 * Converts a video to the new format. To avoid problems the video is restart to the begining.
-	 * @param path - path to the video.
-	 * @param dest - out video format.
-	 */
-	virtual void convert(const std::string& path, VideoFormat dest);
 
 	/**
 	 * Gets the videos number of frames.
@@ -95,14 +75,10 @@ protected:
 	/**
 	 * File stream to read of write the video (YUV444, YUV422 and YUV422 formats).
 	 */
-	std::fstream m_stream;
-	bool m_fromCam;
-	/**
-	 * Access to the RGB video (camera or .avi)
-	 */
-	cv::VideoCapture m_video;
-	/** Header's size. */
-	uint m_headerSize;
+	BitStream m_bs;
+
+	GolombCAVHeader m_header;
+	VideoCAVHeader *m_vh;
 };
 
 #endif
